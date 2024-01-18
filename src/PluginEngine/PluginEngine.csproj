@@ -1,0 +1,47 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>PluginEngine</AssemblyName>
+    <RootNamespace>PluginEngine</RootNamespace>
+    <PackageId>Zaiets.dotnet.plugin.engine</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Vladyslav Zaiets</Authors>
+    <Description>Hot-reloadable plugin system for .NET - AssemblyLoadContext isolation, dependency resolution, versioning</Description>
+    <PackageTags>dotnet plugin engine hot-reload assemblyloadcontext dynamic-loading isolation dependency-resolution</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/sarmkadan/dotnet-plugin-engine</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/sarmkadan/dotnet-plugin-engine</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="BackgroundServices\BackgroundPluginMonitor.cs" />
+    <Compile Remove="BackgroundServices\PluginHealthCheckService.cs" />
+    <Compile Remove="Cli\CommandParser.cs" />
+    <Compile Remove="Cli\PluginEngineCliHost.cs" />
+    <Compile Remove="Configuration\LoggingConfiguration.cs" />
+    <Compile Remove="Integration\WebhookHandler.cs" />
+    <Compile Remove="Middleware\ErrorHandlingMiddleware.cs" />
+    <Compile Remove="Middleware\LoggingMiddleware.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.0" />
+  </ItemGroup>
+
+</Project>
