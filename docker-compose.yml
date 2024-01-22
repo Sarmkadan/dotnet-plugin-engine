@@ -3,8 +3,6 @@
 # CTO & Software Architect
 # =============================================================================
 
-version: '3.8'
-
 services:
   # Main plugin engine application
   plugin-engine:
@@ -15,7 +13,7 @@ services:
 
     # Port mappings
     ports:
-      - "5000:5000"
+      - "8080:8080"
 
     # Volume mounts
     volumes:
@@ -30,6 +28,7 @@ services:
     environment:
       # .NET environment
       ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
       DOTNET_ENVIRONMENT: Production
 
       # Plugin engine options
@@ -50,7 +49,7 @@ services:
 
     # Health check
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -81,7 +80,7 @@ services:
     # Labels for monitoring
     labels:
       service: plugin-engine
-      version: "1.2.0"
+      version: "2.0.0"
       monitoring: "enabled"
 
   # Optional: File system watcher service
@@ -205,26 +204,26 @@ x-common-healthcheck: &common-healthcheck
 # Usage Instructions:
 #
 # 1. Start all services:
-#    docker-compose up -d
+#    docker compose up -d
 #
 # 2. View logs:
-#    docker-compose logs -f plugin-engine
+#    docker compose logs -f plugin-engine
 #
 # 3. Stop services:
-#    docker-compose down
+#    docker compose down
 #
 # 4. Access plugin engine:
-#    http://localhost:5000
+#    http://localhost:8080
 #
 # 5. Add plugins:
 #    Copy plugin DLLs to ./plugins/ directory
 #    Engine automatically detects and loads them
 #
 # 6. Monitor health:
-#    curl http://localhost:5000/health
+#    curl http://localhost:8080/health
 #
 # 7. View all running services:
-#    docker-compose ps
+#    docker compose ps
 #
 # Environment file (.env) example:
 # DB_PASSWORD=your-secure-password

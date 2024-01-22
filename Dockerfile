@@ -25,7 +25,7 @@ RUN dotnet test -c Release --no-build --logger "console;verbosity=minimal"
 RUN dotnet publish src/PluginEngine/PluginEngine.csproj -c Release -o /publish
 
 # Runtime stage
-FROM mcr.microsoft.com/dotnet/runtime:10.0
+FROM mcr.microsoft.com/dotnet/aspnet:10.0
 
 WORKDIR /app
 
@@ -50,21 +50,22 @@ USER appuser
 # Volume for plugins and logs
 VOLUME ["/app/plugins", "/app/logs"]
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD dotnet --version || exit 1
+# Health check - verify the HTTP endpoint responds
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:8080/health || exit 1
 
 # Default port
-EXPOSE 5000
+EXPOSE 8080
 
 # Environment variables
 ENV ASPNETCORE_ENVIRONMENT=Production
+ENV ASPNETCORE_URLS=http://+:8080
 ENV DOTNET_RUNNING_IN_CONTAINER=true
 ENV DOTNET_EnableDiagnostics=0
 
 # Labels
 LABEL maintainer="Vladyslav Zaiets <vladyslav.zaiets@sarmkadan.com>"
-LABEL version="1.2.0"
+LABEL version="2.0.0"
 LABEL description="Hot-reloadable plugin system for .NET"
 
 # Entry point
