@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -9,7 +10,7 @@ namespace PluginEngine.Cli;
 /// Parses command-line arguments and extracts command type and options.
 /// Handles validation and error reporting for malformed commands.
 /// </summary>
-public class CommandParser
+public sealed class CommandParser
 {
     private static readonly Dictionary<string, CommandType> CommandMap = new()
     {

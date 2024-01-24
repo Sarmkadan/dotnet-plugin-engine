@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -51,7 +52,7 @@ public interface IDependencyResolutionService
 /// <summary>
 /// Represents a dependency graph for a plugin.
 /// </summary>
-public class DependencyGraph
+public sealed class DependencyGraph
 {
     public Guid RootPluginId { get; set; }
     public List<DependencyNode> Nodes { get; set; } = new();
@@ -61,7 +62,7 @@ public class DependencyGraph
 /// <summary>
 /// Represents a node in the dependency graph.
 /// </summary>
-public class DependencyNode
+public sealed class DependencyNode
 {
     public Guid PluginId { get; set; }
     public string PluginName { get; set; } = string.Empty;
@@ -72,7 +73,7 @@ public class DependencyNode
 /// <summary>
 /// Represents an edge in the dependency graph.
 /// </summary>
-public class DependencyEdge
+public sealed class DependencyEdge
 {
     public Guid FromPluginId { get; set; }
     public Guid ToPluginId { get; set; }

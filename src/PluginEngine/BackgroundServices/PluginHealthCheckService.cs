@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -9,7 +10,7 @@ namespace PluginEngine.BackgroundServices;
 /// Background service that periodically checks the health of loaded plugins.
 /// Monitors dependencies, capabilities, and reports issues.
 /// </summary>
-public class PluginHealthCheckService : BackgroundService
+public sealed class PluginHealthCheckService : BackgroundService
 {
     private readonly IPluginManagerService _pluginManager;
     private readonly IDependencyResolutionService _dependencyResolver;

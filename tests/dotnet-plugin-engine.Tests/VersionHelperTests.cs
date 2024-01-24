@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -11,7 +12,7 @@ using Xunit;
 
 namespace PluginEngine.Tests;
 
-public class VersionHelperTests
+public sealed class VersionHelperTests
 {
     private readonly Mock<ILogger<VersionHelper>> _mockLogger;
     private readonly VersionHelper _sut;

@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -9,7 +10,7 @@ namespace PluginEngine.Execution;
 /// Represents the execution context for a plugin operation.
 /// Tracks execution state, performance metrics, and resource usage.
 /// </summary>
-public class PluginExecutionContext
+public sealed class PluginExecutionContext
 {
     /// <summary>
     /// Unique identifier for this execution.
@@ -127,7 +128,7 @@ public enum ExecutionState
 /// <summary>
 /// Performance metrics for an execution.
 /// </summary>
-public class ExecutionMetrics
+public sealed class ExecutionMetrics
 {
     public long CpuTimeMs { get; set; }
     public long MemoryBytesAllocated { get; set; }
@@ -140,7 +141,7 @@ public class ExecutionMetrics
 /// <summary>
 /// Summary of a completed execution.
 /// </summary>
-public class ExecutionSummary
+public sealed class ExecutionSummary
 {
     public required Guid ExecutionId { get; set; }
     public required string PluginName { get; set; }

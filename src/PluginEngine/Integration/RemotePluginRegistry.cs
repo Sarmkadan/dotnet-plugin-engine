@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -9,7 +10,7 @@ namespace PluginEngine.Integration;
 /// Manages interaction with a remote plugin registry for discovery, updates, and publishing.
 /// Caches registry data locally to minimize network requests.
 /// </summary>
-public class RemotePluginRegistry : IRemotePluginRegistry
+public sealed class RemotePluginRegistry : IRemotePluginRegistry
 {
     private readonly HttpPluginClient _httpClient;
     private readonly IMemoryCache _cache;
@@ -63,7 +64,7 @@ public class RemotePluginRegistry : IRemotePluginRegistry
 
         var pluginInfo = await _httpClient.GetPluginInfoAsync(pluginId);
 
-        if (pluginInfo != null)
+        if (pluginInfo is not null)
         {
             var cacheOptions = new MemoryCacheEntryOptions
             {
@@ -107,7 +108,7 @@ public class RemotePluginRegistry : IRemotePluginRegistry
         try
         {
             var pluginInfo = await GetPluginAsync(pluginId);
-            if (pluginInfo?.DownloadUrl == null)
+            if (pluginInfo?.DownloadUrl is null)
             {
                 _logger.LogWarning("No download URL found for plugin: {PluginId}", pluginId);
                 return null;
@@ -180,7 +181,7 @@ public class RemotePluginRegistry : IRemotePluginRegistry
 /// <summary>
 /// Contains version-specific plugin information from registry.
 /// </summary>
-public class PluginVersionInfo
+public sealed class PluginVersionInfo
 {
     public required string Version { get; set; }
     public required DateTime PublishedAtUtc { get; set; }
@@ -193,7 +194,7 @@ public class PluginVersionInfo
 /// <summary>
 /// Metadata for publishing a plugin to the registry.
 /// </summary>
-public class PluginPublishMetadata
+public sealed class PluginPublishMetadata
 {
     public required string PluginName { get; set; }
     public required string Version { get; set; }

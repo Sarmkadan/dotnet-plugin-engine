@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -10,7 +11,7 @@ namespace PluginEngine.Middleware;
 /// Catches exceptions, logs them with context, and optionally provides recovery options.
 /// Prevents unhandled exceptions from propagating up the call stack.
 /// </summary>
-public class ErrorHandlingMiddleware : IPluginMiddleware
+public sealed class ErrorHandlingMiddleware : IPluginMiddleware
 {
     private readonly ILogger<ErrorHandlingMiddleware> _logger;
     private readonly bool _continueOnError;

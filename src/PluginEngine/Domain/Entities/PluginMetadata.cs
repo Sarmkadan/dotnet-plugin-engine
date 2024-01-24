@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -10,7 +11,7 @@ namespace PluginEngine.Domain.Entities;
 /// <summary>
 /// Represents metadata about a plugin without loading the full assembly.
 /// </summary>
-public class PluginMetadata
+public sealed class PluginMetadata
 {
     private Dictionary<string, string> _customProperties = new();
 

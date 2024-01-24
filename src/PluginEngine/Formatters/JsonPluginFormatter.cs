@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -9,7 +10,7 @@ namespace PluginEngine.Formatters;
 /// Formats plugin data as JSON for API responses and file storage.
 /// Provides compact and detailed output modes for flexibility.
 /// </summary>
-public class JsonPluginFormatter : IPluginFormatter
+public sealed class JsonPluginFormatter : IPluginFormatter
 {
     public string FormatType => "json";
 
@@ -68,7 +69,7 @@ public class JsonPluginFormatter : IPluginFormatter
                 status = plugin.Status.ToString(),
                 loadedAtUtc = plugin.ModifiedAt
             },
-            metadata = plugin.Metadata != null ? new
+            metadata = plugin.Metadata is not null ? new
             {
                 description = plugin.Metadata.Description,
                 author = plugin.Metadata.Author,

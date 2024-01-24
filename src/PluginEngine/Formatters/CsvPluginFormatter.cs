@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -9,7 +10,7 @@ namespace PluginEngine.Formatters;
 /// Formats plugin data as CSV for spreadsheet applications and data analysis.
 /// Supports both simple summary and detailed export formats.
 /// </summary>
-public class CsvPluginFormatter : IPluginFormatter
+public sealed class CsvPluginFormatter : IPluginFormatter
 {
     public string FormatType => "csv";
 
