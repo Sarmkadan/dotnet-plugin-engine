@@ -1,0 +1,231 @@
+# =============================================================================
+# Author: Vladyslav Zaiets | https://sarmkadan.com
+# CTO & Software Architect
+# =============================================================================
+
+version: '3.8'
+
+services:
+  # Main plugin engine application
+  plugin-engine:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: plugin-engine-app
+
+    # Port mappings
+    ports:
+      - "5000:5000"
+
+    # Volume mounts
+    volumes:
+      # Plugin directory - mount your plugins here
+      - ./plugins:/app/plugins
+      # Logs directory
+      - ./logs:/app/logs
+      # Configuration (optional)
+      - ./appsettings.json:/app/appsettings.json:ro
+
+    # Environment configuration
+    environment:
+      # .NET environment
+      ASPNETCORE_ENVIRONMENT: Production
+      DOTNET_ENVIRONMENT: Production
+
+      # Plugin engine options
+      PLUGIN_DIRECTORY: /app/plugins
+      LOG_LEVEL: Information
+      OPERATION_TIMEOUT_MS: 60000
+      HOT_RELOAD_ENABLED: "true"
+      HOT_RELOAD_CHECK_INTERVAL_MS: 5000
+      ENABLE_DEPENDENCY_CACHING: "true"
+      MAX_CONCURRENT_LOADS: 4
+
+      # Logging
+      Logging__LogLevel__Default: Information
+      Logging__LogLevel__PluginEngine: Debug
+
+    # Restart policy
+    restart: unless-stopped
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+    # Network
+    networks:
+      - plugin-network
+
+    # Resource limits (adjust based on your needs)
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 1G
+
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service=plugin-engine"
+
+    # Labels for monitoring
+    labels:
+      service: plugin-engine
+      version: "1.2.0"
+      monitoring: "enabled"
+
+  # Optional: File system watcher service
+  # Useful for monitoring and reloading plugins
+  plugin-monitor:
+    image: alpine:latest
+    container_name: plugin-monitor
+
+    # Mount the plugin directory
+    volumes:
+      - ./plugins:/plugins:ro
+
+    # Simple monitoring script
+    command: |
+      sh -c '
+      while true; do
+        find /plugins -type f -name "*.dll" -newer /tmp/last_check 2>/dev/null && \
+        echo "Plugin changes detected at $(date)"
+        touch /tmp/last_check
+        sleep 5
+      done
+      '
+
+    # Network
+    networks:
+      - plugin-network
+
+    # Always running
+    restart: unless-stopped
+
+    # Minimal resources
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 32M
+
+  # Optional: PostgreSQL for persistent plugin metadata
+  # Uncomment if you want to use a database-backed repository
+  # postgres:
+  #   image: postgres:16-alpine
+  #   container_name: plugin-engine-db
+  #
+  #   environment:
+  #     POSTGRES_USER: pluginuser
+  #     POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
+  #     POSTGRES_DB: plugindb
+  #
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #     - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+  #
+  #   ports:
+  #     - "5432:5432"
+  #
+  #   networks:
+  #     - plugin-network
+  #
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U pluginuser"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #
+  #   restart: unless-stopped
+
+  # Optional: Redis for distributed caching
+  # Uncomment if you need distributed plugin cache
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: plugin-engine-cache
+  #
+  #   command: redis-server --appendonly yes
+  #
+  #   volumes:
+  #     - redis_data:/data
+  #
+  #   ports:
+  #     - "6379:6379"
+  #
+  #   networks:
+  #     - plugin-network
+  #
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 5s
+  #     timeout: 3s
+  #     retries: 5
+  #
+  #   restart: unless-stopped
+
+# Network configuration
+networks:
+  plugin-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/16
+
+# Volume definitions
+volumes:
+  # postgres_data:
+  #   driver: local
+  # redis_data:
+  #   driver: local
+  logs:
+    driver: local
+
+# Service discovery (optional)
+x-common-environment: &common-env
+  ASPNETCORE_ENVIRONMENT: Production
+  DOTNET_ENVIRONMENT: Production
+  LOG_LEVEL: Information
+
+x-common-healthcheck: &common-healthcheck
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  start_period: 5s
+
+# Usage Instructions:
+#
+# 1. Start all services:
+#    docker-compose up -d
+#
+# 2. View logs:
+#    docker-compose logs -f plugin-engine
+#
+# 3. Stop services:
+#    docker-compose down
+#
+# 4. Access plugin engine:
+#    http://localhost:5000
+#
+# 5. Add plugins:
+#    Copy plugin DLLs to ./plugins/ directory
+#    Engine automatically detects and loads them
+#
+# 6. Monitor health:
+#    curl http://localhost:5000/health
+#
+# 7. View all running services:
+#    docker-compose ps
+#
+# Environment file (.env) example:
+# DB_PASSWORD=your-secure-password
+# ASPNETCORE_ENVIRONMENT=Production
