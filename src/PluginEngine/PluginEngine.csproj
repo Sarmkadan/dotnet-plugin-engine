@@ -6,6 +6,9 @@
     <Nullable>enable</Nullable>
     <AssemblyName>PluginEngine</AssemblyName>
     <RootNamespace>PluginEngine</RootNamespace>
+    <Authors>Vladyslav Zaiets</Authors>
+    <RepositoryUrl>https://github.com/sarmkadan/dotnet-plugin-engine</RepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>

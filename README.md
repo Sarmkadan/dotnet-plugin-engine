@@ -43,16 +43,16 @@ This engine provides a battle-tested foundation for plugin architecture in .NET.
 
 ## Key Features
 
-- **🔌 Plugin Isolation**: AssemblyLoadContext ensures plugins are loaded in isolated contexts, preventing version conflicts and namespace pollution
-- **🔄 Hot Reload**: Monitor file changes and reload plugins without restarting the host application
-- **📦 Dependency Management**: Sophisticated dependency resolution with version constraints, transitive dependency resolution, and circular dependency detection
-- **🏗️ Clean Architecture**: Domain-driven design with clear separation of concerns (Domain, Services, Repository, Configuration layers)
-- **🔐 Type Safety**: Full C# 13 language features, nullable reference types, and compile-time safety
-- **⚡ Performance**: In-memory dependency caching, fully async/await, minimal memory allocations, efficient file monitoring
-- **📊 Diagnostics**: Built-in health monitoring, performance statistics, event tracking, and detailed logging
-- **🚀 Enterprise Ready**: Comprehensive exception handling, operation timeouts, rate limiting middleware, configurable concurrency
-- **🔧 Extensible**: Plugin interfaces, custom middleware, event publishing/subscribing, multiple output formatters
-- **🌐 Remote Integration**: HTTP client for remote plugin registries, webhook support for event notifications
+- **Plugin Isolation**: AssemblyLoadContext ensures plugins are loaded in isolated contexts, preventing version conflicts and namespace pollution
+- **Hot Reload**: Monitor file changes and reload plugins without restarting the host application
+- **Dependency Management**: Sophisticated dependency resolution with version constraints, transitive dependency resolution, and circular dependency detection
+- **Clean Architecture**: Domain-driven design with clear separation of concerns (Domain, Services, Repository, Configuration layers)
+- **Type Safety**: Full C# 13 language features, nullable reference types, and compile-time safety
+- **Performance**: In-memory dependency caching, fully async/await, minimal memory allocations, efficient file monitoring
+- **Diagnostics**: Built-in health monitoring, performance statistics, event tracking, and detailed logging
+- **Enterprise Ready**: Comprehensive exception handling, operation timeouts, rate limiting middleware, configurable concurrency
+- **Extensible**: Plugin interfaces, custom middleware, event publishing/subscribing, multiple output formatters
+- **Remote Integration**: HTTP client for remote plugin registries, webhook support for event notifications
 
 ## Architecture
 
