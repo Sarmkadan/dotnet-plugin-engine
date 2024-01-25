@@ -55,6 +55,11 @@ public class PluginMetadata
     public string Author { get; set; } = string.Empty;
 
     /// <summary>
+    /// Gets or sets the company or organization that created the plugin.
+    /// </summary>
+    public string Company { get; set; } = string.Empty;
+
+    /// <summary>
     /// Gets or sets the plugin description.
     /// </summary>
     public string Description { get; set; } = string.Empty;

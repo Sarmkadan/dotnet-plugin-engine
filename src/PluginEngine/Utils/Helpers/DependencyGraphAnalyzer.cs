@@ -66,7 +66,7 @@ public class DependencyGraphAnalyzer
         {
             if (depth < 5) // Limit depth to prevent infinite recursion
             {
-                sb.AppendLine($"{GetIndent(depth + 1)}└─ Requires: {dep.DependencyId}");
+                sb.AppendLine($"{GetIndent(depth + 1)}└─ Requires: {dep.DependencyPluginId}");
             }
         }
 
@@ -87,13 +87,13 @@ public class DependencyGraphAnalyzer
             {
                 PluginName = plugin.Name,
                 DirectDependencies = plugin.Dependencies.Count,
-                TotalDependencies = dependencies.Count,
+                TotalDependencies = dependencies.Count(),
                 HasCircularDependencies = hasCircular,
                 AnalyzedAtUtc = DateTime.UtcNow
             };
 
             // Calculate complexity score
-            report.ComplexityScore = CalculateComplexityScore(plugin, dependencies.Count);
+            report.ComplexityScore = CalculateComplexityScore(plugin, dependencies.Count());
 
             // Identify potential issues
             if (plugin.Dependencies.Count > 20)
@@ -130,7 +130,7 @@ public class DependencyGraphAnalyzer
 
         foreach (var plugin in allPlugins)
         {
-            if (plugin.Dependencies.Any(d => d.DependencyId == targetPluginId))
+            if (plugin.Dependencies.Any(d => d.DependencyPluginId == targetPluginId))
             {
                 dependents.Add(plugin.Id);
             }

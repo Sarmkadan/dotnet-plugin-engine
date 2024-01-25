@@ -126,7 +126,6 @@ public static class WebhookConfigurationExtensions
         if (config.IsValid())
         {
             services.AddSingleton(config);
-            services.AddSingleton<WebhookHandler>();
         }
 
         return services;

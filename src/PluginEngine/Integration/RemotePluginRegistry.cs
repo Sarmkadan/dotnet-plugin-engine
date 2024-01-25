@@ -9,7 +9,7 @@ namespace PluginEngine.Integration;
 /// Manages interaction with a remote plugin registry for discovery, updates, and publishing.
 /// Caches registry data locally to minimize network requests.
 /// </summary>
-public class RemotePluginRegistry
+public class RemotePluginRegistry : IRemotePluginRegistry
 {
     private readonly HttpPluginClient _httpClient;
     private readonly IMemoryCache _cache;

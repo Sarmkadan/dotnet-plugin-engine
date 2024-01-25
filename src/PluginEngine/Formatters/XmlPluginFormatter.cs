@@ -62,7 +62,7 @@ public class XmlPluginFormatter : IPluginFormatter
         xmlWriter.WriteElementString("Name", plugin.Name);
         xmlWriter.WriteElementString("Version", plugin.Version);
         xmlWriter.WriteElementString("Status", plugin.Status.ToString());
-        xmlWriter.WriteElementString("LoadedAt", plugin.LoadedAtUtc.ToString("O"));
+        xmlWriter.WriteElementString("LoadedAt", plugin.ModifiedAt.ToString("O"));
         xmlWriter.WriteEndElement();
 
         // Metadata
@@ -82,8 +82,8 @@ public class XmlPluginFormatter : IPluginFormatter
         foreach (var dep in plugin.Dependencies)
         {
             xmlWriter.WriteStartElement("Dependency");
-            xmlWriter.WriteElementString("Id", dep.DependencyId.ToString());
-            xmlWriter.WriteElementString("RequiredVersion", dep.RequiredVersion);
+            xmlWriter.WriteElementString("Id", dep.DependencyPluginId.ToString());
+            xmlWriter.WriteElementString("RequiredVersion", dep.MinimumVersion);
             xmlWriter.WriteElementString("IsOptional", dep.IsOptional.ToString());
             xmlWriter.WriteEndElement();
         }
@@ -151,7 +151,7 @@ public class XmlPluginFormatter : IPluginFormatter
         xmlWriter.WriteElementString("Name", plugin.Name);
         xmlWriter.WriteElementString("Version", plugin.Version);
         xmlWriter.WriteElementString("Status", plugin.Status.ToString());
-        xmlWriter.WriteElementString("LoadedAt", plugin.LoadedAtUtc.ToString("O"));
+        xmlWriter.WriteElementString("LoadedAt", plugin.ModifiedAt.ToString("O"));
         xmlWriter.WriteElementString("DependencyCount", plugin.Dependencies.Count.ToString());
         xmlWriter.WriteElementString("CapabilityCount", plugin.Capabilities.Count.ToString());
     }

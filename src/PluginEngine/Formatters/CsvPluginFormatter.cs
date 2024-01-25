@@ -41,7 +41,7 @@ public class CsvPluginFormatter : IPluginFormatter
         // Plugin info
         sb.AppendLine("Plugin Information");
         sb.AppendLine("ID,Name,Version,Status,LoadedAtUtc");
-        sb.AppendLine($"\"{EscapeCsv(plugin.Id.ToString())}\",\"{EscapeCsv(plugin.Name)}\",\"{plugin.Version}\",\"{plugin.Status}\",\"{plugin.LoadedAtUtc:O}\"");
+        sb.AppendLine($"\"{EscapeCsv(plugin.Id.ToString())}\",\"{EscapeCsv(plugin.Name)}\",\"{plugin.Version}\",\"{plugin.Status}\",\"{plugin.ModifiedAt:O}\"");
 
         // Dependencies
         sb.AppendLine();
@@ -50,7 +50,7 @@ public class CsvPluginFormatter : IPluginFormatter
 
         foreach (var dep in plugin.Dependencies)
         {
-            sb.AppendLine($"\"{EscapeCsv(dep.DependencyId.ToString())}\",\"{dep.RequiredVersion}\",\"{dep.IsOptional}\"");
+            sb.AppendLine($"\"{EscapeCsv(dep.DependencyPluginId.ToString())}\",\"{dep.MinimumVersion}\",\"{dep.IsOptional}\"");
         }
 
         // Capabilities
@@ -95,7 +95,7 @@ public class CsvPluginFormatter : IPluginFormatter
             $"\"{EscapeCsv(plugin.Name)}\"," +
             $"\"{plugin.Version}\"," +
             $"\"{plugin.Status}\"," +
-            $"\"{plugin.LoadedAtUtc:O}\"," +
+            $"\"{plugin.ModifiedAt:O}\"," +
             $"{plugin.Dependencies.Count}," +
             $"{plugin.Capabilities.Count}");
     }

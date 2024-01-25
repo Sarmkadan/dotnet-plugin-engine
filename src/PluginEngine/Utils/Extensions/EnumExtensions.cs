@@ -49,8 +49,8 @@ public static class EnumExtensions
             PluginStatus.Loading => "Loading...",
             PluginStatus.Loaded => "Loaded",
             PluginStatus.Unloading => "Unloading...",
-            PluginStatus.Error => "Error",
-            PluginStatus.Disabled => "Disabled",
+            PluginStatus.Failed => "Error",
+            PluginStatus.Inactive => "Disabled",
             _ => status.ToString()
         };
     }
@@ -64,9 +64,9 @@ public static class EnumExtensions
         {
             PluginStatus.Loaded => "status-loaded",
             PluginStatus.Unloaded => "status-unloaded",
-            PluginStatus.Error => "status-error",
+            PluginStatus.Failed => "status-error",
             PluginStatus.Loading => "status-loading",
-            PluginStatus.Disabled => "status-disabled",
+            PluginStatus.Inactive => "status-disabled",
             _ => "status-unknown"
         };
     }

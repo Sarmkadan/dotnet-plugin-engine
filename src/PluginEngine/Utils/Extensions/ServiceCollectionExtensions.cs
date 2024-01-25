@@ -31,8 +31,6 @@ public static class ServiceCollectionExtensions
 
         // Middleware pipeline
         services.AddSingleton<PluginMiddlewarePipeline>();
-        services.AddSingleton<IPluginMiddleware, LoggingMiddleware>();
-        services.AddSingleton<IPluginMiddleware, ErrorHandlingMiddleware>();
 
         // Caching
         services.AddMemoryCache();
@@ -56,10 +54,6 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<CsvPluginFormatter>();
         services.AddSingleton<XmlPluginFormatter>();
         services.AddSingleton<FormatterFactory>();
-
-        // Background services
-        services.AddHostedService<BackgroundPluginMonitor>();
-        services.AddHostedService<PluginHealthCheckService>();
 
         return services;
     }
