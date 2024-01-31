@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -10,7 +11,7 @@ namespace PluginEngine.Domain.Entities;
 /// <summary>
 /// Represents versioning information for plugins and assemblies.
 /// </summary>
-public class VersionInfo
+public sealed class VersionInfo
 {
     /// <summary>
     /// Gets the unique identifier for this version record.

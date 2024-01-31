@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -66,7 +67,7 @@ public interface IPluginManagerService
 /// <summary>
 /// Represents the status of the plugin manager.
 /// </summary>
-public class PluginManagerStatus
+public sealed class PluginManagerStatus
 {
     public bool IsInitialized { get; set; }
     public DateTime InitializedAt { get; set; }
@@ -80,7 +81,7 @@ public class PluginManagerStatus
 /// <summary>
 /// Represents detailed information about a plugin.
 /// </summary>
-public class PluginDetails
+public sealed class PluginDetails
 {
     public Plugin Plugin { get; set; } = new();
     public PluginMetadata? Metadata { get; set; }
@@ -92,7 +93,7 @@ public class PluginDetails
 /// <summary>
 /// Represents search criteria for plugins.
 /// </summary>
-public class PluginSearchCriteria
+public sealed class PluginSearchCriteria
 {
     public string? Name { get; set; }
     public string? Author { get; set; }
@@ -106,7 +107,7 @@ public class PluginSearchCriteria
 /// <summary>
 /// Represents plugin manager statistics.
 /// </summary>
-public class PluginManagerStatistics
+public sealed class PluginManagerStatistics
 {
     public int TotalPlugins { get; set; }
     public int LoadedPlugins { get; set; }

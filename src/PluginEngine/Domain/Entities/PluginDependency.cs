@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -8,7 +9,7 @@ namespace PluginEngine.Domain.Entities;
 /// <summary>
 /// Represents a dependency relationship between plugins.
 /// </summary>
-public class PluginDependency
+public sealed class PluginDependency
 {
     /// <summary>
     /// Gets the unique identifier for this dependency record.

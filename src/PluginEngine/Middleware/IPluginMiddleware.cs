@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -21,7 +22,7 @@ public interface IPluginMiddleware
 /// <summary>
 /// Represents the context of a plugin operation being processed by middleware.
 /// </summary>
-public class PluginOperationContext
+public sealed class PluginOperationContext
 {
     public required string OperationType { get; set; }
     public required Plugin Plugin { get; set; }
@@ -40,7 +41,7 @@ public delegate Task PluginOperationDelegate(PluginOperationContext context);
 /// <summary>
 /// Pipeline builder for composing multiple middleware components.
 /// </summary>
-public class PluginMiddlewarePipeline
+public sealed class PluginMiddlewarePipeline
 {
     private readonly List<Func<PluginOperationDelegate, PluginOperationDelegate>> _pipeline = [];
 

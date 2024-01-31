@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -12,7 +13,7 @@ namespace PluginEngine;
 /// Main entry point and façade for the plugin engine system.
 /// Provides a unified interface for managing plugins, dependencies, and hot reload.
 /// </summary>
-public class PluginEngine
+public sealed class PluginEngine
 {
     private readonly IPluginManagerService _pluginManagerService;
     private readonly IPluginLoaderService _pluginLoaderService;

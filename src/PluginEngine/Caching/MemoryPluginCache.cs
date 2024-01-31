@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -10,7 +11,7 @@ namespace PluginEngine.Caching;
 /// Uses .NET MemoryCache with automatic expiration and eviction.
 /// Thread-safe with support for sliding and absolute expiration.
 /// </summary>
-public class MemoryPluginCache : IPluginCache
+public sealed class MemoryPluginCache : IPluginCache
 {
     private readonly IMemoryCache _cache;
     private readonly ILogger<MemoryPluginCache> _logger;

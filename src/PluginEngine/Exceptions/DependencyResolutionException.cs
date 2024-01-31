@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -8,7 +9,7 @@ namespace PluginEngine.Exceptions;
 /// <summary>
 /// Exception thrown when plugin dependency resolution fails.
 /// </summary>
-public class DependencyResolutionException : PluginException
+public sealed class DependencyResolutionException : PluginException
 {
     /// <summary>
     /// Gets or sets the required dependency plugin ID.

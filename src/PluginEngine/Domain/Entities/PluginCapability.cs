@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -10,7 +11,7 @@ namespace PluginEngine.Domain.Entities;
 /// <summary>
 /// Represents a capability or feature provided by a plugin.
 /// </summary>
-public class PluginCapability
+public sealed class PluginCapability
 {
     /// <summary>
     /// Gets the unique identifier for this capability record.
@@ -86,7 +87,7 @@ public class PluginCapability
     /// </summary>
     public void SetTags(IEnumerable<string> tags)
     {
-        if (tags == null)
+        if (tags is null)
         {
             Tags = string.Empty;
             return;

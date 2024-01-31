@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -9,7 +10,7 @@ namespace PluginEngine.Integration;
 /// Handles incoming webhooks from external systems about plugin updates and events.
 /// Provides secure webhook processing with signature verification.
 /// </summary>
-public class WebhookHandler
+public sealed class WebhookHandler
 {
     private readonly ILogger<WebhookHandler> _logger;
     private readonly IPluginManagerService _pluginManager;
@@ -131,7 +132,7 @@ public class WebhookHandler
 /// <summary>
 /// Represents the payload of a webhook event.
 /// </summary>
-public class WebhookPayload
+public sealed class WebhookPayload
 {
     public required Guid PluginId { get; set; }
     public required string EventType { get; set; }

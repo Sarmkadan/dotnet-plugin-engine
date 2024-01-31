@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -48,7 +49,7 @@ public enum MarketplaceSortOrder
 /// Represents a plugin listing in the marketplace, including discovery metadata
 /// and the list of published versions.
 /// </summary>
-public class MarketplaceEntry
+public sealed class MarketplaceEntry
 {
     /// <summary>Gets or sets the unique plugin identifier.</summary>
     public Guid Id { get; set; } = Guid.NewGuid();
@@ -97,7 +98,7 @@ public class MarketplaceEntry
 /// Cross-reference matrix that maps every published plugin version to the set of
 /// host engine versions and the <see cref="CompatibilityStatus"/> for each pairing.
 /// </summary>
-public class VersionCompatibilityMatrix
+public sealed class VersionCompatibilityMatrix
 {
     private readonly Dictionary<string, Dictionary<string, CompatibilityStatus>> _matrix =
         new(StringComparer.OrdinalIgnoreCase);
@@ -166,7 +167,7 @@ public class VersionCompatibilityMatrix
 /// <summary>
 /// Search and filter criteria passed to marketplace queries.
 /// </summary>
-public class MarketplaceSearchFilter
+public sealed class MarketplaceSearchFilter
 {
     /// <summary>Gets or sets the free-text search query.</summary>
     public string? Query { get; set; }
