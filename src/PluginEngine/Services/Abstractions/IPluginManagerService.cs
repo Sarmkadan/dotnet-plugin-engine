@@ -14,53 +14,80 @@ namespace PluginEngine.Services.Abstractions;
 public interface IPluginManagerService
 {
     /// <summary>
-    /// Initializes the plugin manager.
+    /// Discovers and loads all plugins from configured directories, resolves dependencies,
+    /// and activates auto-start plugins. Must be called before any other operations.
     /// </summary>
+    /// <param name="cancellationToken">Token to cancel the initialization.</param>
     Task InitializeAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Shuts down the plugin manager.
+    /// Gracefully shuts down all active plugins in reverse dependency order and
+    /// releases all associated AssemblyLoadContexts.
     /// </summary>
+    /// <param name="cancellationToken">Token to cancel the shutdown.</param>
     Task ShutdownAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Gets the manager status.
+    /// Returns the current status of the plugin manager including initialization state,
+    /// plugin counts by category, and last error information.
     /// </summary>
+    /// <returns>A <see cref="PluginManagerStatus"/> snapshot.</returns>
     Task<PluginManagerStatus> GetStatusAsync();
 
     /// <summary>
-    /// Gets all plugins.
+    /// Returns all registered plugins regardless of their current status.
     /// </summary>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>An enumerable of all <see cref="Plugin"/> instances.</returns>
     Task<IEnumerable<Plugin>> GetAllPluginsAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Gets plugins filtered by status.
+    /// Returns plugins filtered by their current lifecycle status.
     /// </summary>
+    /// <param name="status">The plugin status to filter by (e.g., Active, Inactive, Failed).</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>An enumerable of plugins matching the specified status.</returns>
     Task<IEnumerable<Plugin>> GetPluginsByStatusAsync(PluginStatus status, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Activates a plugin.
+    /// Activates a previously loaded but inactive plugin. Resolves its dependencies
+    /// and invokes the plugin's initialization hook.
     /// </summary>
+    /// <param name="pluginId">The unique identifier of the plugin to activate.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns><c>true</c> if the plugin was activated successfully; <c>false</c> if not found or activation failed.</returns>
     Task<bool> ActivatePluginAsync(Guid pluginId, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Deactivates a plugin.
+    /// Deactivates a running plugin, invoking its shutdown hook and releasing resources.
     /// </summary>
+    /// <param name="pluginId">The unique identifier of the plugin to deactivate.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns><c>true</c> if the plugin was deactivated successfully; <c>false</c> if not found or already inactive.</returns>
     Task<bool> DeactivatePluginAsync(Guid pluginId, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Gets plugin details.
+    /// Retrieves detailed information about a plugin including metadata, loaded assemblies,
+    /// dependency graph, and declared capabilities.
     /// </summary>
+    /// <param name="pluginId">The unique identifier of the plugin.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A <see cref="PluginDetails"/> object, or <c>null</c> if the plugin is not found.</returns>
     Task<PluginDetails?> GetPluginDetailsAsync(Guid pluginId, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Searches for plugins.
+    /// Searches for plugins matching the specified criteria with pagination support.
     /// </summary>
+    /// <param name="criteria">Search filters including name, author, status, version, and tags.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A paginated enumerable of matching <see cref="Plugin"/> instances.</returns>
     Task<IEnumerable<Plugin>> SearchPluginsAsync(PluginSearchCriteria criteria, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Gets manager statistics.
+    /// Returns aggregate statistics about plugin manager operations including memory usage,
+    /// load context counts, and average load times.
     /// </summary>
+    /// <returns>A <see cref="PluginManagerStatistics"/> snapshot.</returns>
     Task<PluginManagerStatistics> GetStatisticsAsync();
 }
 
