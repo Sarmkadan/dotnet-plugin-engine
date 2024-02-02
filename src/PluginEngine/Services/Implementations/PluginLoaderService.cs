@@ -49,6 +49,12 @@ public sealed class PluginLoaderService : IPluginLoaderService
 
     private readonly Dictionary<Guid, (Plugin Plugin, AssemblyLoadContext Context)> _loadedPlugins = new();
     private readonly object _lockObject = new object();
+    private readonly IServiceProvider? _serviceProvider;
+
+    public PluginLoaderService(IServiceProvider? serviceProvider = null)
+    {
+        _serviceProvider = serviceProvider;
+    }
 
     /// <summary>
     /// Loads a plugin from the specified assembly path.
@@ -122,6 +128,20 @@ public sealed class PluginLoaderService : IPluginLoaderService
                     if (contextField?.GetValue(context) is bool disposed && !disposed)
                     {
                         context.Dispose();
+                    }
+
+                    if (_serviceProvider != null)
+                    {
+                        // Clean up event subscribers
+                        var publisher = _serviceProvider.GetService(typeof(PluginEngine.Events.IPluginEventPublisher)) as PluginEngine.Events.IPluginEventPublisher;
+                        publisher?.RemoveSubscribersForContext(context);
+
+                        var subscriber = _serviceProvider.GetService(typeof(PluginEngine.Events.IPluginEventSubscriber)) as PluginEngine.Events.IPluginEventSubscriber;
+                        subscriber?.RemoveSubscribersForContext(context);
+
+                        // Clean up hot reload callbacks
+                        var hotReloader = _serviceProvider.GetService(typeof(IHotReloadService)) as IHotReloadService;
+                        hotReloader?.RemoveCallbacksForContext(context);
                     }
 
                     _loadedPlugins.Remove(pluginId);

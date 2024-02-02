@@ -53,6 +53,11 @@ public interface IPluginEventPublisher
     /// Publishes an event to all subscribers.
     /// </summary>
     Task PublishAsync<T>(T @event) where T : IPluginEvent;
+
+    /// <summary>
+    /// Removes all subscribers belonging to the specified AssemblyLoadContext.
+    /// </summary>
+    void RemoveSubscribersForContext(System.Runtime.Loader.AssemblyLoadContext context);
 }
 
 /// <summary>

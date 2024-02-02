@@ -52,6 +52,11 @@ public interface IHotReloadService
     /// Gets the hot reload status of a plugin.
     /// </summary>
     Task<HotReloadStatus?> GetHotReloadStatusAsync(Guid pluginId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Removes callbacks belonging to a specific AssemblyLoadContext to prevent memory leaks.
+    /// </summary>
+    void RemoveCallbacksForContext(System.Runtime.Loader.AssemblyLoadContext context);
 }
 
 /// <summary>

@@ -176,6 +176,22 @@ public sealed class HotReloadService : IHotReloadService
         return await Task.FromResult(_hotReloadStatusMap.TryGetValue(pluginId, out var status) ? status : null);
     }
 
+    /// <summary>
+    /// Removes callbacks belonging to a specific AssemblyLoadContext to prevent memory leaks.
+    /// </summary>
+    public void RemoveCallbacksForContext(System.Runtime.Loader.AssemblyLoadContext context)
+    {
+        foreach (var key in _hotReloadCallbacks.Keys.ToList())
+        {
+            var callback = _hotReloadCallbacks[key];
+            var assembly = callback.Method.DeclaringType?.Assembly;
+            if (assembly != null && System.Runtime.Loader.AssemblyLoadContext.GetLoadContext(assembly) == context)
+            {
+                _hotReloadCallbacks.Remove(key);
+            }
+        }
+    }
+
     private void OnPluginFileChanged(object sender, FileSystemEventArgs e)
     {
         // File changed event handler - would typically trigger hot reload logic
