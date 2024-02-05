@@ -29,6 +29,7 @@
     <Compile Remove="Cli\CommandParser.cs" />
     <Compile Remove="Cli\PluginEngineCliHost.cs" />
     <Compile Remove="Configuration\LoggingConfiguration.cs" />
+    <Compile Remove="Controllers\HealthController.cs" />
     <Compile Remove="Integration\WebhookHandler.cs" />
     <Compile Remove="Middleware\ErrorHandlingMiddleware.cs" />
     <Compile Remove="Middleware\LoggingMiddleware.cs" />
