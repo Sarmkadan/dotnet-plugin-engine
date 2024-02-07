@@ -121,10 +121,27 @@ public sealed class PluginEventSubscriber : IPluginEventSubscriber
     /// </summary>
     public void UnsubscribeAll<T>() where T : IPluginEvent
     {
+        List<Delegate> handlers;
+
         lock (_subscriptionsLock)
         {
             var eventType = typeof(T);
+
+            if (!_subscriptions.TryGetValue(eventType, out var existing))
+            {
+                return;
+            }
+
+            handlers = new List<Delegate>(existing);
             _subscriptions.Remove(eventType);
+        }
+
+        foreach (var handler in handlers)
+        {
+            if (handler is Func<T, Task> typedHandler)
+            {
+                _publisher.Unsubscribe(typedHandler);
+            }
         }
 
         _logger.LogInformation("Unsubscribed all handlers from event: {EventType}", typeof(T).Name);
