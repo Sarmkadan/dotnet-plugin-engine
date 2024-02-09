@@ -57,7 +57,10 @@ This engine provides a battle-tested foundation for plugin architecture in .NET.
 
 - **Plugin Isolation**: AssemblyLoadContext ensures plugins are loaded in isolated contexts, preventing version conflicts and namespace pollution
 - **Hot Reload**: Monitor file changes and reload plugins without restarting the host application
+- **Hot-Swap Without Restart**: Replace a running plugin's assembly with a new version atomically — zero host downtime, automatic rollback on failure
 - **Dependency Management**: Sophisticated dependency resolution with version constraints, transitive dependency resolution, and circular dependency detection
+- **Dependency Resolver**: Advanced topological install ordering, cross-plugin conflict detection, and complete resolution plans with actionable steps
+- **Marketplace Browser**: Discover, search, and install plugins from the remote registry — browse by category, trending, featured, and compatibility matrix
 - **Clean Architecture**: Domain-driven design with clear separation of concerns (Domain, Services, Repository, Configuration layers)
 - **Type Safety**: Full C# 13 language features, nullable reference types, and compile-time safety
 - **Performance**: In-memory dependency caching, fully async/await, minimal memory allocations, efficient file monitoring
@@ -599,6 +602,143 @@ Console.WriteLine(xmlOutput);
 string csvOutput = await csvFormatter.FormatAsync(plugins);
 Console.WriteLine(csvOutput);
 ```
+
+### Example 13: Plugin Marketplace Browser
+
+Register the marketplace services in your DI setup:
+
+```csharp
+services.AddPluginEngine();
+services.AddPluginMarketplace(); // registers IPluginMarketplaceService + IMarketplaceBrowserService
+```
+
+Browse and install plugins at runtime:
+
+```csharp
+var browser = serviceProvider.GetRequiredService<IMarketplaceBrowserService>();
+
+// Fetch the home page (featured + trending + categories) in one call
+var home = await browser.GetHomePageAsync();
+Console.WriteLine($"Featured: {home.Data!.Featured.Count} plugins");
+Console.WriteLine($"Trending: {home.Data.Trending.Count} plugins");
+
+// Browse a category
+var loggingPlugins = await browser.BrowseCategoryAsync("logging");
+foreach (var entry in loggingPlugins.Data!)
+    Console.WriteLine($"  {entry.Name} v{entry.LatestVersion} — {entry.Downloads:N0} downloads");
+
+// Search by keyword
+var marketplace = serviceProvider.GetRequiredService<IPluginMarketplaceService>();
+var results = await marketplace.SearchAsync(new MarketplaceSearchFilter
+{
+    Query     = "authentication",
+    SortOrder = MarketplaceSortOrder.Rating,
+    PageSize  = 10
+});
+
+// Install from the marketplace
+await marketplace.InstallAsync(results.Data![0].Id, results.Data[0].LatestVersion, "./plugins");
+```
+
+CLI usage:
+
+```bash
+# Search for plugins
+plugin-engine marketplace --action search --query logging --limit 10
+
+# View plugin details
+plugin-engine marketplace --action info --id <guid>
+
+# Install a specific version
+plugin-engine marketplace --action install --id <guid> --version 2.1.0 --target ./plugins
+```
+
+### Example 14: Hot-Swap Without Restart
+
+`IHotSwapService` replaces a running plugin's assembly atomically. Unlike hot-reload (which reloads the same path), hot-swap can point to an entirely new assembly file — for example, after deploying a new version.
+
+```csharp
+var hotSwap = serviceProvider.GetRequiredService<IHotSwapService>();
+
+// Register a callback invoked after every successful swap
+hotSwap.RegisterPostSwapCallback(plugin.Id, async updated =>
+{
+    Console.WriteLine($"Plugin '{updated.Name}' is now running v{updated.Version}");
+    // Re-bind any services that depend on the plugin
+});
+
+// Swap to a new assembly (host keeps serving traffic throughout)
+var result = await hotSwap.SwapPluginAsync(plugin.Id, "./plugins/MyPlugin.v2.dll");
+
+if (result.Success)
+{
+    Console.WriteLine(result.Message); // "Plugin 'MyPlugin' swapped successfully in 42ms"
+}
+else
+{
+    // Rollback was automatically attempted on failure
+    Console.WriteLine($"Swap failed: {result.Message}");
+}
+
+// Inspect swap history
+var history = await hotSwap.GetSwapHistoryAsync(plugin.Id);
+foreach (var record in history.Data!)
+    Console.WriteLine($"  {record.SwappedAtUtc:u}  {record.PreviousAssemblyPath} → {record.NewAssemblyPath}  success={record.Success}");
+
+// Explicit rollback to the previous assembly
+await hotSwap.RollbackSwapAsync(plugin.Id);
+```
+
+CLI usage:
+
+```bash
+plugin-engine swap --id <guid> --path ./plugins/MyPlugin.v2.dll
+```
+
+### Example 15: Plugin Dependency Resolver
+
+`IPluginDependencyResolver` provides set-oriented analysis on top of the basic `IDependencyResolutionService`: topological install ordering, cross-plugin conflict detection, and complete resolution plans.
+
+```csharp
+var resolver = serviceProvider.GetRequiredService<IPluginDependencyResolver>();
+var loader   = serviceProvider.GetRequiredService<IPluginLoaderService>();
+
+var plugins = (await loader.GetAllLoadedPluginsAsync()).ToList();
+
+// 1. Compute correct installation order (Kahn's topological sort)
+var orderResult = await resolver.GetInstallOrderAsync(plugins);
+Console.WriteLine("Install order:");
+foreach (var p in orderResult.Data!)
+    Console.WriteLine($"  {p.Name} v{p.Version}");
+
+// 2. Detect version conflicts across the entire plugin set
+var conflictsResult = await resolver.FindConflictsAsync(plugins);
+if (conflictsResult.Data!.Count == 0)
+{
+    Console.WriteLine("No dependency conflicts.");
+}
+else
+{
+    foreach (var conflict in conflictsResult.Data)
+        Console.WriteLine($"  ⚠ {conflict.Description}");
+}
+
+// 3. Build a full resolution plan for a single plugin
+var planResult = await resolver.BuildResolutionPlanAsync(myPlugin.Id);
+var plan = planResult.Data!;
+
+Console.WriteLine($"Plan executable: {plan.IsExecutable}");
+foreach (var step in plan.Steps)
+    Console.WriteLine($"  {step.Order}. [{step.Action}] {step.PluginName} v{step.Version}");
+```
+
+CLI usage:
+
+```bash
+plugin-engine resolve --id <guid>
+```
+
+
 
 ## API Reference
 

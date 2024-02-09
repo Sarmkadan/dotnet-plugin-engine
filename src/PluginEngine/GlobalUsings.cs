@@ -22,6 +22,7 @@ global using PluginEngine.Exceptions;
 global using PluginEngine.Execution;
 global using PluginEngine.Formatters;
 global using PluginEngine.Integration;
+global using PluginEngine.Marketplace;
 global using PluginEngine.Middleware;
 global using PluginEngine.Results;
 global using PluginEngine.Services.Abstractions;

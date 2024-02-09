@@ -14,7 +14,8 @@ public static class MarketplaceExtensions
     /// <summary>
     /// Adds the plugin marketplace service to the dependency injection container.
     /// Registers <see cref="IPluginMarketplaceService"/> as a singleton backed by
-    /// <see cref="PluginMarketplaceService"/>. Ensures memory caching is available
+    /// <see cref="PluginMarketplaceService"/>, and <see cref="IMarketplaceBrowserService"/>
+    /// backed by <see cref="MarketplaceBrowserService"/>. Ensures memory caching is available
     /// so compatibility matrices can be cached between calls.
     /// </summary>
     /// <remarks>
@@ -26,6 +27,7 @@ public static class MarketplaceExtensions
     {
         services.AddMemoryCache();
         services.AddSingleton<IPluginMarketplaceService, PluginMarketplaceService>();
+        services.AddSingleton<IMarketplaceBrowserService, MarketplaceBrowserService>();
         return services;
     }
 }
