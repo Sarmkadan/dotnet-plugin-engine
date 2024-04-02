@@ -5,6 +5,30 @@ All notable changes to dotnet-plugin-engine are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-03-08
+
+### Breaking Changes
+- Default port changed from 5000 to 8080
+- Docker runtime base image switched from `dotnet/runtime` to `dotnet/aspnet`
+- Removed deprecated `version` field from docker-compose.yml (Compose v2+ standard)
+- `ASPNETCORE_URLS` now explicitly set to `http://+:8080`
+
+### Added
+- Multi-stage Dockerfile with .NET 10, build-time test execution, and non-root user
+- HTTP-based HEALTHCHECK (`/health` endpoint) replacing `dotnet --version` probe
+- docker-compose.yml with resource limits, structured logging, and plugin monitor service
+- Migration guide: `docs/MIGRATION_v2.md`
+
+### Changed
+- Bumped package version to 2.0.0
+- Docker labels updated to reflect v2.0.0
+- Health check start period increased to 10s for more reliable container startup
+
+### Fixed
+- Health check now validates actual application state instead of runtime presence
+
+---
+
 ## [1.0.0] - 2025-12-20
 
 ### Added
@@ -110,4 +134,4 @@ For issues, questions, or suggestions:
 
 ---
 
-**Last Updated**: 2025-12-20
+**Last Updated**: 2026-03-08
