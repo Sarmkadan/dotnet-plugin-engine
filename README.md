@@ -3,8 +3,12 @@
 [![.NET](https://img.shields.io/badge/.NET-10.0-purple.svg)](https://dotnet.microsoft.com/)
 
 # dotnet-plugin-engine
-
 A production-grade, hot-reloadable plugin system for .NET with advanced AssemblyLoadContext isolation, sophisticated dependency resolution, versioning support, and enterprise-ready features. Build extensible applications that evolve with your needs.
+
+[![Docker](https://img.shields.io/badge/Docker-ready-blue.svg)](https://github.com/Sarmkadan/dotnet-plugin-engine/pkgs/container/dotnet-plugin-engine)
+
+## v2.0 Features
+* Plugin sandboxing with resource limits and permission scopes
 
 ## Table of Contents
 
