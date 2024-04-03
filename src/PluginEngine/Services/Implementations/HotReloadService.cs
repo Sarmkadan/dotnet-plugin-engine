@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -12,7 +13,7 @@ namespace PluginEngine.Services.Implementations;
 /// <summary>
 /// Service implementation for managing hot reload of plugins.
 /// </summary>
-public class HotReloadService : IHotReloadService
+public sealed class HotReloadService : IHotReloadService
 {
     private readonly IPluginLoaderService _pluginLoaderService;
     private readonly Dictionary<Guid, Func<Plugin, Task>> _hotReloadCallbacks = new();
@@ -33,7 +34,7 @@ public class HotReloadService : IHotReloadService
     /// </summary>
     public async Task StartHotReloadMonitoringAsync(CancellationToken cancellationToken = default)
     {
-        if (_monitoringTokenSource != null)
+        if (_monitoringTokenSource is not null)
             return;
 
         _monitoringTokenSource = new CancellationTokenSource();
@@ -52,7 +53,7 @@ public class HotReloadService : IHotReloadService
     /// </summary>
     public async Task StopHotReloadMonitoringAsync()
     {
-        if (_monitoringTokenSource == null)
+        if (_monitoringTokenSource is null)
             return;
 
         _monitoringTokenSource.Cancel();
@@ -60,7 +61,7 @@ public class HotReloadService : IHotReloadService
         _fileSystemWatcher = null;
         _monitoringTokenSource = null;
 
-        if (_monitoringTask != null)
+        if (_monitoringTask is not null)
             await _monitoringTask;
     }
 
@@ -69,7 +70,7 @@ public class HotReloadService : IHotReloadService
     /// </summary>
     public bool CanHotReload(Plugin plugin)
     {
-        if (plugin == null)
+        if (plugin is null)
             return false;
 
         return plugin.SupportsHotReload && plugin.Status == PluginStatus.Loaded;
@@ -83,7 +84,7 @@ public class HotReloadService : IHotReloadService
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
         var plugin = await _pluginLoaderService.GetLoadedPluginAsync(pluginId, cancellationToken);
 
-        if (plugin == null)
+        if (plugin is null)
             return false;
 
         if (!CanHotReload(plugin))
@@ -155,7 +156,7 @@ public class HotReloadService : IHotReloadService
     /// </summary>
     public void RegisterHotReloadCallback(Guid pluginId, Func<Plugin, Task> callback)
     {
-        if (callback != null)
+        if (callback is not null)
             _hotReloadCallbacks[pluginId] = callback;
     }
 

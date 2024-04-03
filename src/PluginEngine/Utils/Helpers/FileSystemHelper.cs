@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -10,7 +11,7 @@ namespace PluginEngine.Utils.Helpers;
 /// Provides utilities for directory management, file discovery, and cleanup.
 /// Abstracts file system complexity and provides cross-platform compatibility.
 /// </summary>
-public class FileSystemHelper
+public sealed class FileSystemHelper
 {
     private readonly ILogger<FileSystemHelper> _logger;
 

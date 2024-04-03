@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -9,7 +10,7 @@ namespace PluginEngine.BackgroundServices;
 /// Background service that monitors plugin file system changes.
 /// Detects plugin installations, updates, and deletions for automatic hot reload.
 /// </summary>
-public class BackgroundPluginMonitor : BackgroundService
+public sealed class BackgroundPluginMonitor : BackgroundService
 {
     private readonly IPluginManagerService _pluginManager;
     private readonly IHotReloadService _hotReloadService;

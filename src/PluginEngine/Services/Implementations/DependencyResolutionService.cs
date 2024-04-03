@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -12,7 +13,7 @@ namespace PluginEngine.Services.Implementations;
 /// <summary>
 /// Service implementation for resolving plugin dependencies.
 /// </summary>
-public class DependencyResolutionService : IDependencyResolutionService
+public sealed class DependencyResolutionService : IDependencyResolutionService
 {
     private readonly IPluginLoaderService _pluginLoaderService;
     private readonly Dictionary<Guid, List<Plugin>> _dependencyCache = new();
@@ -27,7 +28,7 @@ public class DependencyResolutionService : IDependencyResolutionService
     /// </summary>
     public async Task<IEnumerable<Plugin>> ResolveDependenciesAsync(Plugin plugin, CancellationToken cancellationToken = default)
     {
-        if (plugin == null)
+        if (plugin is null)
             throw new ArgumentNullException(nameof(plugin));
 
         if (_dependencyCache.TryGetValue(plugin.Id, out var cached))
@@ -47,13 +48,13 @@ public class DependencyResolutionService : IDependencyResolutionService
     /// </summary>
     public async Task<bool> ValidateDependenciesAsync(Plugin plugin, CancellationToken cancellationToken = default)
     {
-        if (plugin == null)
+        if (plugin is null)
             throw new ArgumentNullException(nameof(plugin));
 
         foreach (var dependency in plugin.Dependencies)
         {
             var resolved = await ResolveSingleDependencyAsync(dependency, cancellationToken);
-            if (resolved == null && !dependency.IsOptional)
+            if (resolved is null && !dependency.IsOptional)
                 return false;
         }
 
@@ -65,7 +66,7 @@ public class DependencyResolutionService : IDependencyResolutionService
     /// </summary>
     public async Task<bool> HasCircularDependenciesAsync(Plugin plugin, CancellationToken cancellationToken = default)
     {
-        if (plugin == null)
+        if (plugin is null)
             throw new ArgumentNullException(nameof(plugin));
 
         var visited = new HashSet<Guid>();
@@ -80,7 +81,7 @@ public class DependencyResolutionService : IDependencyResolutionService
     public async Task<DependencyGraph> GetDependencyGraphAsync(Guid pluginId, CancellationToken cancellationToken = default)
     {
         var plugin = await _pluginLoaderService.GetLoadedPluginAsync(pluginId, cancellationToken);
-        if (plugin == null)
+        if (plugin is null)
             throw new PluginException($"Plugin {pluginId} not found.", "PLUGIN_NOT_FOUND");
 
         var graph = new DependencyGraph { RootPluginId = pluginId };
@@ -97,13 +98,13 @@ public class DependencyResolutionService : IDependencyResolutionService
     /// </summary>
     public async Task<Plugin?> ResolveSingleDependencyAsync(PluginDependency dependency, CancellationToken cancellationToken = default)
     {
-        if (dependency == null)
+        if (dependency is null)
             throw new ArgumentNullException(nameof(dependency));
 
         var loadedPlugins = await _pluginLoaderService.GetAllLoadedPluginsAsync(cancellationToken);
         var resolved = loadedPlugins.FirstOrDefault(p => p.Id == dependency.DependencyPluginId);
 
-        if (resolved == null)
+        if (resolved is null)
             return null;
 
         if (!dependency.IsSatisfiedBy(resolved.Version))
@@ -148,7 +149,7 @@ public class DependencyResolutionService : IDependencyResolutionService
         foreach (var dependency in plugin.Dependencies)
         {
             var resolvedDep = await ResolveSingleDependencyAsync(dependency, cancellationToken);
-            if (resolvedDep != null && !resolved.Any(p => p.Id == resolvedDep.Id))
+            if (resolvedDep is not null && !resolved.Any(p => p.Id == resolvedDep.Id))
             {
                 resolved.Add(resolvedDep);
                 await ResolveDependenciesRecursiveAsync(resolvedDep, resolved, visited, cancellationToken);
@@ -162,7 +163,7 @@ public class DependencyResolutionService : IDependencyResolutionService
         recursionStack.Add(pluginId);
 
         var plugin = await _pluginLoaderService.GetLoadedPluginAsync(pluginId, cancellationToken);
-        if (plugin == null)
+        if (plugin is null)
             return false;
 
         foreach (var dep in plugin.Dependencies)
@@ -198,7 +199,7 @@ public class DependencyResolutionService : IDependencyResolutionService
         foreach (var dep in plugin.Dependencies)
         {
             var resolvedDep = await ResolveSingleDependencyAsync(dep, cancellationToken);
-            if (resolvedDep != null)
+            if (resolvedDep is not null)
             {
                 var edge = new DependencyEdge
                 {

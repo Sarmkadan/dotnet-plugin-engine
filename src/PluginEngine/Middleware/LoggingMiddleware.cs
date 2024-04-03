@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -10,7 +11,7 @@ namespace PluginEngine.Middleware;
 /// Logs operation start, duration, and any exceptions that occur.
 /// Provides diagnostic information for troubleshooting plugin issues.
 /// </summary>
-public class LoggingMiddleware : IPluginMiddleware
+public sealed class LoggingMiddleware : IPluginMiddleware
 {
     private readonly ILogger<LoggingMiddleware> _logger;
 

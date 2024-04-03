@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -84,7 +85,7 @@ public abstract class PluginEventBase : IPluginEvent
 /// <summary>
 /// Event raised when a plugin is loaded.
 /// </summary>
-public class PluginLoadedEvent : PluginEventBase
+public sealed class PluginLoadedEvent : PluginEventBase
 {
     public override string EventType => "PluginLoaded";
     public required string PluginName { get; set; }
@@ -95,7 +96,7 @@ public class PluginLoadedEvent : PluginEventBase
 /// <summary>
 /// Event raised when a plugin is unloaded.
 /// </summary>
-public class PluginUnloadedEvent : PluginEventBase
+public sealed class PluginUnloadedEvent : PluginEventBase
 {
     public override string EventType => "PluginUnloaded";
     public required string PluginName { get; set; }
@@ -105,7 +106,7 @@ public class PluginUnloadedEvent : PluginEventBase
 /// <summary>
 /// Event raised when a plugin is updated.
 /// </summary>
-public class PluginUpdatedEvent : PluginEventBase
+public sealed class PluginUpdatedEvent : PluginEventBase
 {
     public override string EventType => "PluginUpdated";
     public required string PreviousVersion { get; set; }
@@ -116,7 +117,7 @@ public class PluginUpdatedEvent : PluginEventBase
 /// <summary>
 /// Event raised when a plugin encounters an error.
 /// </summary>
-public class PluginErrorEvent : PluginEventBase
+public sealed class PluginErrorEvent : PluginEventBase
 {
     public override string EventType => "PluginError";
     public required string ErrorMessage { get; set; }
@@ -127,7 +128,7 @@ public class PluginErrorEvent : PluginEventBase
 /// <summary>
 /// Event raised when dependencies are resolved.
 /// </summary>
-public class DependenciesResolvedEvent : PluginEventBase
+public sealed class DependenciesResolvedEvent : PluginEventBase
 {
     public override string EventType => "DependenciesResolved";
     public List<Guid> ResolvedDependencies { get; set; } = [];

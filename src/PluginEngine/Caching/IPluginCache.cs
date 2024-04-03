@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -40,7 +41,7 @@ public interface IPluginCache
 /// <summary>
 /// Cache statistics for monitoring and diagnostics.
 /// </summary>
-public class CacheStatistics
+public sealed class CacheStatistics
 {
     public long TotalHits { get; set; }
     public long TotalMisses { get; set; }

@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -56,7 +57,7 @@ public interface IHotReloadService
 /// <summary>
 /// Represents hot reload statistics.
 /// </summary>
-public class HotReloadStatistics
+public sealed class HotReloadStatistics
 {
     public int TotalReloads { get; set; }
     public int SuccessfulReloads { get; set; }
@@ -69,7 +70,7 @@ public class HotReloadStatistics
 /// <summary>
 /// Represents a hot reload event.
 /// </summary>
-public class HotReloadEvent
+public sealed class HotReloadEvent
 {
     public Guid PluginId { get; set; }
     public DateTime Timestamp { get; set; }
@@ -81,7 +82,7 @@ public class HotReloadEvent
 /// <summary>
 /// Represents the hot reload status of a plugin.
 /// </summary>
-public class HotReloadStatus
+public sealed class HotReloadStatus
 {
     public Guid PluginId { get; set; }
     public bool SupportsHotReload { get; set; }

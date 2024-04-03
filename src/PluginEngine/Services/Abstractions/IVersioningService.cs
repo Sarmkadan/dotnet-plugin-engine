@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -56,7 +57,7 @@ public interface IVersioningService
 /// <summary>
 /// Represents a semantic version.
 /// </summary>
-public class SemanticVersion
+public sealed class SemanticVersion
 {
     public int Major { get; set; }
     public int Minor { get; set; }
