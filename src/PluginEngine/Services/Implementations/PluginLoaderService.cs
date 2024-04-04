@@ -83,6 +83,16 @@ public sealed class PluginLoaderService : IPluginLoaderService
                 try
                 {
                     context.Unload();
+
+                    // Hotfix: Explicitly dispose the AssemblyLoadContext to prevent memory leaks
+                    // The context.Unload() marks the context for unloading but doesn't immediately
+                    // release all resources. Disposing ensures proper cleanup.
+                    var contextField = context.GetType().GetField("_disposed", BindingFlags.NonPublic | BindingFlags.Instance);
+                    if (contextField?.GetValue(context) is bool disposed && !disposed)
+                    {
+                        context.Dispose();
+                    }
+
                     _loadedPlugins.Remove(pluginId);
                     plugin.Status = PluginStatus.Unloaded;
                     return true;
