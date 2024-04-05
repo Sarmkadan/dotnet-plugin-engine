@@ -142,6 +142,7 @@ info: ## Display project information
 	@echo "  - docs/getting-started.md"
 	@echo "  - docs/architecture.md"
 	@echo "  - docs/api-reference.md"
+	@echo "  - docs/alc-isolation-guide.md"
 	@echo "  - docs/deployment.md"
 	@echo "  - docs/faq.md"
 

@@ -187,6 +187,7 @@ dotnet-plugin-engine/
 │   ├── getting-started.md
 │   ├── architecture.md
 │   ├── api-reference.md
+│   ├── alc-isolation-guide.md
 │   ├── deployment.md
 │   └── faq.md
 ├── .github/
