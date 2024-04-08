@@ -135,6 +135,37 @@ public sealed class PluginEventPublisher : IPluginEventPublisher
             };
         }
     }
+
+    /// <summary>
+    /// Removes all subscribers belonging to the specified AssemblyLoadContext.
+    /// This prevents memory leaks when plugins are unloaded.
+    /// </summary>
+    public void RemoveSubscribersForContext(System.Runtime.Loader.AssemblyLoadContext context)
+    {
+        lock (_subscribersLock)
+        {
+            foreach (var key in _subscribers.Keys.ToList())
+            {
+                var handlers = _subscribers[key];
+                int removed = handlers.RemoveAll(h => 
+                {
+                    var assembly = h.Method.DeclaringType?.Assembly;
+                    return assembly != null && System.Runtime.Loader.AssemblyLoadContext.GetLoadContext(assembly) == context;
+                });
+                
+                if (removed > 0)
+                {
+                    _logger.LogDebug("Removed {Count} subscribers for context {ContextName} on event {EventType}", 
+                        removed, context.Name, key.Name);
+                }
+
+                if (handlers.Count == 0)
+                {
+                    _subscribers.Remove(key);
+                }
+            }
+        }
+    }
 }
 
 /// <summary>
