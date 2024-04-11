@@ -81,6 +81,11 @@ public sealed class PluginMetadata
     public string MinimumClrVersion { get; set; } = "10.0";
 
     /// <summary>
+    /// Gets or sets the semantic version constraint for the host API compatibility.
+    /// </summary>
+    public string EngineVersionConstraint { get; set; } = string.Empty;
+
+    /// <summary>
     /// Gets or sets whether the plugin is signed.
     /// </summary>
     public bool IsSigned { get; set; } = false;

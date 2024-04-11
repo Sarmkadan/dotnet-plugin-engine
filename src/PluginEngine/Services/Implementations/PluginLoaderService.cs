@@ -90,6 +90,41 @@ public sealed class PluginLoaderService : IPluginLoaderService
                     Version = versionStr
                 };
 
+                var directory = Path.GetDirectoryName(fullPath) ?? string.Empty;
+                var pluginJsonPath = Path.Combine(directory, "plugin.json");
+                
+                if (!File.Exists(pluginJsonPath))
+                {
+                    pluginJsonPath = Path.Combine(directory, Path.GetFileNameWithoutExtension(fullPath) + PluginEngine.Constants.PluginEngineConstants.MetadataFileExtension);
+                }
+
+                if (File.Exists(pluginJsonPath))
+                {
+                    try
+                    {
+                        var json = File.ReadAllText(pluginJsonPath);
+                        plugin.Metadata = System.Text.Json.JsonSerializer.Deserialize<PluginMetadata>(json, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                        
+                        if (plugin.Metadata != null && !string.IsNullOrWhiteSpace(plugin.Metadata.EngineVersionConstraint))
+                        {
+                            var versioningService = _serviceProvider?.GetService(typeof(IVersioningService)) as IVersioningService;
+                            if (versioningService != null)
+                            {
+                                var hostVersion = typeof(PluginLoaderService).Assembly.GetName().Version?.ToString(3) ?? "1.0.0";
+                                if (!versioningService.IsSatisfiedBy(plugin.Metadata.EngineVersionConstraint, hostVersion))
+                                {
+                                    context.Unload();
+                                    throw new PluginIncompatibleException(plugin.Name, plugin.Metadata.EngineVersionConstraint, hostVersion);
+                                }
+                            }
+                        }
+                    }
+                    catch (System.Text.Json.JsonException)
+                    {
+                        // Ignore invalid JSON or handle as needed
+                    }
+                }
+
                 var lifecycles = new List<global::PluginEngine.Execution.IPluginLifecycle>();
                 foreach (var type in assembly.GetTypes())
                 {
