@@ -10,7 +10,7 @@ namespace PluginEngine.Results;
 /// Standard result wrapper for plugin operations.
 /// Provides consistent error handling and response formatting.
 /// </summary>
-public sealed class PluginOperationResult
+public class PluginOperationResult
 {
     /// <summary>
     /// Indicates whether the operation was successful.

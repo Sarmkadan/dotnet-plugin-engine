@@ -105,17 +105,18 @@ public sealed class PluginValidator
     private void ValidateMetadata(PluginMetadata? metadata, List<string> errors)
     {
         if (metadata is null)
-        {
-            errors.Add("Plugin metadata cannot be null");
             return;
-        }
 
         if (string.IsNullOrWhiteSpace(metadata.Description))
         {
             errors.Add("Plugin description cannot be empty");
         }
 
-        if (!string.IsNullOrWhiteSpace(metadata.Author) && metadata.Author.Length > 100)
+        if (string.IsNullOrWhiteSpace(metadata.Author))
+        {
+            errors.Add("Plugin author cannot be empty");
+        }
+        else if (metadata.Author.Length > 100)
         {
             errors.Add("Plugin author name exceeds maximum length");
         }
@@ -137,12 +138,24 @@ public sealed class PluginValidator
         {
             if (string.IsNullOrWhiteSpace(dep.MinimumVersion))
             {
-                errors.Add($"Dependency {dep.DependencyPluginId} has invalid version constraint");
+                errors.Add($"Dependency {dep.DependencyPluginId} has invalid minimum version constraint");
+            }
+            else if (!_versionHelper.IsValidSemanticVersion(dep.MinimumVersion))
+            {
+                errors.Add($"Dependency {dep.DependencyPluginId} has invalid minimum version: {dep.MinimumVersion}");
             }
 
-            if (!_versionHelper.IsValidSemanticVersion(dep.MinimumVersion))
+            if (!string.IsNullOrWhiteSpace(dep.MaximumVersion))
             {
-                errors.Add($"Dependency {dep.DependencyPluginId} version constraint is not semantic version: {dep.MinimumVersion}");
+                if (!_versionHelper.IsValidSemanticVersion(dep.MaximumVersion))
+                {
+                    errors.Add($"Dependency {dep.DependencyPluginId} has invalid maximum version: {dep.MaximumVersion}");
+                }
+                else if (_versionHelper.IsValidSemanticVersion(dep.MinimumVersion) &&
+                         _versionHelper.CompareVersions(dep.MaximumVersion, dep.MinimumVersion) < 0)
+                {
+                    errors.Add($"Dependency {dep.DependencyPluginId} maximum version {dep.MaximumVersion} cannot be less than minimum version {dep.MinimumVersion}");
+                }
             }
 
             if (!seenIds.Add(dep.DependencyPluginId))

@@ -6,8 +6,11 @@
 
 using System.Reflection;
 using System.Runtime.Loader;
+using PluginEngine.Constants;
 using PluginEngine.Domain.Entities;
+using PluginEngine.Events;
 using PluginEngine.Exceptions;
+using PluginEngine.Execution;
 using PluginEngine.Services.Abstractions;
 
 namespace PluginEngine.Services.Implementations;
@@ -47,7 +50,7 @@ public sealed class PluginLoaderService : IPluginLoaderService
         }
     }
 
-    private readonly Dictionary<Guid, (Plugin Plugin, AssemblyLoadContext Context, List<global::PluginEngine.Execution.IPluginLifecycle> Lifecycles)> _loadedPlugins = new();
+    private readonly Dictionary<Guid, (Plugin Plugin, AssemblyLoadContext Context, List<IPluginLifecycle> Lifecycles)> _loadedPlugins = new();
     private readonly object _lockObject = new object();
     private readonly IServiceProvider? _serviceProvider;
 
@@ -95,7 +98,7 @@ public sealed class PluginLoaderService : IPluginLoaderService
                 
                 if (!File.Exists(pluginJsonPath))
                 {
-                    pluginJsonPath = Path.Combine(directory, Path.GetFileNameWithoutExtension(fullPath) + PluginEngine.Constants.PluginEngineConstants.MetadataFileExtension);
+                    pluginJsonPath = Path.Combine(directory, Path.GetFileNameWithoutExtension(fullPath) + PluginEngineConstants.MetadataFileExtension);
                 }
 
                 if (File.Exists(pluginJsonPath))
@@ -195,21 +198,13 @@ public sealed class PluginLoaderService : IPluginLoaderService
             {
                 context.Unload();
 
-                // Hotfix: Explicitly dispose the AssemblyLoadContext to prevent memory leaks
-                var contextField = context.GetType().GetField("_disposed", BindingFlags.NonPublic | BindingFlags.Instance);
-                if (contextField?.GetValue(context) is bool disposed && !disposed)
-                {
-                    context.Dispose();
-                }
+                // Unload the AssemblyLoadContext to prevent memory leaks
+                context.Unload();
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
 
                 if (_serviceProvider != null)
                 {
-                    var publisher = _serviceProvider.GetService(typeof(PluginEngine.Events.IPluginEventPublisher)) as PluginEngine.Events.IPluginEventPublisher;
-                    publisher?.RemoveSubscribersForContext(context);
-
-                    var subscriber = _serviceProvider.GetService(typeof(PluginEngine.Events.IPluginEventSubscriber)) as PluginEngine.Events.IPluginEventSubscriber;
-                    subscriber?.RemoveSubscribersForContext(context);
-
                     var hotReloader = _serviceProvider.GetService(typeof(IHotReloadService)) as IHotReloadService;
                     hotReloader?.RemoveCallbacksForContext(context);
                 }
