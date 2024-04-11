@@ -43,6 +43,8 @@ public static class DependencyInjectionSetup
         services.AddSingleton<IDependencyResolutionService, DependencyResolutionService>();
         services.AddSingleton<IVersioningService, VersioningService>();
         services.AddSingleton<IHotReloadService, HotReloadService>();
+        services.AddSingleton<IHotSwapService, HotSwapService>();
+        services.AddSingleton<IPluginDependencyResolver, PluginDependencyResolver>();
         services.AddSingleton<IPluginManagerService, PluginManagerService>();
 
         return services;
