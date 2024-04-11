@@ -1,8 +1,9 @@
-[![Build](https://github.com/sarmkadan/dotnet-plugin-engine/actions/workflows/build.yml/badge.svg)](https://github.com/sarmkadan/dotnet-plugin-engine/actions/workflows/build.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![.NET](https://img.shields.io/badge/.NET-10.0-purple.svg)](https://dotnet.microsoft.com/)
-
 # dotnet-plugin-engine
+
+![CI](https://github.com/sarmkadan/dotnet-plugin-engine/actions/workflows/ci.yml/badge.svg)
+![License](https://img.shields.io/github/license/sarmkadan/dotnet-plugin-engine)
+![.NET](https://img.shields.io/badge/.NET-10.0-512BD4)
+
 A production-grade, hot-reloadable plugin system for .NET with advanced AssemblyLoadContext isolation, sophisticated dependency resolution, versioning support, and enterprise-ready features. Build extensible applications that evolve with your needs.
 
 [![Docker](https://img.shields.io/badge/Docker-ready-blue.svg)](https://github.com/Sarmkadan/dotnet-plugin-engine/pkgs/container/dotnet-plugin-engine)
