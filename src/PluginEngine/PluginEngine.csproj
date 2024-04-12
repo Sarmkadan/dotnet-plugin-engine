@@ -7,9 +7,9 @@
     <AssemblyName>PluginEngine</AssemblyName>
     <RootNamespace>PluginEngine</RootNamespace>
     <PackageId>Zaiets.dotnet.plugin.engine</PackageId>
-    <Version>2.0.2</Version>
+    <Version>1.0.0</Version>
     <Authors>Vladyslav Zaiets</Authors>
-    <Description>Hot-reloadable plugin system for .NET - AssemblyLoadContext isolation, dependency resolution, versioning</Description>
+    <Description>A robust and extensible plugin engine for .NET applications featuring assembly isolation, dynamic loading, and hot-reloading capabilities.</Description>
     <PackageTags>dotnet plugin engine hot-reload assemblyloadcontext dynamic-loading isolation dependency-resolution</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/sarmkadan/dotnet-plugin-engine</PackageProjectUrl>
