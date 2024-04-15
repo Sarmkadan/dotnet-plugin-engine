@@ -1,0 +1,54 @@
+
+# 2026-07-03 15:29:19.096937
++Add performance benchmarks to sarmkadan/dotnet-plugin-engine.
++Work in: /home/redrocket/task-factory/workdir/dotnet-plugin-engine
++
++1. Create a benchmarks project (dotnet-plugin-engine.Benchmarks) if missing, using BenchmarkDotNet
++2. Add 3-5 benchmarks for the most critical operations:
++   - Measure throughput of main operations
++   - Compare different configurations/approaches if applicable
++   - Include memory allocation benchmarks ([MemoryDiagnoser])
++3. Add a README section about running benchmarks
++4. Add benchmark results table to README if you can run them
++
++Commit as: "perf: add BenchmarkDotNet performance benchmarks"
++
++Git config:
++  git config user.name "Vladyslav Zaiets"
++  git config user.email "rutova2@gmail.com"
++
++CRITICAL RULES:
++- Do NOT add Co-Authored-By headers
++- Do NOT mention AI, Claude, GPT, Copilot, generated, automated anywhere in code or commits
++- Do NOT mention Red Rocket or Amdaris anywhere
++- Write natural commit messages
++- Push to main when done
++
++IMPORTANT: Do NOT run the benchmarks. Only write the benchmark code and verify it compiles with dotnet build.
+
+# 2026-07-03 15:29:19.096994
++Add performance benchmarks to sarmkadan/dotnet-plugin-engine.
++Work in: /home/redrocket/task-factory/workdir/dotnet-plugin-engine
++
++1. Create a benchmarks project (dotnet-plugin-engine.Benchmarks) if missing, using BenchmarkDotNet
++2. Add 3-5 benchmarks for the most critical operations:
++   - Measure throughput of main operations
++   - Compare different configurations/approaches if applicable
++   - Include memory allocation benchmarks ([MemoryDiagnoser])
++3. Add a README section about running benchmarks
++4. Add benchmark results table to README if you can run them
++
++Commit as: "perf: add BenchmarkDotNet performance benchmarks"
++
++Git config:
++  git config user.name "Vladyslav Zaiets"
++  git config user.email "rutova2@gmail.com"
++
++CRITICAL RULES:
++- Do NOT add Co-Authored-By headers
++- Do NOT mention AI, Claude, GPT, Copilot, generated, automated anywhere in code or commits
++- Do NOT mention Red Rocket or Amdaris anywhere
++- Write natural commit messages
++- Push to main when done
++
++IMPORTANT: Do NOT run the benchmarks. Only write the benchmark code and verify it compiles with dotnet build.

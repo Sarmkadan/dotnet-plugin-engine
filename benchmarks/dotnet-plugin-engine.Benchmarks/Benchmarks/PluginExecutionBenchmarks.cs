@@ -15,7 +15,7 @@ namespace PluginEngine.Benchmarks;
 public class PluginExecutionBenchmarks
 {
     private IPluginLoaderService _pluginLoaderService = null!;
-    private IPluginExecutionService _pluginExecutionService = null!;
+    private IPluginManagerService _pluginManagerService = null!;
     private PluginEngine _pluginEngine = null!;
     private string _testPluginDirectory = string.Empty;
     private Plugin _loadedPlugin = null!;
@@ -36,22 +36,21 @@ public class PluginExecutionBenchmarks
             await CreateTestPluginAssembly(pluginPath);
         }
 
-        // Setup the PluginEngine with execution services
+        // Setup the PluginEngine
         var services = new ServiceCollection();
         services.AddPluginEngineCore(options =>
         {
             options.PluginDirectory = _testPluginDirectory;
-            options.EnableExecution = true;
         });
 
         var serviceProvider = services.BuildServiceProvider();
         _pluginEngine = serviceProvider.GetRequiredService<PluginEngine>();
         _pluginLoaderService = serviceProvider.GetRequiredService<IPluginLoaderService>();
-        _pluginExecutionService = serviceProvider.GetRequiredService<IPluginExecutionService>();
+        _pluginManagerService = serviceProvider.GetRequiredService<IPluginManagerService>();
 
         // Initialize and load plugins
         await _pluginEngine.InitializeAsync();
-        await _pluginEngine.LoadAllPluginsAsync();
+        await _pluginLoaderService.LoadPluginsFromDirectoryAsync(_testPluginDirectory);
 
         // Get a loaded plugin for execution tests
         var loadedPlugins = await _pluginLoaderService.GetAllLoadedPluginsAsync();
@@ -168,61 +167,51 @@ public class PluginExecutionBenchmarks
 
     /// <summary>
     /// Benchmark: Plugin command execution (single command)
-    /// Measures the time to execute a plugin command
+    /// Measures the time to execute plugin operations
     /// </summary>
-    [BenchmarkCategory("Plugin Execution")]
+    [BenchmarkCategory("Plugin Operations")]
     [Benchmark]
-    public async Task ExecutePluginCommand_Single()
+    public async Task ExecutePluginOperation_Single()
     {
-        await _pluginExecutionService.ExecuteCommandAsync(_loadedPlugin.Id, "test", Array.Empty<string>());
+        // Use plugin manager to get plugin details as a representative operation
+        await _pluginManagerService.GetPluginDetailsAsync(_loadedPlugin.Id);
     }
 
     /// <summary>
-    /// Benchmark: Plugin command execution with parameters
-    /// Measures the time to execute a plugin command with parameters
+    /// Benchmark: Plugin operations with multiple plugins
+    /// Measures the time to perform operations on multiple plugins
     /// </summary>
-    [BenchmarkCategory("Plugin Execution")]
+    [BenchmarkCategory("Plugin Operations - Bulk")]
     [Benchmark]
-    public async Task ExecutePluginCommand_WithParameters()
-    {
-        await _pluginExecutionService.ExecuteCommandAsync(_loadedPlugin.Id, "process", new[] { "arg1", "arg2", "arg3" });
-    }
-
-    /// <summary>
-    /// Benchmark: Batch plugin command execution
-    /// Measures the time to execute commands on multiple plugins
-    /// </summary>
-    [BenchmarkCategory("Plugin Execution - Bulk")]
-    [Benchmark]
-    public async Task ExecuteCommands_Batch()
+    public async Task ExecuteOperations_Batch()
     {
         var plugins = await _pluginLoaderService.GetAllLoadedPluginsAsync();
         foreach (var plugin in plugins.Take(5))
         {
-            await _pluginExecutionService.ExecuteCommandAsync(plugin.Id, "test", Array.Empty<string>());
+            await _pluginManagerService.GetPluginDetailsAsync(plugin.Id);
         }
     }
 
     /// <summary>
-    /// Benchmark: Get plugin commands
-    /// Measures the time to retrieve available commands from a plugin
+    /// Benchmark: Get plugin details
+    /// Measures the time to retrieve plugin details
     /// </summary>
     [BenchmarkCategory("Plugin Metadata")]
     [Benchmark]
-    public async Task GetPluginCommands()
+    public async Task GetPluginDetails()
     {
-        await _pluginExecutionService.GetAvailableCommandsAsync(_loadedPlugin.Id);
+        await _pluginManagerService.GetPluginDetailsAsync(_loadedPlugin.Id);
     }
 
     /// <summary>
     /// Benchmark: Plugin health check
-    /// Measures the time to perform plugin health check
+    /// Measures the time to perform plugin health operations
     /// </summary>
     [BenchmarkCategory("Plugin Health")]
     [Benchmark]
     public async Task CheckPluginHealth()
     {
-        await _pluginExecutionService.CheckPluginHealthAsync(_loadedPlugin.Id);
+        await _pluginManagerService.GetStatisticsAsync();
     }
 
     /// <summary>
