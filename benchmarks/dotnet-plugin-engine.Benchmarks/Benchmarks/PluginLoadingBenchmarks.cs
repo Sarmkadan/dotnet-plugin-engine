@@ -1,5 +1,6 @@
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Diagnosers;
+using Microsoft.Extensions.DependencyInjection;
 using PluginEngine.Domain.Entities;
 using PluginEngine.Services.Abstractions;
 

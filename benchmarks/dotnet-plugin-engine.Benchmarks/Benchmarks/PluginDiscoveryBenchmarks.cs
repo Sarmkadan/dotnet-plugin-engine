@@ -14,7 +14,7 @@ namespace PluginEngine.Benchmarks;
 [GroupBenchmarksBy(BenchmarkDotNet.Configs.BenchmarkLogicalGroupRule.ByCategory)]
 public class PluginDiscoveryBenchmarks
 {
-    private IPluginDiscoveryService _pluginDiscoveryService = null!;
+    private IPluginLoaderService _pluginLoaderService = null!;
     private string _testPluginDirectory = string.Empty;
     private const int PluginCount = 50;
     private const int LargePluginCount = 200;
@@ -34,12 +34,12 @@ public class PluginDiscoveryBenchmarks
             await CreateTestPluginAssembly(pluginPath);
         }
 
-        // Setup the plugin discovery service
+        // Setup the plugin loader service
         var serviceProvider = new ServiceCollection()
             .AddPluginEngineCore()
             .BuildServiceProvider();
 
-        _pluginDiscoveryService = serviceProvider.GetRequiredService<IPluginDiscoveryService>();
+        _pluginLoaderService = serviceProvider.GetRequiredService<IPluginLoaderService>();
     }
 
     [GlobalCleanup]
@@ -131,7 +131,7 @@ public class PluginDiscoveryBenchmarks
     [Benchmark(Baseline = true)]
     public async Task Discover_EmptyDirectory()
     {
-        await _pluginDiscoveryService.DiscoverPluginsAsync(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
+        await _pluginLoaderService.LoadPluginsFromDirectoryAsync(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
     }
 
     /// <summary>
@@ -142,7 +142,7 @@ public class PluginDiscoveryBenchmarks
     [Benchmark]
     public async Task Discover_50Plugins()
     {
-        await _pluginDiscoveryService.DiscoverPluginsAsync(_testPluginDirectory);
+        await _pluginLoaderService.LoadPluginsFromDirectoryAsync(_testPluginDirectory);
     }
 
     /// <summary>
@@ -167,7 +167,7 @@ public class PluginDiscoveryBenchmarks
                 await CreateTestPluginAssembly(pluginPath);
             }
 
-            await _pluginDiscoveryService.DiscoverPluginsAsync(largeDirectory);
+            await _pluginLoaderService.LoadPluginsFromDirectoryAsync(largeDirectory);
         }
         finally
         {
@@ -187,8 +187,8 @@ public class PluginDiscoveryBenchmarks
     [Benchmark]
     public async Task GetPluginMetadata_Single()
     {
-        var metadata = await _pluginDiscoveryService.GetPluginMetadataAsync(_testPluginDirectory);
-        _ = metadata.Count();
+        var plugins = await _pluginLoaderService.GetAllLoadedPluginsAsync();
+        _ = plugins.Count();
     }
 
     /// <summary>
@@ -199,7 +199,8 @@ public class PluginDiscoveryBenchmarks
     [Benchmark]
     public async Task ValidatePluginFiles()
     {
-        await _pluginDiscoveryService.ValidatePluginFilesAsync(_testPluginDirectory);
+        // Plugin file validation is handled during load
+        await _pluginLoaderService.LoadPluginsFromDirectoryAsync(_testPluginDirectory);
     }
 
     /// <summary>
@@ -210,8 +211,8 @@ public class PluginDiscoveryBenchmarks
     [Benchmark]
     public async Task FilterValidPlugins()
     {
-        var allPlugins = await _pluginDiscoveryService.DiscoverPluginsAsync(_testPluginDirectory);
-        var validPlugins = allPlugins.Where(p => p.IsValid).ToList();
+        var allPlugins = await _pluginLoaderService.GetAllLoadedPluginsAsync();
+        var validPlugins = allPlugins.Where(p => p.Status != PluginStatus.Failed).ToList();
         _ = validPlugins.Count;
     }
 }
