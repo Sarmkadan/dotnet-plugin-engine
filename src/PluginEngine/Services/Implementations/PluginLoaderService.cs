@@ -314,4 +314,93 @@ public sealed class PluginLoaderService : IPluginLoaderService
 
         return await LoadPluginAsync(assemblyPath, cancellationToken);
     }
+
+    private async Task<Plugin> CreatePluginFromAssemblyAsync(string fullPath, string assemblyPath)
+    {
+        var assemblyName = AssemblyName.GetAssemblyName(fullPath);
+        var assemblyNameStr = assemblyName.Name ?? "Unknown";
+        var versionStr = assemblyName.Version?.ToString() ?? "1.0.0";
+
+        var plugin = new Plugin
+        {
+            Id = Guid.NewGuid(),
+            Name = assemblyNameStr,
+            AssemblyPath = assemblyPath,
+            LoadContextId = PluginEngineConstants.LoadContextPrefix + Guid.NewGuid(),
+            Status = PluginStatus.Loading,
+            Version = versionStr
+        };
+
+        await LoadPluginMetadataAsync(plugin, fullPath);
+
+        return plugin;
+    }
+
+    private async Task LoadPluginMetadataAsync(Plugin plugin, string fullPath)
+    {
+        var directory = Path.GetDirectoryName(fullPath) ?? string.Empty;
+        var pluginJsonPath = Path.Combine(directory, "plugin.json");
+
+        if (!File.Exists(pluginJsonPath))
+        {
+            pluginJsonPath = Path.Combine(directory, Path.GetFileNameWithoutExtension(fullPath) + PluginEngineConstants.MetadataFileExtension);
+        }
+
+        if (File.Exists(pluginJsonPath))
+        {
+            try
+            {
+                var json = await File.ReadAllTextAsync(pluginJsonPath);
+                plugin.Metadata = System.Text.Json.JsonSerializer.Deserialize<PluginMetadata>(json, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (plugin.Metadata != null && !string.IsNullOrWhiteSpace(plugin.Metadata.EngineVersionConstraint))
+                {
+                    await ValidateEngineVersionConstraintAsync(plugin, pluginJsonPath);
+                }
+            }
+            catch (System.Text.Json.JsonException)
+            {
+                // Ignore invalid JSON or handle as needed
+            }
+        }
+    }
+
+    private async Task ValidateEngineVersionConstraintAsync(Plugin plugin, string pluginJsonPath)
+    {
+        var versioningService = _serviceProvider?.GetService(typeof(IVersioningService)) as IVersioningService;
+        if (versioningService != null)
+        {
+            var hostVersion = typeof(PluginLoaderService).Assembly.GetName().Version?.ToString(3) ?? "1.0.0";
+            if (!versioningService.IsSatisfiedBy(plugin.Metadata!.EngineVersionConstraint, hostVersion))
+            {
+                throw new PluginIncompatibleException(plugin.Name, plugin.Metadata.EngineVersionConstraint, hostVersion);
+            }
+        }
+    }
+
+    private async Task<List<IPluginLifecycle>> DiscoverPluginLifecyclesAsync(Assembly assembly)
+    {
+        var lifecycles = new List<IPluginLifecycle>();
+
+        foreach (var type in assembly.GetTypes())
+        {
+            if (typeof(IPluginLifecycle).IsAssignableFrom(type) && !type.IsInterface && !type.IsAbstract)
+            {
+                if (Activator.CreateInstance(type) is IPluginLifecycle instance)
+                {
+                    lifecycles.Add(instance);
+                }
+            }
+        }
+
+        return lifecycles;
+    }
+
+    private async Task InvokeLifecycleMethodsAsync(List<IPluginLifecycle> lifecycles, Func<IPluginLifecycle, Task> lifecycleAction)
+    {
+        foreach (var lifecycle in lifecycles)
+        {
+            await lifecycleAction(lifecycle);
+        }
+    }
 }
