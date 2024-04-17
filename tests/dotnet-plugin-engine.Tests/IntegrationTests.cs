@@ -11,6 +11,10 @@ using Xunit;
 
 namespace PluginEngine.Tests;
 
+/// <summary>
+/// Contains integration tests for the plugin engine system, validating end-to-end workflows
+/// including dependency resolution, version validation, file system operations, and plugin lifecycle management.
+/// </summary>
 public sealed class IntegrationTests
 {
     private readonly Mock<ILogger<DependencyResolutionService>> _mockDepLogger;
@@ -20,6 +24,10 @@ public sealed class IntegrationTests
     private readonly Mock<ILogger<PluginDiscoveryService>> _mockDiscoveryLogger;
     private readonly Mock<IPluginLoaderService> _mockLoaderService;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="IntegrationTests"/> class with mock dependencies
+    /// for testing plugin engine services including dependency resolution, validation, versioning, and file system operations.
+    /// </summary>
     public IntegrationTests()
     {
         _mockDepLogger = new Mock<ILogger<DependencyResolutionService>>();
@@ -30,6 +38,13 @@ public sealed class IntegrationTests
         _mockLoaderService = new Mock<IPluginLoaderService>();
     }
 
+    /// <summary>
+    /// Creates a test plugin with the specified identifier, name, and version.
+    /// </summary>
+    /// <param name="id">The unique identifier for the plugin.</param>
+    /// <param name="name">The name of the plugin.</param>
+    /// <param name="version">The version string of the plugin.</param>
+    /// <returns>A new <see cref="Plugin"/> instance configured with the provided parameters.</returns>
     private static Plugin CreatePlugin(Guid id, string name, string version)
     {
         return new Plugin
@@ -41,6 +56,10 @@ public sealed class IntegrationTests
         };
     }
 
+    /// <summary>
+    /// Tests that a plugin with dependencies can be loaded and its dependencies successfully resolved.
+    /// Validates the complete workflow from plugin creation through dependency resolution and validation.
+    /// </summary>
     [Fact]
     public async Task PluginWorkflow_LoadPluginWithDependencies_SuccessfullyResolves()
     {
@@ -78,6 +97,10 @@ public sealed class IntegrationTests
         resolved.Should().ContainSingle();
     }
 
+    /// <summary>
+    /// Tests dependency resolution with multiple plugins that have chained dependencies (A depends on B depends on C).
+    /// Verifies that the resolution service correctly resolves all transitive dependencies in the correct order.
+    /// </summary>
     [Fact]
     public async Task PluginWorkflow_MultiplePluginsWithChainedDependencies()
     {
@@ -116,6 +139,10 @@ public sealed class IntegrationTests
         resolved.Should().HaveCount(2);
     }
 
+    /// <summary>
+    /// Tests version constraint validation to ensure version comparison logic works correctly.
+    /// Validates that version ranges like >= and ^ constraints are properly respected during dependency resolution.
+    /// </summary>
     [Fact]
     public async Task VersionValidation_WithConstraints_RespectsVersionRanges()
     {
@@ -128,6 +155,10 @@ public sealed class IntegrationTests
         versionHelper.SatisfiesConstraint("2.0.0", "^1.0.0").Should().BeFalse();
     }
 
+    /// <summary>
+    /// Tests plugin validation with complex dependency scenarios including version constraints and metadata.
+    /// Validates that all constraints are properly checked during plugin validation.
+    /// </summary>
     [Fact]
     public async Task PluginValidation_WithComplexDependencies_ValidatesAllConstraints()
     {
@@ -158,6 +189,10 @@ public sealed class IntegrationTests
         result.IsValid.Should().BeTrue();
     }
 
+    /// <summary>
+    /// Tests file system operations for creating and validating plugin directories.
+    /// Validates directory creation, existence checks, and writability verification.
+    /// </summary>
     [Fact]
     public void FileSystemWorkflow_CreateAndValidatePluginDirectory()
     {
@@ -179,6 +214,10 @@ public sealed class IntegrationTests
         }
     }
 
+    /// <summary>
+    /// Tests plugin discovery functionality by creating test plugin files and verifying they are correctly discovered.
+    /// Validates that the file system helper can find and enumerate plugin DLL files in a directory.
+    /// </summary>
     [Fact]
     public void FileSystemWorkflow_DiscoverAndBackupPlugins()
     {
@@ -202,6 +241,10 @@ public sealed class IntegrationTests
         }
     }
 
+    /// <summary>
+    /// Tests circular dependency detection to ensure the system correctly identifies circular references between plugins.
+    /// Validates that the dependency resolution service can detect cycles in the dependency graph.
+    /// </summary>
     [Fact]
     public async Task CircularDependencyDetection_WithCircularReferences()
     {
@@ -238,6 +281,10 @@ public sealed class IntegrationTests
         hasCircular.Should().BeTrue();
     }
 
+    /// <summary>
+    /// Tests plugin filtering by author to ensure plugins can be correctly filtered based on their metadata.
+    /// Validates that the filtering logic correctly identifies plugins matching specific author criteria.
+    /// </summary>
     [Fact]
     public async Task PluginSearch_FiltersByAuthor()
     {
@@ -265,6 +312,10 @@ public sealed class IntegrationTests
             .Which.Name.Should().Be("AuthPlugin");
     }
 
+    /// <summary>
+    /// Tests the complete plugin lifecycle including validation, dependency validation, and dependency resolution.
+    /// Validates the sequence of operations from initial plugin creation through validation and resolution.
+    /// </summary>
     [Fact]
     public async Task PluginLifecycle_ValidateAndResolveSequence()
     {
@@ -300,6 +351,10 @@ public sealed class IntegrationTests
         deps.Should().ContainSingle();
     }
 
+    /// <summary>
+    /// Tests plugin capability management including adding, exposing, and searching capabilities.
+    /// Validates that plugin capabilities can be correctly added to plugins and searched/filtered by tags.
+    /// </summary>
     [Fact]
     public void PluginCapability_ExposesAndSearches()
     {
