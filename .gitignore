@@ -85,3 +85,6 @@ plugin-cache/
 
 # IDE settings
 *.DotSettings.user
+
+# aider internal state - never commit
+.aider*
