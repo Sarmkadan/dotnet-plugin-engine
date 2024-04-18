@@ -4,10 +4,16 @@ using PluginEngine.Domain.Entities;
 using PluginEngine.Execution;
 using Xunit;
 
-namespace PluginEngine.Tests;
-
+/// <summary>
+/// Tests for the PluginExecutionContext class.
+/// </summary>
 public sealed class PluginExecutionContextTests
 {
+    /// <summary>
+    /// Creates a new Plugin instance with the specified name.
+    /// </summary>
+    /// <param name="name">The name of the plugin.</param>
+    /// <returns>A new Plugin instance.</returns>
     private static Plugin MakePlugin(string name = "TestPlugin") => new()
     {
         Id = Guid.NewGuid(),
@@ -16,6 +22,11 @@ public sealed class PluginExecutionContextTests
         AssemblyPath = "/plugins/test.dll"
     };
 
+    /// <summary>
+    /// Creates a new PluginExecutionContext instance with the specified operation type.
+    /// </summary>
+    /// <param name="op">The operation type.</param>
+    /// <returns>A new PluginExecutionContext instance.</returns>
     private static PluginExecutionContext MakeContext(string op = "Load") => new()
     {
         Plugin = MakePlugin(),
@@ -24,6 +35,9 @@ public sealed class PluginExecutionContextTests
 
     // ── Initial state ───────────────────────────────────────────────────────
 
+    /// <summary>
+    /// Verifies that a new PluginExecutionContext instance has a unique execution ID.
+    /// </summary>
     [Fact]
     public void NewContext_HasUniqueExecutionId()
     {
@@ -33,6 +47,9 @@ public sealed class PluginExecutionContextTests
         ctx1.ExecutionId.Should().NotBe(ctx2.ExecutionId);
     }
 
+    /// <summary>
+    /// Verifies that a new PluginExecutionContext instance is in the Running state.
+    /// </summary>
     [Fact]
     public void NewContext_StateIsRunning()
     {
@@ -41,6 +58,9 @@ public sealed class PluginExecutionContextTests
         ctx.State.Should().Be(ExecutionState.Running);
     }
 
+    /// <summary>
+    /// Verifies that a new PluginExecutionContext instance has a recently set StartedAtUtc value.
+    /// </summary>
     [Fact]
     public void NewContext_StartedAtUtcIsRecentlySet()
     {
@@ -51,6 +71,9 @@ public sealed class PluginExecutionContextTests
         ctx.StartedAtUtc.Should().BeOnOrAfter(before).And.BeOnOrBefore(after);
     }
 
+    /// <summary>
+    /// Verifies that a new PluginExecutionContext instance has a null CompletedAtUtc value.
+    /// </summary>
     [Fact]
     public void NewContext_CompletedAtUtcIsNull()
     {
@@ -59,6 +82,9 @@ public sealed class PluginExecutionContextTests
         ctx.CompletedAtUtc.Should().BeNull();
     }
 
+    /// <summary>
+    /// Verifies that a new PluginExecutionContext instance has an empty Data dictionary.
+    /// </summary>
     [Fact]
     public void NewContext_DataDictionaryIsEmpty()
     {
@@ -69,6 +95,9 @@ public sealed class PluginExecutionContextTests
 
     // ── CompleteSuccess ─────────────────────────────────────────────────────
 
+    /// <summary>
+    /// Verifies that calling CompleteSuccess on a PluginExecutionContext instance sets its state to Completed.
+    /// </summary>
     [Fact]
     public void CompleteSuccess_SetsStateToCompleted()
     {
@@ -79,6 +108,9 @@ public sealed class PluginExecutionContextTests
         ctx.State.Should().Be(ExecutionState.Completed);
     }
 
+    /// <summary>
+    /// Verifies that calling CompleteSuccess on a PluginExecutionContext instance sets its CompletedAtUtc value.
+    /// </summary>
     [Fact]
     public void CompleteSuccess_SetsCompletedAtUtc()
     {
@@ -90,6 +122,10 @@ public sealed class PluginExecutionContextTests
             .And.BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(2));
     }
 
+    /// <summary>
+    /// Verifies that calling CompleteSuccess on a PluginExecutionContext instance stores the result.
+    /// </summary>
+    /// <param name="result">The result to store.</param>
     [Fact]
     public void CompleteSuccess_WithResult_StoresResult()
     {
@@ -101,6 +137,9 @@ public sealed class PluginExecutionContextTests
         ctx.Result.Should().BeSameAs(result);
     }
 
+    /// <summary>
+    /// Verifies that calling CompleteSuccess on a PluginExecutionContext instance sets its Duration value to a positive value.
+    /// </summary>
     [Fact]
     public void CompleteSuccess_DurationIsPositive()
     {
@@ -113,6 +152,10 @@ public sealed class PluginExecutionContextTests
 
     // ── CompleteFailed ──────────────────────────────────────────────────────
 
+    /// <summary>
+    /// Verifies that calling CompleteFailed on a PluginExecutionContext instance sets its state to Failed.
+    /// </summary>
+    /// <param name="ex">The exception to store.</param>
     [Fact]
     public void CompleteFailed_SetsStateToFailed()
     {
@@ -123,6 +166,10 @@ public sealed class PluginExecutionContextTests
         ctx.State.Should().Be(ExecutionState.Failed);
     }
 
+    /// <summary>
+    /// Verifies that calling CompleteFailed on a PluginExecutionContext instance stores the exception.
+    /// </summary>
+    /// <param name="ex">The exception to store.</param>
     [Fact]
     public void CompleteFailed_StoresException()
     {
@@ -134,6 +181,9 @@ public sealed class PluginExecutionContextTests
         ctx.Exception.Should().BeSameAs(ex);
     }
 
+    /// <summary>
+    /// Verifies that calling CompleteFailed on a PluginExecutionContext instance sets its CompletedAtUtc value.
+    /// </summary>
     [Fact]
     public void CompleteFailed_SetsCompletedAtUtc()
     {
@@ -146,6 +196,9 @@ public sealed class PluginExecutionContextTests
 
     // ── Cancel ──────────────────────────────────────────────────────────────
 
+    /// <summary>
+    /// Verifies that calling Cancel on a PluginExecutionContext instance sets its state to Cancelled.
+    /// </summary>
     [Fact]
     public void Cancel_SetsStateToCancelled()
     {
@@ -156,6 +209,9 @@ public sealed class PluginExecutionContextTests
         ctx.State.Should().Be(ExecutionState.Cancelled);
     }
 
+    /// <summary>
+    /// Verifies that calling Cancel on a PluginExecutionContext instance sets its CompletedAtUtc value.
+    /// </summary>
     [Fact]
     public void Cancel_SetsCompletedAtUtc()
     {
@@ -168,6 +224,9 @@ public sealed class PluginExecutionContextTests
 
     // ── GetSummary ──────────────────────────────────────────────────────────
 
+    /// <summary>
+    /// Verifies that calling GetSummary on a PluginExecutionContext instance after CompleteSuccess returns a successful summary.
+    /// </summary>
     [Fact]
     public void GetSummary_AfterCompleteSuccess_IsSuccessfulTrue()
     {
@@ -180,6 +239,9 @@ public sealed class PluginExecutionContextTests
         summary.OperationType.Should().Be("Execute");
     }
 
+    /// <summary>
+    /// Verifies that calling GetSummary on a PluginExecutionContext instance after CompleteFailed returns a failed summary.
+    /// </summary>
     [Fact]
     public void GetSummary_AfterCompleteFailed_IsSuccessfulFalse()
     {
@@ -192,6 +254,9 @@ public sealed class PluginExecutionContextTests
         summary.ErrorMessage.Should().Be("boom");
     }
 
+    /// <summary>
+    /// Verifies that calling GetSummary on a PluginExecutionContext instance returns a summary with the plugin name.
+    /// </summary>
     [Fact]
     public void GetSummary_ContainsPluginName()
     {
@@ -203,6 +268,9 @@ public sealed class PluginExecutionContextTests
         summary.PluginName.Should().Be(ctx.Plugin.Name);
     }
 
+    /// <summary>
+    /// Verifies that calling GetSummary on a PluginExecutionContext instance returns a summary with key information in its ToString method.
+    /// </summary>
     [Fact]
     public void GetSummary_ToStringContainsKeyInfo()
     {
@@ -218,6 +286,9 @@ public sealed class PluginExecutionContextTests
 
     // ── Data dictionary ─────────────────────────────────────────────────────
 
+    /// <summary>
+    /// Verifies that a PluginExecutionContext instance can store arbitrary values in its Data dictionary.
+    /// </summary>
     [Fact]
     public void Data_CanStoreArbitraryValues()
     {
@@ -231,6 +302,9 @@ public sealed class PluginExecutionContextTests
 
     // ── Metrics ─────────────────────────────────────────────────────────────
 
+    /// <summary>
+    /// Verifies that a new PluginExecutionContext instance has a non-null Metrics object.
+    /// </summary>
     [Fact]
     public void Metrics_ArePresentOnNewContext()
     {
@@ -239,6 +313,9 @@ public sealed class PluginExecutionContextTests
         ctx.Metrics.Should().NotBeNull();
     }
 
+    /// <summary>
+    /// Verifies that a new PluginExecutionContext instance has an empty CustomMetrics dictionary.
+    /// </summary>
     [Fact]
     public void Metrics_CustomMetricsDictionaryIsEmpty()
     {
