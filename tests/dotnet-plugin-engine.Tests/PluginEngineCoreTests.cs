@@ -16,6 +16,11 @@ using Xunit;
 
 namespace PluginEngine.Tests;
 
+/// <summary>
+/// Unit tests for the <see cref="PluginEngine"/> core functionality.
+/// Tests constructor validation, initialization, shutdown, plugin loading/unloading,
+/// status retrieval, and health reporting.
+/// </summary>
 public sealed class PluginEngineCoreTests : IDisposable
 {
     private readonly Mock<IPluginManagerService> _pluginManagerMock = new();
@@ -26,6 +31,10 @@ public sealed class PluginEngineCoreTests : IDisposable
     private readonly PluginEngineOptions _options;
     private readonly string _testDirectory;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PluginEngineCoreTests"/> class.
+    /// Sets up mock services and creates a temporary test directory.
+    /// </summary>
     public PluginEngineCoreTests()
     {
         _testDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
@@ -33,6 +42,10 @@ public sealed class PluginEngineCoreTests : IDisposable
         _options = new PluginEngineOptions { PluginDirectory = _testDirectory };
     }
 
+    /// <summary>
+    /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+    /// Deletes the temporary test directory created during test initialization.
+    /// </summary>
     public void Dispose()
     {
         try
@@ -48,6 +61,10 @@ public sealed class PluginEngineCoreTests : IDisposable
         }
     }
 
+    /// <summary>
+    /// Creates a new instance of <see cref="PluginEngine"/> for testing purposes.
+    /// </summary>
+    /// <returns>A new <see cref="PluginEngine"/> instance configured with mock services.</returns>
     private PluginEngine CreateEngine()
     {
         return new PluginEngine(
@@ -62,6 +79,9 @@ public sealed class PluginEngineCoreTests : IDisposable
 
     // ── Constructor Tests ────────────────────────────────────────────────────
 
+    /// <summary>
+    /// Tests that the constructor throws <see cref="ArgumentNullException"/> when pluginManagerService is null.
+    /// </summary>
     [Fact]
     public void Constructor_WithNullPluginManager_ThrowsArgumentNullException()
     {
@@ -79,6 +99,9 @@ public sealed class PluginEngineCoreTests : IDisposable
         act.Should().Throw<ArgumentNullException>().WithParameterName("pluginManagerService");
     }
 
+    /// <summary>
+    /// Tests that the constructor throws <see cref="ArgumentNullException"/> when pluginLoaderService is null.
+    /// </summary>
     [Fact]
     public void Constructor_WithNullPluginLoader_ThrowsArgumentNullException()
     {
@@ -96,6 +119,9 @@ public sealed class PluginEngineCoreTests : IDisposable
         act.Should().Throw<ArgumentNullException>().WithParameterName("pluginLoaderService");
     }
 
+    /// <summary>
+    /// Tests that the constructor throws <see cref="ArgumentNullException"/> when dependencyResolutionService is null.
+    /// </summary>
     [Fact]
     public void Constructor_WithNullDependencyResolver_ThrowsArgumentNullException()
     {
@@ -113,6 +139,9 @@ public sealed class PluginEngineCoreTests : IDisposable
         act.Should().Throw<ArgumentNullException>().WithParameterName("dependencyResolutionService");
     }
 
+    /// <summary>
+    /// Tests that the constructor throws <see cref="ArgumentNullException"/> when versioningService is null.
+    /// </summary>
     [Fact]
     public void Constructor_WithNullVersioningService_ThrowsArgumentNullException()
     {
@@ -130,6 +159,9 @@ public sealed class PluginEngineCoreTests : IDisposable
         act.Should().Throw<ArgumentNullException>().WithParameterName("versioningService");
     }
 
+    /// <summary>
+    /// Tests that the constructor throws <see cref="ArgumentNullException"/> when hotReloadService is null.
+    /// </summary>
     [Fact]
     public void Constructor_WithNullHotReloadService_ThrowsArgumentNullException()
     {
@@ -147,6 +179,9 @@ public sealed class PluginEngineCoreTests : IDisposable
         act.Should().Throw<ArgumentNullException>().WithParameterName("hotReloadService");
     }
 
+    /// <summary>
+    /// Tests that the constructor throws <see cref="ArgumentNullException"/> when options is null.
+    /// </summary>
     [Fact]
     public void Constructor_WithNullOptions_ThrowsArgumentNullException()
     {
@@ -166,6 +201,9 @@ public sealed class PluginEngineCoreTests : IDisposable
 
     // ── InitializeAsync Tests ──────────────────────────────────────────────────
 
+    /// <summary>
+    /// Tests that <see cref="PluginEngine.InitializeAsync"/> calls the plugin manager's InitializeAsync method.
+    /// </summary>
     [Fact]
     public async Task InitializeAsync_CallsPluginManagerInitialize()
     {
@@ -183,6 +221,9 @@ public sealed class PluginEngineCoreTests : IDisposable
         _pluginManagerMock.Verify();
     }
 
+    /// <summary>
+    /// Tests that <see cref="PluginEngine.InitializeAsync(CancellationToken)"/> passes the cancellation token to the plugin manager's InitializeAsync method.
+    /// </summary>
     [Fact]
     public async Task InitializeAsync_WithCancellationToken_PassesTokenToManager()
     {
@@ -202,6 +243,9 @@ public sealed class PluginEngineCoreTests : IDisposable
 
     // ── ShutdownAsync Tests ────────────────────────────────────────────────────
 
+    /// <summary>
+    /// Tests that <see cref="PluginEngine.ShutdownAsync"/> calls the plugin manager's ShutdownAsync method.
+    /// </summary>
     [Fact]
     public async Task ShutdownAsync_CallsPluginManagerShutdown()
     {
@@ -219,6 +263,9 @@ public sealed class PluginEngineCoreTests : IDisposable
         _pluginManagerMock.Verify();
     }
 
+    /// <summary>
+    /// Tests that <see cref="PluginEngine.ShutdownAsync(CancellationToken)"/> passes the cancellation token to the plugin manager's ShutdownAsync method.
+    /// </summary>
     [Fact]
     public async Task ShutdownAsync_WithCancellationToken_PassesTokenToManager()
     {
@@ -238,6 +285,9 @@ public sealed class PluginEngineCoreTests : IDisposable
 
     // ── GetStatusAsync Tests ───────────────────────────────────────────────────
 
+    /// <summary>
+    /// Tests that <see cref="PluginEngine.GetStatusAsync"/> returns the status from the plugin manager.
+    /// </summary>
     [Fact]
     public async Task GetStatusAsync_ReturnsStatusFromPluginManager()
     {
@@ -269,6 +319,9 @@ public sealed class PluginEngineCoreTests : IDisposable
 
     // ── LoadAllPluginsAsync Tests ──────────────────────────────────────────────
 
+    /// <summary>
+    /// Tests that <see cref="PluginEngine.LoadAllPluginsAsync"/> throws <see cref="DirectoryNotFoundException"/> when the plugin directory does not exist.
+    /// </summary>
     [Fact]
     public async Task LoadAllPluginsAsync_WithNonExistentDirectory_ThrowsDirectoryNotFoundException()
     {
@@ -283,6 +336,9 @@ public sealed class PluginEngineCoreTests : IDisposable
         await act.Should().ThrowAsync<DirectoryNotFoundException>();
     }
 
+    /// <summary>
+    /// Tests that <see cref="PluginEngine.LoadAllPluginsAsync"/> calls the plugin loader with the correct plugin directory.
+    /// </summary>
     [Fact]
     public async Task LoadAllPluginsAsync_CallsPluginLoaderWithCorrectDirectory()
     {
@@ -303,6 +359,9 @@ public sealed class PluginEngineCoreTests : IDisposable
         _pluginLoaderMock.Verify();
     }
 
+    /// <summary>
+    /// Tests that <see cref="PluginEngine.LoadAllPluginsAsync(CancellationToken)"/> passes the cancellation token to the plugin loader.
+    /// </summary>
     [Fact]
     public async Task LoadAllPluginsAsync_WithCancellationToken_PassesTokenToLoader()
     {
@@ -324,6 +383,9 @@ public sealed class PluginEngineCoreTests : IDisposable
 
     // ── UnloadAllPluginsAsync Tests ────────────────────────────────────────────
 
+    /// <summary>
+    /// Tests that <see cref="PluginEngine.UnloadAllPluginsAsync"/> calls UnloadPluginAsync on each loaded plugin.
+    /// </summary>
     [Fact]
     public async Task UnloadAllPluginsAsync_CallsUnloadOnEachPlugin()
     {
@@ -355,6 +417,9 @@ public sealed class PluginEngineCoreTests : IDisposable
         _pluginLoaderMock.Verify();
     }
 
+    /// <summary>
+    /// Tests that <see cref="PluginEngine.UnloadAllPluginsAsync(CancellationToken)"/> passes the cancellation token to all plugin unloading operations.
+    /// </summary>
     [Fact]
     public async Task UnloadAllPluginsAsync_WithCancellationToken_PassesTokenToOperations()
     {
@@ -381,6 +446,9 @@ public sealed class PluginEngineCoreTests : IDisposable
 
     // ── GetHealthInfoAsync Tests ───────────────────────────────────────────────
 
+    /// <summary>
+    /// Tests that <see cref="PluginEngine.GetHealthInfoAsync"/> returns a formatted health report string with plugin engine statistics.
+    /// </summary>
     [Fact]
     public async Task GetHealthInfoAsync_ReturnsFormattedHealthReport()
     {
@@ -433,6 +501,9 @@ public sealed class PluginEngineCoreTests : IDisposable
 
     // ── Property Access Tests ────────────────────────────────────────────────────
 
+    /// <summary>
+    /// Tests that the <see cref="PluginEngine.PluginManager"/> property returns the configured plugin manager instance.
+    /// </summary>
     [Fact]
     public void PluginManager_ReturnsConfiguredPluginManager()
     {
@@ -446,6 +517,9 @@ public sealed class PluginEngineCoreTests : IDisposable
         result.Should().BeSameAs(_pluginManagerMock.Object);
     }
 
+    /// <summary>
+    /// Tests that the <see cref="PluginEngine.PluginLoader"/> property returns the configured plugin loader instance.
+    /// </summary>
     [Fact]
     public void PluginLoader_ReturnsConfiguredPluginLoader()
     {
@@ -459,6 +533,9 @@ public sealed class PluginEngineCoreTests : IDisposable
         result.Should().BeSameAs(_pluginLoaderMock.Object);
     }
 
+    /// <summary>
+    /// Tests that the <see cref="PluginEngine.DependencyResolver"/> property returns the configured dependency resolver instance.
+    /// </summary>
     [Fact]
     public void DependencyResolver_ReturnsConfiguredDependencyResolver()
     {
@@ -472,6 +549,9 @@ public sealed class PluginEngineCoreTests : IDisposable
         result.Should().BeSameAs(_dependencyResolverMock.Object);
     }
 
+    /// <summary>
+    /// Tests that the <see cref="PluginEngine.VersioningService"/> property returns the configured versioning service instance.
+    /// </summary>
     [Fact]
     public void VersioningService_ReturnsConfiguredVersioningService()
     {
@@ -485,6 +565,9 @@ public sealed class PluginEngineCoreTests : IDisposable
         result.Should().BeSameAs(_versioningMock.Object);
     }
 
+    /// <summary>
+    /// Tests that the <see cref="PluginEngine.HotReloader"/> property returns the configured hot reload service instance.
+    /// </summary>
     [Fact]
     public void HotReloader_ReturnsConfiguredHotReloadService()
     {
@@ -498,6 +581,9 @@ public sealed class PluginEngineCoreTests : IDisposable
         result.Should().BeSameAs(_hotReloadMock.Object);
     }
 
+    /// <summary>
+    /// Tests that the <see cref="PluginEngine.Options"/> property returns the configured options instance.
+    /// </summary>
     [Fact]
     public void Options_ReturnsConfiguredOptions()
     {
