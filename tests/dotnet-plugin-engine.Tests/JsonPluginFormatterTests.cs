@@ -7,10 +7,19 @@ using Xunit;
 
 namespace PluginEngine.Tests;
 
+/// <summary>
+/// Tests for the JsonPluginFormatter class.
+/// </summary>
 public sealed class JsonPluginFormatterTests
 {
     private readonly JsonPluginFormatter _sut = new();
 
+    /// <summary>
+    /// Creates a new plugin with the specified name and version.
+    /// </summary>
+    /// <param name="name">The name of the plugin.</param>
+    /// <param name="version">The version of the plugin.</param>
+    /// <returns>A new plugin instance.</returns>
     private static Plugin MakePlugin(string name = "TestPlugin", string version = "1.0.0")
     {
         return new Plugin
@@ -25,6 +34,9 @@ public sealed class JsonPluginFormatterTests
 
     // ── FormatType ──────────────────────────────────────────────────────────
 
+    /// <summary>
+    /// Verifies that the FormatType method returns "json".
+    /// </summary>
     [Fact]
     public void FormatType_IsJson()
     {
@@ -33,6 +45,9 @@ public sealed class JsonPluginFormatterTests
 
     // ── FormatPluginAsync ───────────────────────────────────────────────────
 
+    /// <summary>
+    /// Verifies that the FormatPluginAsync method produces valid JSON.
+    /// </summary>
     [Fact]
     public async Task FormatPluginAsync_ProducesValidJson()
     {
@@ -44,6 +59,9 @@ public sealed class JsonPluginFormatterTests
         act.Should().NotThrow();
     }
 
+    /// <summary>
+    /// Verifies that the FormatPluginAsync method includes the plugin name in the JSON output.
+    /// </summary>
     [Fact]
     public async Task FormatPluginAsync_ContainsPluginName()
     {
@@ -54,6 +72,9 @@ public sealed class JsonPluginFormatterTests
         json.Should().Contain("AuthPlugin");
     }
 
+    /// <summary>
+    /// Verifies that the FormatPluginAsync method includes the plugin version in the JSON output.
+    /// </summary>
     [Fact]
     public async Task FormatPluginAsync_ContainsVersion()
     {
@@ -64,6 +85,9 @@ public sealed class JsonPluginFormatterTests
         json.Should().Contain("2.5.0");
     }
 
+    /// <summary>
+    /// Verifies that the FormatPluginAsync method includes the dependency count in the JSON output.
+    /// </summary>
     [Fact]
     public async Task FormatPluginAsync_ContainsDependencyCount()
     {
@@ -83,6 +107,9 @@ public sealed class JsonPluginFormatterTests
 
     // ── FormatPluginsAsync ──────────────────────────────────────────────────
 
+    /// <summary>
+    /// Verifies that the FormatPluginsAsync method produces valid JSON.
+    /// </summary>
     [Fact]
     public async Task FormatPluginsAsync_ProducesValidJson()
     {
@@ -94,6 +121,9 @@ public sealed class JsonPluginFormatterTests
         act.Should().NotThrow();
     }
 
+    /// <summary>
+    /// Verifies that the FormatPluginsAsync method includes the correct count of plugins in the JSON output.
+    /// </summary>
     [Fact]
     public async Task FormatPluginsAsync_CountMatchesPluginCount()
     {
@@ -105,6 +135,9 @@ public sealed class JsonPluginFormatterTests
         doc.RootElement.GetProperty("count").GetInt32().Should().Be(3);
     }
 
+    /// <summary>
+    /// Verifies that the FormatPluginsAsync method returns a count of 0 when given an empty collection.
+    /// </summary>
     [Fact]
     public async Task FormatPluginsAsync_WithEmptyCollection_ReturnsZeroCount()
     {
@@ -116,6 +149,9 @@ public sealed class JsonPluginFormatterTests
 
     // ── FormatDetailedReportAsync ───────────────────────────────────────────
 
+    /// <summary>
+    /// Verifies that the FormatDetailedReportAsync method produces valid JSON.
+    /// </summary>
     [Fact]
     public async Task FormatDetailedReportAsync_ProducesValidJson()
     {
@@ -127,6 +163,9 @@ public sealed class JsonPluginFormatterTests
         act.Should().NotThrow();
     }
 
+    /// <summary>
+    /// Verifies that the FormatDetailedReportAsync method includes metadata in the JSON output when it is set.
+    /// </summary>
     [Fact]
     public async Task FormatDetailedReportAsync_ContainsMetadataWhenSet()
     {
@@ -145,6 +184,9 @@ public sealed class JsonPluginFormatterTests
         doc.RootElement.GetProperty("metadata").GetProperty("author").GetString().Should().Be("TestAuthor");
     }
 
+    /// <summary>
+    /// Verifies that the FormatDetailedReportAsync method does not include metadata in the JSON output when it is not set.
+    /// </summary>
     [Fact]
     public async Task FormatDetailedReportAsync_MetadataIsNullWhenNotSet()
     {
@@ -158,6 +200,9 @@ public sealed class JsonPluginFormatterTests
 
     // ── FormatHealthReportAsync ─────────────────────────────────────────────
 
+    /// <summary>
+    /// Verifies that the FormatHealthReportAsync method produces valid JSON.
+    /// </summary>
     [Fact]
     public async Task FormatHealthReportAsync_ProducesValidJson()
     {
@@ -177,6 +222,9 @@ public sealed class JsonPluginFormatterTests
         act.Should().NotThrow();
     }
 
+    /// <summary>
+    /// Verifies that the FormatHealthReportAsync method reflects the isHealthy property in the JSON output.
+    /// </summary>
     [Fact]
     public async Task FormatHealthReportAsync_IsHealthyReflectsInput()
     {
