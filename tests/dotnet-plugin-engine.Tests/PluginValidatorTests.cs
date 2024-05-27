@@ -183,6 +183,7 @@ public sealed class PluginValidatorTests
 	/// <summary>
 	/// Tests that validation returns valid result for various valid plugin names.
 	/// </summary>
+	/// <param name="validName">A valid plugin name to test.</param>
 	public void Validate_WithValidNames_ReturnsValidResult(string validName)
 	{
 		var plugin = CreateValidPlugin(validName);
@@ -232,6 +233,7 @@ public sealed class PluginValidatorTests
 	/// <summary>
 	/// Tests that validation returns valid result for various valid version formats.
 	/// </summary>
+	/// <param name="validVersion">A valid version string to test.</param>
 	public void Validate_WithValidVersions_ReturnsValidResult(string validVersion)
 	{
 		var plugin = CreateValidPlugin("ValidPlugin", validVersion);
@@ -378,6 +380,7 @@ public sealed class PluginValidatorTests
 	/// <summary>
 	/// Tests that validation returns valid result when plugin name starts with a letter or digit.
 	/// </summary>
+	/// <param name="name">A plugin name that starts with a letter or digit.</param>
 	public void Validate_WithNameStartingWithLetterOrDigit_IsValid(string name)
 	{
 		var plugin = CreateValidPlugin(name);
