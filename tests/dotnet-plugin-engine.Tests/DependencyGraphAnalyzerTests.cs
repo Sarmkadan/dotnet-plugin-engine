@@ -7,14 +7,18 @@ using PluginEngine.Services.Abstractions;
 using PluginEngine.Utils.Helpers;
 using Xunit;
 
-namespace PluginEngine.Tests;
-
+/// <summary>
+/// Tests for the DependencyGraphAnalyzer class.
+/// </summary>
 public sealed class DependencyGraphAnalyzerTests
 {
     private readonly Mock<IDependencyResolutionService> _mockResolver;
     private readonly Mock<ILogger<DependencyGraphAnalyzer>> _mockLogger;
     private readonly DependencyGraphAnalyzer _sut;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DependencyGraphAnalyzerTests"/> class.
+    /// </summary>
     public DependencyGraphAnalyzerTests()
     {
         _mockResolver = new Mock<IDependencyResolutionService>();
@@ -22,6 +26,12 @@ public sealed class DependencyGraphAnalyzerTests
         _sut = new DependencyGraphAnalyzer(_mockResolver.Object, _mockLogger.Object);
     }
 
+    /// <summary>
+    /// Creates a new plugin with the specified name and dependency count.
+    /// </summary>
+    /// <param name="name">The name of the plugin.</param>
+    /// <param name="depCount">The number of dependencies for the plugin.</param>
+    /// <returns>A new plugin instance.</returns>
     private static Plugin MakePlugin(string name = "TestPlugin", int depCount = 0)
     {
         var plugin = new Plugin
@@ -47,6 +57,9 @@ public sealed class DependencyGraphAnalyzerTests
 
     // ── FindDependentsAsync ─────────────────────────────────────────────────
 
+    /// <summary>
+    /// Tests that FindDependentsAsync returns an empty list when there are no dependents.
+    /// </summary>
     [Fact]
     public async Task FindDependentsAsync_WithNoDependents_ReturnsEmpty()
     {
@@ -58,6 +71,9 @@ public sealed class DependencyGraphAnalyzerTests
         result.Should().BeEmpty();
     }
 
+    /// <summary>
+    /// Tests that FindDependentsAsync returns the dependent plugin when there is one.
+    /// </summary>
     [Fact]
     public async Task FindDependentsAsync_WithOneDependentPlugin_ReturnsThatPlugin()
     {
@@ -76,6 +92,9 @@ public sealed class DependencyGraphAnalyzerTests
             .Which.Should().Be(dependent.Id);
     }
 
+    /// <summary>
+    /// Tests that FindDependentsAsync returns all dependents when there are multiple.
+    /// </summary>
     [Fact]
     public async Task FindDependentsAsync_WithMultipleDependents_ReturnsAll()
     {
@@ -94,6 +113,9 @@ public sealed class DependencyGraphAnalyzerTests
             .And.Contain(dep2.Id);
     }
 
+    /// <summary>
+    /// Tests that FindDependentsAsync returns an empty list when the plugin list is empty.
+    /// </summary>
     [Fact]
     public async Task FindDependentsAsync_WithEmptyPluginList_ReturnsEmpty()
     {
@@ -104,6 +126,9 @@ public sealed class DependencyGraphAnalyzerTests
 
     // ── AnalyzeAsync ────────────────────────────────────────────────────────
 
+    /// <summary>
+    /// Tests that AnalyzeAsync returns zero counts when there are no dependencies.
+    /// </summary>
     [Fact]
     public async Task AnalyzeAsync_WithNoDependencies_ReturnsZeroCounts()
     {
@@ -120,6 +145,9 @@ public sealed class DependencyGraphAnalyzerTests
         report.HasCircularDependencies.Should().BeFalse();
     }
 
+    /// <summary>
+    /// Tests that AnalyzeAsync reports a circular dependency issue.
+    /// </summary>
     [Fact]
     public async Task AnalyzeAsync_WithCircularDependency_ReportsIssue()
     {
@@ -135,6 +163,9 @@ public sealed class DependencyGraphAnalyzerTests
         report.Issues.Should().Contain(i => i.Contains("Circular"));
     }
 
+    /// <summary>
+    /// Tests that AnalyzeAsync returns a simple complexity level when there are few dependencies.
+    /// </summary>
     [Fact]
     public async Task AnalyzeAsync_WithFewDependencies_HasSimpleComplexityLevel()
     {
@@ -149,6 +180,9 @@ public sealed class DependencyGraphAnalyzerTests
         report.GetComplexityLevel().Should().Be("Simple");
     }
 
+    /// <summary>
+    /// Tests that AnalyzeAsync returns the plugin name.
+    /// </summary>
     [Fact]
     public async Task AnalyzeAsync_ReturnsPluginName()
     {
@@ -165,6 +199,9 @@ public sealed class DependencyGraphAnalyzerTests
 
     // ── GenerateGraphVisualizationAsync ─────────────────────────────────────
 
+    /// <summary>
+    /// Tests that GenerateGraphVisualizationAsync returns a non-empty string for a simple plugin.
+    /// </summary>
     [Fact]
     public async Task GenerateGraphVisualizationAsync_WithSimplePlugin_ReturnsNonEmptyString()
     {
@@ -180,6 +217,11 @@ public sealed class DependencyGraphAnalyzerTests
 
     // ── DependencyAnalysisReport.GetComplexityLevel ─────────────────────────
 
+    /// <summary>
+    /// Tests that GetComplexityLevel maps a score to the expected label.
+    /// </summary>
+    /// <param name="score">The complexity score.</param>
+    /// <param name="expected">The expected complexity label.</param>
     [Theory]
     [InlineData(0, "Simple")]
     [InlineData(19, "Simple")]
