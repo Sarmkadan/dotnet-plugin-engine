@@ -16,6 +16,13 @@ public sealed class HttpPluginClient : IIntegrationClient
     private readonly ILogger<HttpPluginClient> _logger;
     private readonly string? _registryBaseUrl;
 
+    public required Guid PluginId { get; set; }
+    public required string CurrentVersion { get; set; } = string.Empty;
+    public required string AvailableVersion { get; set; } = string.Empty;
+    public required string DownloadUrl { get; set; } = string.Empty;
+    public bool IsSecurityUpdate { get; set; }
+    public string? ReleaseNotes { get; set; }
+
     public string ProviderName => "HttpRegistry";
 
     public HttpPluginClient(
