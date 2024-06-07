@@ -9,12 +9,16 @@ using PluginEngine.Exceptions;
 using PluginEngine.Results;
 using Xunit;
 
-namespace PluginEngine.Tests;
-
+/// <summary>
+/// Tests for <see cref="PluginOperationResult"/> and <see cref="PluginOperationResult{T}"/>.
+/// </summary>
 public sealed class PluginOperationResultTests
 {
     // ── PluginOperationResult ──────────────────────────────────────────
 
+    /// <summary>
+    /// Verifies that <see cref="PluginOperationResult.CreateSuccess(string, int)"/> sets Success to true and preserves the message.
+    /// </summary>
     [Fact]
     public void CreateSuccess_WithMessage_SetsSuccessTrueAndPreservesMessage()
     {
@@ -26,6 +30,9 @@ public sealed class PluginOperationResultTests
         result.ErrorCode.Should().BeNull();
     }
 
+    /// <summary>
+    /// Verifies that <see cref="PluginOperationResult.CreateFailure(string, int, string)"/> sets Success to false and sets the error code.
+    /// </summary>
     [Fact]
     public void CreateFailure_WithCustomErrorCode_SetsSuccessFalseAndErrorCode()
     {
@@ -37,6 +44,9 @@ public sealed class PluginOperationResultTests
         result.Message.Should().Be("Load failed.");
     }
 
+    /// <summary>
+    /// Verifies that <see cref="PluginOperationResult.FromException(PluginLoadException)"/> returns an error code of 1001.
+    /// </summary>
     [Fact]
     public void FromException_WithPluginLoadException_ReturnsErrorCode1001()
     {
@@ -49,6 +59,9 @@ public sealed class PluginOperationResultTests
         result.Message.Should().Be(ex.Message);
     }
 
+    /// <summary>
+    /// Verifies that <see cref="PluginOperationResult.FromException(DependencyResolutionException)"/> returns an error code of 1002.
+    /// </summary>
     [Fact]
     public void FromException_WithDependencyResolutionException_ReturnsErrorCode1002()
     {
@@ -60,6 +73,9 @@ public sealed class PluginOperationResultTests
         result.Success.Should().BeFalse();
     }
 
+    /// <summary>
+    /// Verifies that <see cref="PluginOperationResult.FromException(Exception, int)"/> returns a default error code of 500.
+    /// </summary>
     [Fact]
     public void FromException_WithUnknownException_ReturnsDefaultErrorCode500()
     {
@@ -71,6 +87,9 @@ public sealed class PluginOperationResultTests
         result.DurationMs.Should().Be(10);
     }
 
+    /// <summary>
+    /// Verifies that <see cref="PluginOperationResult.FromException(Exception)"/> includes the inner exception message in the details.
+    /// </summary>
     [Fact]
     public void FromException_WithInnerException_IncludesInnerExceptionMessageInDetails()
     {
@@ -84,6 +103,9 @@ public sealed class PluginOperationResultTests
 
     // ── PluginOperationResult<T> ───────────────────────────────────────
 
+    /// <summary>
+    /// Verifies that <see cref="PluginOperationResult{T}.CreateSuccess(T, string)"/> sets Success to true and preserves the data.
+    /// </summary>
     [Fact]
     public void Generic_CreateSuccess_WithData_SetsBothSuccessAndData()
     {
@@ -96,6 +118,9 @@ public sealed class PluginOperationResultTests
         result.Message.Should().Be("Plugin loaded.");
     }
 
+    /// <summary>
+    /// Verifies that <see cref="PluginOperationResult{T}.CreateFailure(string, int)"/> leaves the data null.
+    /// </summary>
     [Fact]
     public void Generic_CreateFailure_LeavesDataNull()
     {
@@ -107,6 +132,9 @@ public sealed class PluginOperationResultTests
 
     // ── PluginBatchOperationResult ─────────────────────────────────────
 
+    /// <summary>
+    /// Verifies that <see cref="PluginBatchOperationResult.AddResult(Guid, string, PluginOperationResult)"/> increments the success and failure counts correctly.
+    /// </summary>
     [Fact]
     public void BatchResult_AddResult_IncrementsSuccessAndFailureCountsCorrectly()
     {
@@ -122,6 +150,9 @@ public sealed class PluginOperationResultTests
         batch.Results.Should().HaveCount(2);
     }
 
+    /// <summary>
+    /// Verifies that <see cref="PluginBatchOperationResult.IsSuccessful"/> returns true when all results succeed.
+    /// </summary>
     [Fact]
     public void BatchResult_IsSuccessful_WhenAllSucceed_ReturnsTrue()
     {
@@ -132,6 +163,9 @@ public sealed class PluginOperationResultTests
         batch.IsSuccessful.Should().BeTrue();
     }
 
+    /// <summary>
+    /// Verifies that <see cref="PluginBatchOperationResult.IsSuccessful"/> returns false when more failures than successes occur.
+    /// </summary>
     [Fact]
     public void BatchResult_IsSuccessful_WhenMoreFailuresThanSuccesses_ReturnsFalse()
     {
@@ -143,6 +177,9 @@ public sealed class PluginOperationResultTests
         batch.IsSuccessful.Should().BeFalse();
     }
 
+    /// <summary>
+    /// Verifies that <see cref="PluginBatchOperationResult.GetSummary"/> contains the counts and timing.
+    /// </summary>
     [Fact]
     public void BatchResult_GetSummary_ContainsCountsAndTiming()
     {
