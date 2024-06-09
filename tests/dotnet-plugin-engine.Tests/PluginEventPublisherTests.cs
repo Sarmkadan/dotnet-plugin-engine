@@ -5,19 +5,28 @@ using Moq;
 using PluginEngine.Events;
 using Xunit;
 
-namespace PluginEngine.Tests;
-
+/// <summary>
+/// Tests for the <see cref="PluginEventPublisher"/> class.
+/// </summary>
 public sealed class PluginEventPublisherTests
 {
     private readonly Mock<ILogger<PluginEventPublisher>> _mockLogger;
     private readonly PluginEventPublisher _sut;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PluginEventPublisherTests"/> class.
+    /// </summary>
     public PluginEventPublisherTests()
     {
         _mockLogger = new Mock<ILogger<PluginEventPublisher>>();
         _sut = new PluginEventPublisher(_mockLogger.Object);
     }
 
+    /// <summary>
+    /// Creates a new <see cref="PluginLoadedEvent"/> instance with the specified plugin ID.
+    /// </summary>
+    /// <param name="pluginId">The plugin ID to use.</param>
+    /// <returns>A new <see cref="PluginLoadedEvent"/> instance.</returns>
     private static PluginLoadedEvent MakeLoadedEvent(Guid? pluginId = null) => new()
     {
         PluginId = pluginId ?? Guid.NewGuid(),
@@ -30,6 +39,9 @@ public sealed class PluginEventPublisherTests
     [Fact]
     public async Task PublishAsync_WithNoSubscribers_CompletesWithoutError()
     {
+        /// <summary>
+        /// Verifies that publishing an event with no subscribers completes without error.
+        /// </summary>
         var @event = MakeLoadedEvent();
 
         var act = () => _sut.PublishAsync(@event);
@@ -40,6 +52,9 @@ public sealed class PluginEventPublisherTests
     [Fact]
     public async Task PublishAsync_WithOneSubscriber_InvokesHandler()
     {
+        /// <summary>
+        /// Verifies that publishing an event with one subscriber invokes the handler.
+        /// </summary>
         var invoked = false;
         _sut.Subscribe<PluginLoadedEvent>(_ =>
         {
@@ -55,6 +70,9 @@ public sealed class PluginEventPublisherTests
     [Fact]
     public async Task PublishAsync_WithMultipleSubscribers_InvokesAllHandlers()
     {
+        /// <summary>
+        /// Verifies that publishing an event with multiple subscribers invokes all handlers.
+        /// </summary>
         var count = 0;
         _sut.Subscribe<PluginLoadedEvent>(_ => { count++; return Task.CompletedTask; });
         _sut.Subscribe<PluginLoadedEvent>(_ => { count++; return Task.CompletedTask; });
@@ -68,6 +86,9 @@ public sealed class PluginEventPublisherTests
     [Fact]
     public async Task PublishAsync_HandlerReceivesCorrectEvent()
     {
+        /// <summary>
+        /// Verifies that the handler receives the correct event.
+        /// </summary>
         var pluginId = Guid.NewGuid();
         PluginLoadedEvent? received = null;
 
@@ -88,6 +109,9 @@ public sealed class PluginEventPublisherTests
     [Fact]
     public async Task Unsubscribe_AfterSubscribing_HandlerIsNotInvokedOnNextPublish()
     {
+        /// <summary>
+        /// Verifies that unsubscribing a handler after subscribing prevents it from being invoked on the next publish.
+        /// </summary>
         var invoked = false;
         Func<PluginLoadedEvent, Task> handler = _ =>
         {
@@ -106,6 +130,9 @@ public sealed class PluginEventPublisherTests
     [Fact]
     public void Unsubscribe_ForHandlerThatWasNeverRegistered_DoesNotThrow()
     {
+        /// <summary>
+        /// Verifies that unsubscribing a handler that was never registered does not throw.
+        /// </summary>
         Func<PluginLoadedEvent, Task> handler = _ => Task.CompletedTask;
 
         var act = () => _sut.Unsubscribe(handler);
@@ -118,6 +145,9 @@ public sealed class PluginEventPublisherTests
     [Fact]
     public async Task PublishAsync_WithDifferentEventTypes_DeliverOnlyToMatchingSubscribers()
     {
+        /// <summary>
+        /// Verifies that publishing an event with different event types delivers only to matching subscribers.
+        /// </summary>
         var loadedCount = 0;
         var unloadedCount = 0;
 
@@ -133,6 +163,9 @@ public sealed class PluginEventPublisherTests
     [Fact]
     public async Task PublishAsync_ErrorEvent_InvokesCorrectSubscriber()
     {
+        /// <summary>
+        /// Verifies that publishing an error event invokes the correct subscriber.
+        /// </summary>
         var invoked = false;
         _sut.Subscribe<PluginErrorEvent>(_ => { invoked = true; return Task.CompletedTask; });
 
@@ -150,6 +183,9 @@ public sealed class PluginEventPublisherTests
     [Fact]
     public void GetStatistics_Initially_ReturnsZeroCounts()
     {
+        /// <summary>
+        /// Verifies that getting statistics initially returns zero counts.
+        /// </summary>
         var stats = _sut.GetStatistics();
 
         stats.EventsPublished.Should().Be(0);
@@ -160,6 +196,9 @@ public sealed class PluginEventPublisherTests
     [Fact]
     public void GetStatistics_AfterSubscribing_ReflectsSubscriberCount()
     {
+        /// <summary>
+        /// Verifies that getting statistics after subscribing reflects the subscriber count.
+        /// </summary>
         _sut.Subscribe<PluginLoadedEvent>(_ => Task.CompletedTask);
         _sut.Subscribe<PluginLoadedEvent>(_ => Task.CompletedTask);
 
@@ -172,6 +211,9 @@ public sealed class PluginEventPublisherTests
     [Fact]
     public async Task GetStatistics_AfterPublishing_IncrementsEventCount()
     {
+        /// <summary>
+        /// Verifies that getting statistics after publishing increments the event count.
+        /// </summary>
         await _sut.PublishAsync(MakeLoadedEvent());
         await _sut.PublishAsync(MakeLoadedEvent());
 
@@ -183,6 +225,9 @@ public sealed class PluginEventPublisherTests
     [Fact]
     public void GetStatistics_AfterUnsubscribing_DecreasesCount()
     {
+        /// <summary>
+        /// Verifies that getting statistics after unsubscribing decreases the count.
+        /// </summary>
         Func<PluginLoadedEvent, Task> handler = _ => Task.CompletedTask;
         _sut.Subscribe(handler);
         _sut.Unsubscribe(handler);
@@ -197,6 +242,9 @@ public sealed class PluginEventPublisherTests
     [Fact]
     public async Task PublishAsync_ConcurrentPublishes_AllHandlersReceiveEvents()
     {
+        /// <summary>
+        /// Verifies that concurrent publishes invoke all handlers.
+        /// </summary>
         var receivedCount = 0;
         _sut.Subscribe<PluginLoadedEvent>(_ =>
         {
