@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace DotnetPluginEngine.Benchmarks
+namespace PluginEngine.Benchmarks
 {
     /// <summary>
     /// Extension methods that make it easier to work with <see cref="DependencyResolutionBenchmarks"/>.
@@ -15,8 +15,12 @@ namespace DotnetPluginEngine.Benchmarks
         /// Useful for ad‑hoc runs or when you want to ensure the benchmark
         /// class is exercised without using BenchmarkDotNet.
         /// </summary>
+        /// <param name="bench">The benchmark instance to run.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="bench"/> is <see langword="null"/>.</exception>
         public static void RunAll(this DependencyResolutionBenchmarks bench)
         {
+            ArgumentNullException.ThrowIfNull(bench);
+
             // Ensure any required global state is prepared.
             bench.GlobalSetup();
 
@@ -35,13 +39,21 @@ namespace DotnetPluginEngine.Benchmarks
         /// Runs each resolve benchmark once and records the elapsed time.
         /// Returns a dictionary that maps the benchmark method name to its duration.
         /// </summary>
+        /// <param name="bench">The benchmark instance to measure.</param>
+        /// <returns>A read-only dictionary mapping benchmark names to their execution times.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="bench"/> is <see langword="null"/>.</exception>
         public static IReadOnlyDictionary<string, TimeSpan> MeasureAll(this DependencyResolutionBenchmarks bench)
         {
+            ArgumentNullException.ThrowIfNull(bench);
+
             var results = new Dictionary<string, TimeSpan>(StringComparer.Ordinal);
 
             // Helper to time a single action.
             void Measure(string name, Action action)
             {
+                ArgumentNullException.ThrowIfNull(name);
+                ArgumentNullException.ThrowIfNull(action);
+
                 var sw = Stopwatch.StartNew();
                 action();
                 sw.Stop();
@@ -67,10 +79,18 @@ namespace DotnetPluginEngine.Benchmarks
         /// Performs a warm‑up run of all resolve benchmarks a configurable number of times.
         /// This can be useful to mitigate JIT warm‑up effects before a measured run.
         /// </summary>
-        /// <param name="iterations">How many times each benchmark should be executed.</param>
+        /// <param name="bench">The benchmark instance to warm up.</param>
+        /// <param name="iterations">How many times each benchmark should be executed. Must be greater than zero.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="bench"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="iterations"/> is less than or equal to zero.</exception>
         public static void WarmupAll(this DependencyResolutionBenchmarks bench, int iterations = 3)
         {
-            if (iterations <= 0) return;
+            ArgumentNullException.ThrowIfNull(bench);
+
+            if (iterations <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(iterations), iterations, "Iterations must be greater than zero.");
+            }
 
             bench.GlobalSetup();
 
@@ -88,4 +108,4 @@ namespace DotnetPluginEngine.Benchmarks
             }
         }
     }
-}
+}}
