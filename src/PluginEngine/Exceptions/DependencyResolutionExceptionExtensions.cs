@@ -5,45 +5,61 @@ using System.Linq;
 namespace PluginEngine.Exceptions
 {
     /// <summary>
-    /// Extension methods that make working with <see cref="DependencyResolutionException"/> more convenient.
+    /// Provides extension methods that make working with <see cref="DependencyResolutionException"/> more convenient.
     /// </summary>
     public static class DependencyResolutionExceptionExtensions
     {
         /// <summary>
-        /// Sets the <see cref="DependencyResolutionException.DependencyPluginId"/> and returns the same exception
-        /// instance to allow fluent chaining.
+        /// Sets the <see cref="DependencyResolutionException.DependencyPluginId"/> property and returns the same exception
+        /// instance to allow fluent method chaining.
         /// </summary>
+        /// <param name="exception">The exception instance to modify.</param>
+        /// <param name="pluginId">The plugin identifier to set as the dependency plugin ID.</param>
+        /// <returns>The modified exception instance for fluent chaining.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="exception"/> is <see langword="null"/>.</exception>
         public static DependencyResolutionException WithDependencyPluginId(
             this DependencyResolutionException exception,
             Guid pluginId)
         {
-            if (exception == null) throw new ArgumentNullException(nameof(exception));
+            ArgumentNullException.ThrowIfNull(exception);
             exception.DependencyPluginId = pluginId;
             return exception;
         }
 
         /// <summary>
-        /// Sets the <see cref="DependencyResolutionException.VersionConstraint"/> and returns the same exception
-        /// instance to allow fluent chaining.
+        /// Sets the <see cref="DependencyResolutionException.VersionConstraint"/> property and returns the same exception
+        /// instance to allow fluent method chaining.
         /// </summary>
+        /// <param name="exception">The exception instance to modify.</param>
+        /// <param name="versionConstraint">The version constraint string to set.</param>
+        /// <returns>The modified exception instance for fluent chaining.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="exception"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="versionConstraint"/> is <see langword="null"/>.</exception>
         public static DependencyResolutionException WithVersionConstraint(
             this DependencyResolutionException exception,
             string versionConstraint)
         {
-            if (exception == null) throw new ArgumentNullException(nameof(exception));
-            exception.VersionConstraint = versionConstraint ?? throw new ArgumentNullException(nameof(versionConstraint));
+            ArgumentNullException.ThrowIfNull(exception);
+            ArgumentNullException.ThrowIfNull(versionConstraint);
+            exception.VersionConstraint = versionConstraint;
             return exception;
         }
 
         /// <summary>
-        /// Adds multiple unresolved dependency identifiers to the exception.
+        /// Adds multiple unresolved dependency identifiers to the exception by delegating to
+        /// <see cref="DependencyResolutionException.AddUnresolvedDependency(string)"/> for each item.
         /// </summary>
+        /// <param name="exception">The exception instance to modify.</param>
+        /// <param name="dependencies">The collection of dependency names to add.</param>
+        /// <returns>The modified exception instance for fluent chaining.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="exception"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="dependencies"/> is <see langword="null"/>.</exception>
         public static DependencyResolutionException AddUnresolvedDependencies(
             this DependencyResolutionException exception,
             IEnumerable<string> dependencies)
         {
-            if (exception == null) throw new ArgumentNullException(nameof(exception));
-            if (dependencies == null) throw new ArgumentNullException(nameof(dependencies));
+            ArgumentNullException.ThrowIfNull(exception);
+            ArgumentNullException.ThrowIfNull(dependencies);
 
             foreach (var dep in dependencies)
             {
@@ -55,14 +71,16 @@ namespace PluginEngine.Exceptions
         }
 
         /// <summary>
-        /// Returns a single string that lists all unresolved dependencies, separated by commas.
-        /// If there are none, returns an empty string.
+        /// Gets a comma-separated string containing all unresolved dependency names.
         /// </summary>
+        /// <param name="exception">The exception instance containing unresolved dependencies.</param>
+        /// <returns>A comma-separated string of unresolved dependencies, or an empty string if none exist.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="exception"/> is <see langword="null"/>.</exception>
         public static string GetUnresolvedDependenciesSummary(this DependencyResolutionException exception)
         {
-            if (exception == null) throw new ArgumentNullException(nameof(exception));
+            ArgumentNullException.ThrowIfNull(exception);
 
-            return exception.UnresolvedDependencies != null && exception.UnresolvedDependencies.Any()
+            return exception.UnresolvedDependencies?.Count > 0
                 ? string.Join(", ", exception.UnresolvedDependencies)
                 : string.Empty;
         }
