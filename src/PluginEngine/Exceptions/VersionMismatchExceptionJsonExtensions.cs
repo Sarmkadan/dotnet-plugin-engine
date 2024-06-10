@@ -26,12 +26,10 @@ public static class VersionMismatchExceptionJsonExtensions
     /// <param name="value">The exception to serialize.</param>
     /// <param name="indented">Whether to format the JSON with indentation.</param>
     /// <returns>A JSON string representation of the exception.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="value"/> is null.</exception>
     public static string ToJson(this VersionMismatchException value, bool indented = false)
     {
-        if (value is null)
-        {
-            throw new ArgumentNullException(nameof(value));
-        }
+        ArgumentNullException.ThrowIfNull(value);
 
         var options = indented
             ? new JsonSerializerOptions(_jsonOptions)
@@ -47,8 +45,9 @@ public static class VersionMismatchExceptionJsonExtensions
     /// Deserializes a VersionMismatchException from a JSON string.
     /// </summary>
     /// <param name="json">The JSON string to deserialize.</param>
-    /// <returns>The deserialized VersionMismatchException, or null if the JSON is invalid.</returns>
-    public static VersionMismatchException? FromJson(string json)
+    /// <returns>The deserialized VersionMismatchException, or null if the JSON is invalid or whitespace.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="json"/> is null.</exception>
+    public static VersionMismatchException? FromJson(string? json)
     {
         if (string.IsNullOrWhiteSpace(json))
         {
@@ -71,7 +70,8 @@ public static class VersionMismatchExceptionJsonExtensions
     /// <param name="json">The JSON string to deserialize.</param>
     /// <param name="value">The deserialized VersionMismatchException, or null if deserialization failed.</param>
     /// <returns>True if deserialization succeeded; otherwise, false.</returns>
-    public static bool TryFromJson(string json, out VersionMismatchException? value)
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="json"/> is null.</exception>
+    public static bool TryFromJson(string? json, out VersionMismatchException? value)
     {
         value = null;
 

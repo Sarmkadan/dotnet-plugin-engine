@@ -79,10 +79,9 @@ public sealed class VersionMismatchException : PluginException
     public override string ToString()
     {
         var result = base.ToString();
-        result = $"{ComponentType}: {ComponentName}\n";
+        result += $"\n{ComponentType}: {ComponentName}\n";
         result += $"Expected: {ExpectedVersion}\n";
         result += $"Actual: {ActualVersion}\n";
-        result += result;
         return result;
     }
 }
