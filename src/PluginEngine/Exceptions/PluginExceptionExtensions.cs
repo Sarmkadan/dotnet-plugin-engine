@@ -20,10 +20,12 @@ public static class PluginExceptionExtensions
     /// <param name="exception">The original exception</param>
     /// <param name="newErrorCode">The new error code to set</param>
     /// <returns>A new PluginException instance with the updated error code</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="exception"/> is <see langword="null"/></exception>
+    /// <exception cref="ArgumentNullException"><paramref name="newErrorCode"/> is <see langword="null"/></exception>
     public static PluginException WithErrorCode(this PluginException exception, string newErrorCode)
     {
-        if (exception is null)
-            throw new ArgumentNullException(nameof(exception));
+        ArgumentNullException.ThrowIfNull(exception);
+        ArgumentNullException.ThrowIfNull(newErrorCode);
 
         return new PluginException(exception.Message, newErrorCode, exception.InnerException)
         {
@@ -38,10 +40,11 @@ public static class PluginExceptionExtensions
     /// <param name="exception">The exception to add context to</param>
     /// <param name="keyValuePairs">Key-value pairs to add to the context</param>
     /// <returns>The same exception instance for method chaining</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="exception"/> is <see langword="null"/></exception>
     public static PluginException WithContext(this PluginException exception, params (string Key, object Value)[] keyValuePairs)
     {
-        if (exception is null)
-            throw new ArgumentNullException(nameof(exception));
+        ArgumentNullException.ThrowIfNull(exception);
+        ArgumentNullException.ThrowIfNull(keyValuePairs);
 
         foreach (var (key, value) in keyValuePairs)
         {
@@ -58,10 +61,10 @@ public static class PluginExceptionExtensions
     /// <param name="exception">The exception to generate a report for</param>
     /// <param name="includeStackTrace">Whether to include the full stack trace</param>
     /// <returns>A formatted diagnostic report string</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="exception"/> is <see langword="null"/></exception>
     public static string ToDiagnosticReport(this PluginException exception, bool includeStackTrace = false)
     {
-        if (exception is null)
-            return "Exception is null";
+        ArgumentNullException.ThrowIfNull(exception);
 
         var report = new StringBuilder();
 
@@ -101,16 +104,23 @@ public static class PluginExceptionExtensions
 
     /// <summary>
     /// Creates a simplified error message that can be safely exposed to end users.
-    /// Strips internal details like error codes and entity IDs.
+    /// Strips internal details like error codes and entity IDs from the message.
     /// </summary>
     /// <param name="exception">The exception to simplify</param>
-    /// <returns>A user-friendly error message</returns>
+    /// <returns>A user-friendly error message without internal implementation details</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="exception"/> is <see langword="null"/></exception>
     public static string ToUserFriendlyMessage(this PluginException exception)
     {
-        if (exception is null)
-            return "An error occurred";
+        ArgumentNullException.ThrowIfNull(exception);
 
-        return exception.Message;
+        // Remove error code prefix if present (e.g., "[PLUGIN_ERROR] Message" -> "Message")
+        var message = exception.Message;
+        if (message.StartsWith('[') && message.IndexOf(']') is var bracketIndex && bracketIndex > 0)
+        {
+            message = message.Substring(bracketIndex + 1).Trim();
+        }
+
+        return message;
     }
 
     /// <summary>
@@ -119,10 +129,12 @@ public static class PluginExceptionExtensions
     /// <param name="exception">The exception to check</param>
     /// <param name="errorCode">The error code to match against</param>
     /// <returns>True if the error code matches, false otherwise</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="exception"/> is <see langword="null"/></exception>
+    /// <exception cref="ArgumentNullException"><paramref name="errorCode"/> is <see langword="null"/></exception>
     public static bool IsErrorCode(this PluginException exception, string errorCode)
     {
-        if (exception is null)
-            return false;
+        ArgumentNullException.ThrowIfNull(exception);
+        ArgumentNullException.ThrowIfNull(errorCode);
 
         return string.Equals(exception.ErrorCode, errorCode, StringComparison.Ordinal);
     }
