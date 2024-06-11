@@ -3,14 +3,15 @@
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
-// =============================================================================
+// =====================================================================
 
+using System;
 using System.Text;
 
 namespace PluginEngine.Exceptions;
 
 /// <summary>
-/// Provides extension methods for VersionMismatchException to enhance error handling and reporting.
+/// Provides extension methods for <see cref="VersionMismatchException"/> to enhance error handling and reporting.
 /// </summary>
 public static class VersionMismatchExceptionExtensions
 {
@@ -19,12 +20,10 @@ public static class VersionMismatchExceptionExtensions
     /// </summary>
     /// <param name="exception">The VersionMismatchException instance.</param>
     /// <returns>A formatted error message string.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="exception"/> is null.</exception>
     public static string GetFormattedErrorMessage(this VersionMismatchException exception)
     {
-        if (exception is null)
-        {
-            throw new ArgumentNullException(nameof(exception));
-        }
+        ArgumentNullException.ThrowIfNull(exception);
 
         var builder = new StringBuilder();
         builder.AppendLine("Version Mismatch Error:");
@@ -47,11 +46,14 @@ public static class VersionMismatchExceptionExtensions
     /// </summary>
     /// <param name="exception">The VersionMismatchException instance.</param>
     /// <returns>True if the major version numbers differ; otherwise, false.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="exception"/> is null.</exception>
     public static bool IsCriticalVersionMismatch(this VersionMismatchException exception)
     {
-        if (exception is null)
+        ArgumentNullException.ThrowIfNull(exception);
+
+        if (string.IsNullOrEmpty(exception.ExpectedVersion) || string.IsNullOrEmpty(exception.ActualVersion))
         {
-            throw new ArgumentNullException(nameof(exception));
+            return false;
         }
 
         try
@@ -82,12 +84,12 @@ public static class VersionMismatchExceptionExtensions
     /// <param name="key">The context key.</param>
     /// <param name="value">The context value.</param>
     /// <returns>A new VersionMismatchException with the added context.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="exception"/> is null.</exception>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="key"/> is null.</exception>
     public static VersionMismatchException WithContext(this VersionMismatchException exception, string key, object value)
     {
-        if (exception is null)
-        {
-            throw new ArgumentNullException(nameof(exception));
-        }
+        ArgumentNullException.ThrowIfNull(exception);
+        ArgumentNullException.ThrowIfNull(key);
 
         var newException = new VersionMismatchException(
             exception.Message,
@@ -96,18 +98,12 @@ public static class VersionMismatchExceptionExtensions
             exception.ComponentType,
             exception.ComponentName,
             exception.InnerException
-        )
-        {
-            ExpectedVersion = exception.ExpectedVersion,
-            ActualVersion = exception.ActualVersion,
-            ComponentType = exception.ComponentType,
-            ComponentName = exception.ComponentName
-        };
+        );
 
-        // Copy context from original exception if it has PluginException base
-        if (exception is PluginException pluginEx && pluginEx.Context.Count > 0)
+        // Copy context from original exception
+        if (exception.Context.Count > 0)
         {
-            foreach (var kvp in pluginEx.Context)
+            foreach (var kvp in exception.Context)
             {
                 newException.Context[kvp.Key] = kvp.Value;
             }
@@ -124,12 +120,10 @@ public static class VersionMismatchExceptionExtensions
     /// </summary>
     /// <param name="exception">The VersionMismatchException instance.</param>
     /// <returns>A simplified error message string.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="exception"/> is null.</exception>
     public static string GetSimplifiedMessage(this VersionMismatchException exception)
     {
-        if (exception is null)
-        {
-            throw new ArgumentNullException(nameof(exception));
-        }
+        ArgumentNullException.ThrowIfNull(exception);
 
         return $"VersionMismatch[{exception.ComponentType}:{exception.ComponentName}] Expected: {exception.ExpectedVersion}, Actual: {exception.ActualVersion}";
     }
