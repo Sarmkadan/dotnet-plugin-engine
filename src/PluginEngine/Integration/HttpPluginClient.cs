@@ -12,9 +12,9 @@ namespace PluginEngine.Integration;
 /// </summary>
 public sealed class HttpPluginClient : IIntegrationClient
 {
-    private readonly HttpClient _httpClient;
-    private readonly ILogger<HttpPluginClient> _logger;
-    private readonly string? _registryBaseUrl;
+    internal readonly HttpClient _httpClient;
+    internal readonly ILogger<HttpPluginClient> _logger;
+    internal readonly string? _registryBaseUrl;
 
     public required Guid PluginId { get; set; }
     public required string CurrentVersion { get; set; } = string.Empty;

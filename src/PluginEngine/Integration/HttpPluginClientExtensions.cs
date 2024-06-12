@@ -12,7 +12,7 @@ using System.Text;
 namespace PluginEngine.Integration;
 
 /// <summary>
-/// Extension methods for HttpPluginClient providing enhanced functionality for
+/// Extension methods for <see cref="HttpPluginClient"/> providing enhanced functionality for
 /// plugin registry operations and HTTP request handling.
 /// </summary>
 public static class HttpPluginClientExtensions
@@ -24,6 +24,8 @@ public static class HttpPluginClientExtensions
     /// <param name="client">The HttpPluginClient instance.</param>
     /// <param name="request">The HTTP request message to add headers to.</param>
     /// <returns>The HttpRequestMessage with authentication headers added.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="client"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="request"/> is <see langword="null"/>.</exception>
     public static HttpRequestMessage AddPluginAuthHeaders(this HttpPluginClient client, HttpRequestMessage request)
     {
         ArgumentNullException.ThrowIfNull(client);
@@ -42,6 +44,8 @@ public static class HttpPluginClientExtensions
     /// <param name="relativeUrl">The relative URL for the request.</param>
     /// <param name="content">Optional HTTP content to send with the request.</param>
     /// <returns>A configured HttpRequestMessage ready for sending.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="client"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentException"><paramref name="relativeUrl"/> is <see langword="null"/>, empty, or whitespace.</exception>
     public static HttpRequestMessage CreateRequest(
         this HttpPluginClient client,
         HttpMethod method,
@@ -51,8 +55,8 @@ public static class HttpPluginClientExtensions
         ArgumentNullException.ThrowIfNull(client);
         ArgumentException.ThrowIfNullOrEmpty(relativeUrl);
 
-        var baseUrl = GetRegistryBaseUrl(client);
-        var requestUri = new Uri(baseUrl + relativeUrl, UriKind.RelativeOrAbsolute);
+        var baseUrl = client._registryBaseUrl;
+        var requestUri = new Uri(baseUrl + relativeUrl, UriKind.Absolute);
 
         var request = new HttpRequestMessage(method, requestUri)
         {
@@ -69,6 +73,8 @@ public static class HttpPluginClientExtensions
     /// <param name="client">The HttpPluginClient instance.</param>
     /// <param name="pluginInfo">The plugin metadata to register.</param>
     /// <returns>True if the upload was successful; otherwise false.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="client"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="pluginInfo"/> is <see langword="null"/>.</exception>
     public static async Task<bool> UploadPluginMetadataAsync(
         this HttpPluginClient client,
         PluginInfo pluginInfo)
@@ -76,7 +82,8 @@ public static class HttpPluginClientExtensions
         ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(pluginInfo);
 
-        if (string.IsNullOrEmpty(GetRegistryBaseUrl(client)))
+        var baseUrl = client._registryBaseUrl;
+        if (string.IsNullOrEmpty(baseUrl))
         {
             return false;
         }
@@ -90,17 +97,14 @@ public static class HttpPluginClientExtensions
             var request = client.CreateRequest(HttpMethod.Post, url, content);
 
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-            var response = await client.GetAsync(request.RequestUri?.ToString() ?? url);
+            var response = await client._httpClient.SendAsync(request, cts.Token);
 
             return response.IsSuccessStatusCode;
         }
         catch (Exception ex)
         {
-            var logger = GetLogger(client);
-            if (logger != null)
-            {
-                logger.LogError(ex, "Error uploading plugin metadata for {PluginName}", pluginInfo.Name);
-            }
+            var logger = client._logger;
+            logger?.LogError(ex, "Error uploading plugin metadata for {PluginName}", pluginInfo.Name);
             return false;
         }
     }
@@ -111,6 +115,7 @@ public static class HttpPluginClientExtensions
     /// <param name="client">The HttpPluginClient instance.</param>
     /// <param name="pluginId">The ID of the plugin to check.</param>
     /// <returns>True if a security update is available; otherwise false.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="client"/> is <see langword="null"/>.</exception>
     public static async Task<bool> HasSecurityUpdateAsync(
         this HttpPluginClient client,
         Guid pluginId)
@@ -119,33 +124,5 @@ public static class HttpPluginClientExtensions
 
         var updates = await client.CheckForUpdatesAsync(new List<Guid> { pluginId });
         return updates.Count > 0 && updates[0].IsSecurityUpdate;
-    }
-
-    /// <summary>
-    /// Gets the configured registry base URL from the HttpPluginClient.
-    /// </summary>
-    /// <param name="client">The HttpPluginClient instance.</param>
-    /// <returns>The registry base URL or null if not configured.</returns>
-    private static string? GetRegistryBaseUrl(HttpPluginClient client)
-    {
-        var field = typeof(HttpPluginClient).GetField(
-            "_registryBaseUrl",
-            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-
-        return field?.GetValue(client) as string;
-    }
-
-    /// <summary>
-    /// Gets the logger instance from HttpPluginClient for error logging.
-    /// </summary>
-    /// <param name="client">The HttpPluginClient instance.</param>
-    /// <returns>The ILogger instance or null if not available.</returns>
-    private static ILogger<HttpPluginClient>? GetLogger(HttpPluginClient client)
-    {
-        var field = typeof(HttpPluginClient).GetField(
-            "_logger",
-            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-
-        return field?.GetValue(client) as ILogger<HttpPluginClient>;
     }
 }
