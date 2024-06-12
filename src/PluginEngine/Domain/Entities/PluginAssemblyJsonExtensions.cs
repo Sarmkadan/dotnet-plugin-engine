@@ -2,7 +2,7 @@
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
-// =============================================================================
+// =====================================================================
 
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -28,18 +28,14 @@ public static class PluginAssemblyJsonExtensions
     /// <param name="value">The PluginAssembly instance to serialize.</param>
     /// <param name="indented">Whether to format the JSON with indentation for readability.</param>
     /// <returns>A JSON string representation of the PluginAssembly.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="value"/> is null.</exception>
     public static string ToJson(this PluginAssembly value, bool indented = false)
     {
-        if (value is null)
-        {
-            throw new ArgumentNullException(nameof(value));
-        }
+        ArgumentNullException.ThrowIfNull(value);
 
         var options = indented
             ? new JsonSerializerOptions(_jsonOptions)
-            {
-                WriteIndented = true
-            }
+            { WriteIndented = true }
             : _jsonOptions;
 
         return JsonSerializer.Serialize(value, options);
@@ -49,13 +45,11 @@ public static class PluginAssemblyJsonExtensions
     /// Deserializes a JSON string to a PluginAssembly instance.
     /// </summary>
     /// <param name="json">The JSON string to deserialize.</param>
-    /// <returns>A PluginAssembly instance, or null if the JSON is invalid.</returns>
+    /// <returns>A PluginAssembly instance if successful; otherwise, null.</returns>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="json"/> is null or whitespace.</exception>
     public static PluginAssembly? FromJson(string json)
     {
-        if (string.IsNullOrWhiteSpace(json))
-        {
-            throw new ArgumentException("JSON string cannot be null or whitespace.", nameof(json));
-        }
+        ArgumentException.ThrowIfNullOrWhiteSpace(json);
 
         try
         {
