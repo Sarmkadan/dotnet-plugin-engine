@@ -15,12 +15,10 @@ namespace PluginEngine.Results
         /// </summary>
         /// <param name="results">The collection of plugin operation results to convert to a batch.</param>
         /// <returns>A new <see cref="PluginBatchOperationResult"/> containing all operations.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="results"/> is <see langword="null"/>.</exception>
         public static PluginBatchOperationResult ToBatchResult(this IEnumerable<PluginOperationResult> results)
         {
-            if (results == null)
-            {
-                throw new ArgumentNullException(nameof(results));
-            }
+            ArgumentNullException.ThrowIfNull(results);
 
             var batch = new PluginBatchOperationResult();
             var resultList = results.ToList();
@@ -39,12 +37,10 @@ namespace PluginEngine.Results
         /// </summary>
         /// <param name="results">The collection of plugin operation results with identifiers.</param>
         /// <returns>A new <see cref="PluginBatchOperationResult"/> containing all operations.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="results"/> is <see langword="null"/>.</exception>
         public static PluginBatchOperationResult ToBatchResult(this IEnumerable<(Guid PluginId, string PluginName, PluginOperationResult Result)> results)
         {
-            if (results == null)
-            {
-                throw new ArgumentNullException(nameof(results));
-            }
+            ArgumentNullException.ThrowIfNull(results);
 
             var batch = new PluginBatchOperationResult();
             var resultList = results.ToList();
@@ -63,12 +59,10 @@ namespace PluginEngine.Results
         /// </summary>
         /// <param name="result">The plugin operation result to check.</param>
         /// <returns>True if the operation failed or contains failures; otherwise false.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="result"/> is <see langword="null"/>.</exception>
         public static bool HasFailures(this PluginOperationResult result)
         {
-            if (result == null)
-            {
-                throw new ArgumentNullException(nameof(result));
-            }
+            ArgumentNullException.ThrowIfNull(result);
 
             return !result.Success || result.ErrorCode.HasValue;
         }
@@ -78,12 +72,10 @@ namespace PluginEngine.Results
         /// </summary>
         /// <param name="result">The plugin operation result to summarize.</param>
         /// <returns>A formatted string containing the summary information.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="result"/> is <see langword="null"/>.</exception>
         public static string GetDetailedSummary(this PluginOperationResult result)
         {
-            if (result == null)
-            {
-                throw new ArgumentNullException(nameof(result));
-            }
+            ArgumentNullException.ThrowIfNull(result);
 
             var builder = new StringBuilder();
             builder.AppendLine($"Operation Summary:");
@@ -114,12 +106,10 @@ namespace PluginEngine.Results
         /// <typeparam name="T">The data type contained in the result.</typeparam>
         /// <param name="result">The generic plugin operation result to convert.</param>
         /// <returns>A new non-generic <see cref="PluginOperationResult"/>.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="result"/> is <see langword="null"/>.</exception>
         public static PluginOperationResult ToNonGeneric(this PluginOperationResult result)
         {
-            if (result == null)
-            {
-                throw new ArgumentNullException(nameof(result));
-            }
+            ArgumentNullException.ThrowIfNull(result);
 
             return new PluginOperationResult
             {
