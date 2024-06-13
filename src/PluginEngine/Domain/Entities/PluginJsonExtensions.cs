@@ -4,6 +4,7 @@
 // CTO & Software Architect
 // =============================================================================
 
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -28,43 +29,24 @@ public static class PluginJsonExtensions
     /// <param name="value">The plugin to serialize.</param>
     /// <param name="indented">Whether to indent the JSON output.</param>
     /// <returns>A JSON string representation of the plugin.</returns>
-    public static string ToJson(this Plugin value, bool indented = false)
-    {
-        if (value is null)
-        {
-            throw new ArgumentNullException(nameof(value));
-        }
-
-        var options = indented
-            ? new JsonSerializerOptions(_jsonSerializerOptions)
-            {
-                WriteIndented = true
-            }
-            : _jsonSerializerOptions;
-
-        return JsonSerializer.Serialize(value, options);
-    }
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="value"/> is null.</exception>
+    public static string ToJson(this Plugin value, bool indented = false) => value is null
+        ? throw new ArgumentNullException(nameof(value))
+        : JsonSerializer.Serialize(value, GetJsonSerializerOptions(indented));
 
     /// <summary>
     /// Deserializes a Plugin instance from a JSON string.
     /// </summary>
     /// <param name="json">The JSON string to deserialize.</param>
     /// <returns>The deserialized Plugin instance, or null if deserialization fails.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="json"/> is null.</exception>
     public static Plugin? FromJson(string json)
     {
-        if (string.IsNullOrWhiteSpace(json))
-        {
-            return null;
-        }
-
-        try
-        {
-            return JsonSerializer.Deserialize<Plugin>(json, _jsonSerializerOptions);
-        }
-        catch (JsonException)
-        {
-            return null;
-        }
+        return json is null
+            ? throw new ArgumentNullException(nameof(json))
+            : TryDeserialize(json, out var result)
+                ? result
+                : null;
     }
 
     /// <summary>
@@ -72,23 +54,28 @@ public static class PluginJsonExtensions
     /// </summary>
     /// <param name="json">The JSON string to deserialize.</param>
     /// <param name="value">The deserialized Plugin instance, or null if deserialization fails.</param>
-    /// <returns>True if deserialization succeeded; otherwise, false.</returns>
+    /// <returns>True if deserialization succeeded and produced a non-null result; otherwise, false.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="json"/> is null.</exception>
     public static bool TryFromJson(string json, out Plugin? value)
     {
         value = null;
+        return json is not null && TryDeserialize(json, out value);
+    }
 
-        if (string.IsNullOrWhiteSpace(json))
-        {
-            return false;
-        }
+    private static JsonSerializerOptions GetJsonSerializerOptions(bool indented) => indented
+        ? new JsonSerializerOptions(_jsonSerializerOptions) { WriteIndented = true }
+        : _jsonSerializerOptions;
 
+    private static bool TryDeserialize(string json, [NotNullWhen(true)] out Plugin? result)
+    {
         try
         {
-            value = JsonSerializer.Deserialize<Plugin>(json, _jsonSerializerOptions);
-            return value is not null;
+            result = JsonSerializer.Deserialize<Plugin>(json, _jsonSerializerOptions);
+            return result is not null;
         }
         catch (JsonException)
         {
+            result = null;
             return false;
         }
     }
