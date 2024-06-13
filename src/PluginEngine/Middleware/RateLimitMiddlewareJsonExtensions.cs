@@ -32,37 +32,52 @@ public static class RateLimitMiddlewareJsonExtensions
     /// <param name="value">The middleware instance to serialize.</param>
     /// <param name="indented">Whether to format the JSON with indentation for readability.</param>
     /// <returns>A JSON string representation of the middleware.</returns>
-    public static string ToJson(this RateLimitMiddleware value, bool indented = false)
-    {
-        if (value == null)
-        {
-            throw new ArgumentNullException(nameof(value));
-        }
-
-        var options = _jsonOptions;
-        if (indented)
-        {
-            options = new JsonSerializerOptions(_jsonOptions)
-            {
-                WriteIndented = true
-            };
-        }
-
-        return JsonSerializer.Serialize(value, options);
-    }
+    /// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null"/>.</exception>
+    public static string ToJson(this RateLimitMiddleware value, bool indented = false) =>
+        value is null
+            ? throw new ArgumentNullException(nameof(value))
+            : JsonSerializer.Serialize(value, GetOptions(indented));
 
     /// <summary>
     /// Deserializes a JSON string to a <see cref="RateLimitMiddleware"/> instance.
     /// </summary>
     /// <param name="json">The JSON string to deserialize.</param>
-    /// <returns>The deserialized middleware instance, or null if the JSON is null or empty.</returns>
+    /// <returns>The deserialized middleware instance, or <see langword="null"/> if the JSON is <see langword="null"/>, empty, or whitespace.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="json"/> is <see langword="null"/>.</exception>
     public static RateLimitMiddleware? FromJson(string json)
     {
-        if (string.IsNullOrWhiteSpace(json))
-        {
-            return null;
-        }
+        ArgumentNullException.ThrowIfNull(json);
 
+        return string.IsNullOrWhiteSpace(json)
+            ? null
+            : TryDeserialize(json);
+    }
+
+    /// <summary>
+    /// Attempts to deserialize a JSON string to a <see cref="RateLimitMiddleware"/> instance.
+    /// </summary>
+    /// <param name="json">The JSON string to deserialize.</param>
+    /// <param name="value">The deserialized middleware instance, or <see langword="null"/> if deserialization fails.</param>
+    /// <returns><see langword="true"/> if deserialization succeeds; otherwise, <see langword="false"/>.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="json"/> is <see langword="null"/>.</exception>
+    public static bool TryFromJson(string json, out RateLimitMiddleware? value)
+    {
+        ArgumentNullException.ThrowIfNull(json);
+
+        value = string.IsNullOrWhiteSpace(json)
+            ? null
+            : TryDeserialize(json);
+
+        return value is not null;
+    }
+
+    private static JsonSerializerOptions GetOptions(bool indented) =>
+        indented
+            ? new JsonSerializerOptions(_jsonOptions) { WriteIndented = true }
+            : _jsonOptions;
+
+    private static RateLimitMiddleware? TryDeserialize(string json)
+    {
         try
         {
             return JsonSerializer.Deserialize<RateLimitMiddleware>(json, _jsonOptions);
@@ -70,32 +85,6 @@ public static class RateLimitMiddlewareJsonExtensions
         catch (JsonException)
         {
             return null;
-        }
-    }
-
-    /// <summary>
-    /// Attempts to deserialize a JSON string to a <see cref="RateLimitMiddleware"/> instance.
-    /// </summary>
-    /// <param name="json">The JSON string to deserialize.</param>
-    /// <param name="value">The deserialized middleware instance, or null if deserialization fails.</param>
-    /// <returns>True if deserialization succeeds; otherwise, false.</returns>
-    public static bool TryFromJson(string json, out RateLimitMiddleware? value)
-    {
-        value = null;
-
-        if (string.IsNullOrWhiteSpace(json))
-        {
-            return false;
-        }
-
-        try
-        {
-            value = JsonSerializer.Deserialize<RateLimitMiddleware>(json, _jsonOptions);
-            return true;
-        }
-        catch (JsonException)
-        {
-            return false;
         }
     }
 }
