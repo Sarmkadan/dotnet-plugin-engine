@@ -72,6 +72,11 @@ public static class PluginEngineConstants
     public const int MaxDependencyResolutionAttempts = 10;
 
     /// <summary>
+    /// Maximum number of direct dependencies allowed for healthy plugin structure.
+    /// </summary>
+    public const int MaxDirectDependencies = 20;
+
+    /// <summary>
     /// Default assembly resolver search paths subdirectory.
     /// </summary>
     public const string AssemblyResolverSubdirectory = "assemblies";
