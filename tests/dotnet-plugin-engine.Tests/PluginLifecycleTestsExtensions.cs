@@ -20,9 +20,13 @@ public static class PluginLifecycleTestsExtensions
     /// <summary>
     /// Verifies that lifecycle hooks properly handle null cancellation tokens.
     /// </summary>
-    /// <param name="tests">The test instance</param>
+    /// <param name="tests">The test instance.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="tests"/> is <see langword="null"/>.</exception>
     public static async Task Hooks_HandleNullCancellationToken(this PluginLifecycleTests tests)
     {
+        ArgumentNullException.ThrowIfNull(tests);
+
         var lifecycle = new PluginLifecycleTests.RecordingLifecycle();
 
         // Call hooks with null cancellation token (should use default)
@@ -42,9 +46,13 @@ public static class PluginLifecycleTestsExtensions
     /// <summary>
     /// Tests that the lifecycle hooks can be called multiple times without side effects.
     /// </summary>
-    /// <param name="tests">The test instance</param>
+    /// <param name="tests">The test instance.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="tests"/> is <see langword="null"/>.</exception>
     public static async Task Hooks_CanBeCalledMultipleTimes(this PluginLifecycleTests tests)
     {
+        ArgumentNullException.ThrowIfNull(tests);
+
         var lifecycle = new PluginLifecycleTests.RecordingLifecycle();
 
         // First call sequence
@@ -74,9 +82,13 @@ public static class PluginLifecycleTestsExtensions
     /// <summary>
     /// Verifies that lifecycle hooks maintain correct state across multiple invocations.
     /// </summary>
-    /// <param name="tests">The test instance</param>
+    /// <param name="tests">The test instance.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="tests"/> is <see langword="null"/>.</exception>
     public static async Task Hooks_MaintainStateAcrossInvocations(this PluginLifecycleTests tests)
     {
+        ArgumentNullException.ThrowIfNull(tests);
+
         var lifecycle = new PluginLifecycleTests.RecordingLifecycle();
 
         // Load sequence
@@ -104,9 +116,13 @@ public static class PluginLifecycleTestsExtensions
     /// <summary>
     /// Tests that cancellation tokens are properly respected during hook execution.
     /// </summary>
-    /// <param name="tests">The test instance</param>
+    /// <param name="tests">The test instance.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="tests"/> is <see langword="null"/>.</exception>
     public static async Task Hooks_RespectCancellationTokens(this PluginLifecycleTests tests)
     {
+        ArgumentNullException.ThrowIfNull(tests);
+
         using var cts = new CancellationTokenSource();
         var lifecycle = new PluginLifecycleTests.RecordingLifecycle();
 
