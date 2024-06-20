@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 public static class PluginDiscoveryBenchmarksExtensions
 {
     /// <summary>
-    /// Runs all plugin discovery benchmarks sequentially.
+    /// Runs all plugin discovery benchmarks sequentially: empty directory discovery, 50 plugin discovery, and 200 plugin discovery.
     /// </summary>
     /// <param name="benchmarks">The benchmarks instance to run.</param>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="benchmarks"/> is null.</exception>
@@ -21,7 +21,7 @@ public static class PluginDiscoveryBenchmarksExtensions
     }
 
     /// <summary>
-    /// Runs all plugin metadata benchmarks sequentially.
+    /// Runs all plugin metadata benchmarks sequentially: single plugin metadata extraction, plugin file validation, and plugin filtering.
     /// </summary>
     /// <param name="benchmarks">The benchmarks instance to run.</param>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="benchmarks"/> is null.</exception>
@@ -35,7 +35,7 @@ public static class PluginDiscoveryBenchmarksExtensions
     }
 
     /// <summary>
-    /// Runs a complete plugin discovery benchmark including setup, discovery, metadata extraction, and cleanup.
+    /// Executes a complete plugin discovery benchmark workflow including global setup, discovery benchmarks, metadata benchmarks, and global cleanup.
     /// </summary>
     /// <param name="benchmarks">The benchmarks instance to run.</param>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="benchmarks"/> is null.</exception>
@@ -56,10 +56,11 @@ public static class PluginDiscoveryBenchmarksExtensions
     }
 
     /// <summary>
-    /// Runs plugin discovery benchmarks concurrently for the specified number of iterations.
+    /// Executes plugin discovery benchmarks concurrently for the specified number of iterations.
+    /// Each iteration runs empty directory discovery, 50 plugin discovery, and 200 plugin discovery in sequence.
     /// </summary>
     /// <param name="benchmarks">The benchmarks instance to run.</param>
-    /// <param name="iterations">The number of concurrent iterations to run.</param>
+    /// <param name="iterations">The number of concurrent iterations to execute.</param>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="benchmarks"/> is null.</exception>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="iterations"/> is less than 1.</exception>
     public static async Task RunConcurrentDiscoveryBenchmarks(this PluginDiscoveryBenchmarks benchmarks, int iterations)
