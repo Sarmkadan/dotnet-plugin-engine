@@ -4,7 +4,8 @@ using System.Text.Json;
 namespace PluginEngine.Tests
 {
     /// <summary>
-    /// Provides JSON serialization and deserialization extensions for <see cref="PluginDependencyResolverTests"/> test data.
+    /// Provides JSON serialization and deserialization helper methods for <see cref="PluginDependencyResolverTests"/> test data.
+    /// Uses camelCase property naming and Web defaults for serialization.
     /// </summary>
     public static class PluginDependencyResolverTestsJsonExtensions
     {
@@ -18,8 +19,8 @@ namespace PluginEngine.Tests
         /// Serializes the specified test data to a JSON string.
         /// </summary>
         /// <param name="value">The test data to serialize.</param>
-        /// <param name="indented">Whether to format the JSON with indentation for readability.</param>
-        /// <returns>A JSON string representation of the test data.</returns>
+        /// <param name="indented">When true, formats JSON with indentation for readability.</param>
+        /// <returns>JSON string representation of the test data.</returns>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="value"/> is null.</exception>
         public static string ToJson(this PluginDependencyResolverTests value, bool indented = false)
         {
@@ -36,7 +37,9 @@ namespace PluginEngine.Tests
         /// Deserializes JSON data into a <see cref="PluginDependencyResolverTests"/> instance.
         /// </summary>
         /// <param name="json">The JSON string to deserialize.</param>
-        /// <returns>The deserialized test data, or null if the input is null or whitespace.</returns>
+        /// <returns>
+        /// The deserialized test data, or null if the input is null or whitespace.
+        /// </returns>
         public static PluginDependencyResolverTests? FromJson(string json)
         {
             if (string.IsNullOrWhiteSpace(json))
@@ -52,7 +55,9 @@ namespace PluginEngine.Tests
         /// </summary>
         /// <param name="json">The JSON string to deserialize.</param>
         /// <param name="value">Receives the deserialized test data if successful; otherwise, null.</param>
-        /// <returns>True if deserialization succeeded; otherwise, false.</returns>
+        /// <returns>
+        /// True if deserialization succeeded; otherwise, false.
+        /// </returns>
         public static bool TryFromJson(string json, out PluginDependencyResolverTests? value)
         {
             value = null;
