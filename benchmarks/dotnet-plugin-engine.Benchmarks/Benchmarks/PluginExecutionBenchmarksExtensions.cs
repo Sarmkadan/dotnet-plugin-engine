@@ -11,6 +11,7 @@ namespace PluginEngine.Benchmarks
     {
         /// <summary>
         /// Performs a warmup cycle to ensure plugins are loaded and ready for benchmarking.
+        /// This prepares the plugin lifecycle by initializing and cleaning up before actual benchmarking.
         /// </summary>
         /// <param name="benchmarks">The benchmark instance to warm up.</param>
         /// <exception cref="ArgumentNullException"><paramref name="benchmarks"/> is <see langword="null"/>.</exception>
