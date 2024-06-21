@@ -1,29 +1,26 @@
 // ... existing content ...
 
-## PluginExceptionExtensions
+## PluginOperationResultExtensions
 
-The `PluginExceptionExtensions` class provides utility methods for working with `PluginException` instances. It allows you to add additional context and error codes to exceptions, as well as generate diagnostic reports and user-friendly messages.
+The `PluginOperationResultExtensions` class provides utility methods for working with `PluginOperationResult` instances. It allows you to check for failures in a collection of results, convert results to batch operation formats, generate detailed summaries, and convert generic results to non-generic forms.
 
 ### Usage Example
 
 ```csharp
-try
+var results = new List<PluginOperationResult<string>>
 {
-    // Code that might throw a PluginException
-}
-catch (PluginException ex)
+    new PluginOperationResult<string> { Success = true, Data = "Plugin1" },
+    new PluginOperationResult<string> { Success = false, ErrorMessage = "Invalid input" },
+    new PluginOperationResult<string> { Success = true, Data = "Plugin3" }
+};
+
+if (results.HasFailures())
 {
-    var exceptionWithErrorCode = ex.WithErrorCode("PLUGIN_LOAD_FAILED");
-    var exceptionWithContext = exceptionWithErrorCode.WithContext("pluginName", "MyPlugin");
+    var batchResult = results.ToBatchResult();
+    var summary = batchResult.GetDetailedSummary();
+    var nonGenericResult = batchResult.ToNonGeneric();
 
-    Console.WriteLine(exceptionWithContext.ToDiagnosticReport());
-    Console.WriteLine(exceptionWithContext.ToUserFriendlyMessage());
-
-    if (exceptionWithContext.IsErrorCode("PLUGIN_LOAD_FAILED"))
-    {
-        Console.WriteLine("Plugin load failed");
-    }
+    Console.WriteLine(summary);
+    Console.WriteLine(nonGenericResult);
 }
 ```
-
-// ... existing content ...
