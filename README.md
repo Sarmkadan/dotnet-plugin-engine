@@ -1,58 +1,61 @@
 // ... existing content ...
 
-## PluginLoadingBenchmarks
+## HotSwapServiceExtensions
 
-The `PluginLoadingBenchmarks` class provides a set of benchmarks for measuring the performance of plugin loading operations. It includes tests for loading a single plugin, loading all plugins from a directory, unloading and reloading plugins, and more.
-
-### Usage Example
-
-```csharp
-var benchmark = new PluginLoadingBenchmarks();
-await benchmark.GlobalSetup();
-await benchmark.Load_SinglePlugin();
-await benchmark.Load_AllPluginsFromDirectory();
-await benchmark.Unload_Plugin();
-await benchmark.Reload_Plugin();
-await benchmark.GetAllLoadedPlugins();
-await benchmark.IsPluginLoaded();
-await benchmark.Load_PluginsConcurrently();
-await benchmark.Load_WithDependencyResolution();
-await benchmark.Load_WithValidation();
-await benchmark.GlobalCleanup();
-```
-
-## AssemblyLoadContextInfoExtensions
-
-`AssemblyLoadContextInfoExtensions` provides a collection of extension methods for `AssemblyLoadContextInfo` objects. These helpers let you inspect the load‑context’s memory consumption, age, inactivity period, health status, and even search for loaded assemblies by name pattern, making it easier to monitor and manage plugin lifetimes.
+The `HotSwapServiceExtensions` class provides a set of extension methods for facilitating plugin hot-swapping, allowing plugins to be swapped out while the application is running. This enables features like live updates and A/B testing.
 
 ### Usage Example
 
 ```csharp
 using System;
+using System.Threading.Tasks;
 using PluginEngine.Domain.Entities; // Adjust the namespace if necessary
 
-// Assume we have an AssemblyLoadContextInfo instance named ctxInfo
-if (ctxInfo.HasMemoryExceeded())
+public class HotSwapExample
 {
-    Console.WriteLine("Memory limit exceeded.");
-}
+    public async Task DemonstrateHotSwap()
+    {
+        // Check if hot swap is supported
+        if (!HotSwapServiceExtensions.CanSwap)
+        {
+            Console.WriteLine("Hot swap is not supported.");
+            return;
+        }
 
-double ageMinutes = ctxInfo.GetAgeInMinutes();
-double inactivityMinutes = ctxInfo.GetInactivityMinutes();
-bool isStale = ctxInfo.IsStale();
-bool isHealthy = ctxInfo.IsHealthy();
+        try
+        {
+            // Perform a plugin swap
+            var swapResult = await HotSwapServiceExtensions.SwapPluginAsync("MyPlugin", "NewPluginVersion");
+            if (swapResult.IsSuccess)
+            {
+                Console.WriteLine("Plugin swapped successfully.");
+            }
+            else
+            {
+                Console.WriteLine($"Swap failed: {swapResult.ErrorMessage}");
+            }
 
-Console.WriteLine($"Age: {ageMinutes:F2} min, Inactivity: {inactivityMinutes:F2} min");
-Console.WriteLine($"Is stale: {isStale}, Is healthy: {isHealthy}");
+            // Get the last swap record
+            var lastSwapRecordResult = await HotSwapServiceExtensions.GetLastSwapRecordAsync();
+            if (lastSwapRecordResult.IsSuccess && lastSwapRecordResult.Value != null)
+            {
+                Console.WriteLine($"Last swap record: {lastSwapRecordResult.Value.PluginName} -> {lastSwapRecordResult.Value.NewPluginName}");
+            }
 
-string detailedReport = ctxInfo.GetDetailedStatusReport();
-Console.WriteLine(detailedReport);
-
-string memoryUsage = ctxInfo.GetMemoryUsageString();
-Console.WriteLine($"Memory usage: {memoryUsage}");
-
-foreach (var assemblyName in ctxInfo.FindAssembliesByPattern("MyPlugin.*"))
-{
-    Console.WriteLine($"Found assembly: {assemblyName}");
+            // Get swap history
+            var swapHistoryResult = await HotSwapServiceExtensions.GetSwapHistoryAsync();
+            if (swapHistoryResult.IsSuccess)
+            {
+                foreach (var record in swapHistoryResult.Value)
+                {
+                    Console.WriteLine($"Swap record: {record.PluginName} -> {record.NewPluginName} at {record.Timestamp}");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An error occurred: {ex.Message}");
+        }
+    }
 }
 ```
