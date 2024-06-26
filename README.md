@@ -1,36 +1,33 @@
-// ... existing content ...
+## DependencyResolutionServiceTestsExtensions
 
-## HotSwapServiceTestsExtensions
-
-The `HotSwapServiceTestsExtensions` class provides a set of extension methods for testing hot swap functionality. These methods enable creation of test instances and verification of swap results.
+The `DependencyResolutionServiceTestsExtensions` class provides utility methods for testing dependency resolution scenarios. It includes helpers to create test plugins/dependencies, configure loader services, and assert dependency resolution outcomes.
 
 ### Usage Example
 
 ```csharp
 using System;
-using System.Threading.Tasks;
+using System.Collections.Generic;
 
-public class HotSwapExample
+public class DependencyResolutionTest
 {
-    public async Task DemonstrateHotSwap()
+    public void TestDependencyResolution()
     {
-        // Create a test plugin
-        var plugin = HotSwapServiceTestsExtensions.CreatePlugin();
+        // Create test plugin with dependencies
+        var plugin = DependencyResolutionServiceTestsExtensions.CreateTestPlugin("MyPlugin");
+        var dep1 = DependencyResolutionServiceTestsExtensions.CreateTestDependency("Dep1");
+        var dep2 = DependencyResolutionServiceTestsExtensions.CreateTestDependency("Dep2");
 
-        // Create a test hot swap service
-        var hotSwapService = HotSwapServiceTestsExtensions.CreateService();
+        // Setup loader service with plugin
+        DependencyResolutionServiceTestsExtensions.SetupLoaderServiceForPlugin(plugin);
 
-        // Perform a successful swap
-        HotSwapServiceTestsExtensions.ShouldBeSuccessfulSwap(hotSwapService, plugin);
+        // Assert dependency relationships
+        plugin.ShouldHaveDependencyCount(2);
+        plugin.ShouldHaveDependencyOn(dep1);
+        plugin.ShouldHaveDependencyOn(dep2);
 
-        // Verify the swap result
-        HotSwapServiceTestsExtensions.ShouldHaveSingleHistoryEntry(hotSwapService, plugin);
-
-        // Test a failed swap
-        HotSwapServiceTestsExtensions.ShouldBeFailedSwap(hotSwapService, plugin);
-
-        // Create and test a plugin that can be swapped
-        var (swappablePlugin, _) = HotSwapServiceTestsExtensions.CreateAndTestCanSwap();
+        // Resolve dependencies and verify
+        var resolver = DependencyResolutionServiceTestsExtensions.CreateResolver();
+        resolver.ShouldResolveTo(new[] { dep1.Id, dep2.Id });
     }
 }
 ```
