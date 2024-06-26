@@ -1,61 +1,40 @@
 // ... existing content ...
 
-## HotSwapServiceExtensions
+## VersionHelperExtensions
 
-The `HotSwapServiceExtensions` class provides a set of extension methods for facilitating plugin hot-swapping, allowing plugins to be swapped out while the application is running. This enables features like live updates and A/B testing.
+The `VersionHelperExtensions` class provides a set of extension methods for working with version information. These methods enable comparisons and parsing of version strings. 
 
 ### Usage Example
 
 ```csharp
 using System;
-using System.Threading.Tasks;
-using PluginEngine.Domain.Entities; // Adjust the namespace if necessary
 
-public class HotSwapExample
+public class VersionExample
 {
-    public async Task DemonstrateHotSwap()
+    public void DemonstrateVersionComparisons()
     {
-        // Check if hot swap is supported
-        if (!HotSwapServiceExtensions.CanSwap)
+        // Compare version strings
+        var version1 = "1.2.3";
+        var version2 = "1.2.4";
+
+        bool isGreater = VersionHelperExtensions.IsGreaterThan(version1, version2);
+        bool isLessThan = VersionHelperExtensions.IsLessThan(version1, version2);
+        bool isEqual = VersionHelperExtensions.IsEqualTo(version1, version2);
+
+        Console.WriteLine($"Is {version1} greater than {version2}? {isGreater}");
+        Console.WriteLine($"Is {version1} less than {version2}? {isLessThan}");
+        Console.WriteLine($"Is {version1} equal to {version2}? {isEqual}");
+
+        // Parse version information
+        var parsedVersion = VersionHelperExtensions.GetVersionInfo(version1);
+        if (parsedVersion != null)
         {
-            Console.WriteLine("Hot swap is not supported.");
-            return;
+            Console.WriteLine($"Parsed version: {parsedVersion.Major}.{parsedVersion.Minor}.{parsedVersion.Patch}");
         }
 
-        try
-        {
-            // Perform a plugin swap
-            var swapResult = await HotSwapServiceExtensions.SwapPluginAsync("MyPlugin", "NewPluginVersion");
-            if (swapResult.IsSuccess)
-            {
-                Console.WriteLine("Plugin swapped successfully.");
-            }
-            else
-            {
-                Console.WriteLine($"Swap failed: {swapResult.ErrorMessage}");
-            }
-
-            // Get the last swap record
-            var lastSwapRecordResult = await HotSwapServiceExtensions.GetLastSwapRecordAsync();
-            if (lastSwapRecordResult.IsSuccess && lastSwapRecordResult.Value != null)
-            {
-                Console.WriteLine($"Last swap record: {lastSwapRecordResult.Value.PluginName} -> {lastSwapRecordResult.Value.NewPluginName}");
-            }
-
-            // Get swap history
-            var swapHistoryResult = await HotSwapServiceExtensions.GetSwapHistoryAsync();
-            if (swapHistoryResult.IsSuccess)
-            {
-                foreach (var record in swapHistoryResult.Value)
-                {
-                    Console.WriteLine($"Swap record: {record.PluginName} -> {record.NewPluginName} at {record.Timestamp}");
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"An error occurred: {ex.Message}");
-        }
+        // Validate semantic version
+        bool isValid = VersionHelperExtensions.IsValidSemanticVersion(version1);
+        Console.WriteLine($"Is {version1} a valid semantic version? {isValid}");
     }
 }
 ```
