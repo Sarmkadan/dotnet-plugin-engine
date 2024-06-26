@@ -1,40 +1,36 @@
 // ... existing content ...
 
-## VersionHelperExtensions
+## HotSwapServiceTestsExtensions
 
-The `VersionHelperExtensions` class provides a set of extension methods for working with version information. These methods enable comparisons and parsing of version strings. 
+The `HotSwapServiceTestsExtensions` class provides a set of extension methods for testing hot swap functionality. These methods enable creation of test instances and verification of swap results.
 
 ### Usage Example
 
 ```csharp
 using System;
+using System.Threading.Tasks;
 
-public class VersionExample
+public class HotSwapExample
 {
-    public void DemonstrateVersionComparisons()
+    public async Task DemonstrateHotSwap()
     {
-        // Compare version strings
-        var version1 = "1.2.3";
-        var version2 = "1.2.4";
+        // Create a test plugin
+        var plugin = HotSwapServiceTestsExtensions.CreatePlugin();
 
-        bool isGreater = VersionHelperExtensions.IsGreaterThan(version1, version2);
-        bool isLessThan = VersionHelperExtensions.IsLessThan(version1, version2);
-        bool isEqual = VersionHelperExtensions.IsEqualTo(version1, version2);
+        // Create a test hot swap service
+        var hotSwapService = HotSwapServiceTestsExtensions.CreateService();
 
-        Console.WriteLine($"Is {version1} greater than {version2}? {isGreater}");
-        Console.WriteLine($"Is {version1} less than {version2}? {isLessThan}");
-        Console.WriteLine($"Is {version1} equal to {version2}? {isEqual}");
+        // Perform a successful swap
+        HotSwapServiceTestsExtensions.ShouldBeSuccessfulSwap(hotSwapService, plugin);
 
-        // Parse version information
-        var parsedVersion = VersionHelperExtensions.GetVersionInfo(version1);
-        if (parsedVersion != null)
-        {
-            Console.WriteLine($"Parsed version: {parsedVersion.Major}.{parsedVersion.Minor}.{parsedVersion.Patch}");
-        }
+        // Verify the swap result
+        HotSwapServiceTestsExtensions.ShouldHaveSingleHistoryEntry(hotSwapService, plugin);
 
-        // Validate semantic version
-        bool isValid = VersionHelperExtensions.IsValidSemanticVersion(version1);
-        Console.WriteLine($"Is {version1} a valid semantic version? {isValid}");
+        // Test a failed swap
+        HotSwapServiceTestsExtensions.ShouldBeFailedSwap(hotSwapService, plugin);
+
+        // Create and test a plugin that can be swapped
+        var (swappablePlugin, _) = HotSwapServiceTestsExtensions.CreateAndTestCanSwap();
     }
 }
 ```
