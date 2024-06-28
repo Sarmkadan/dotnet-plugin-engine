@@ -85,3 +85,65 @@ benchmarks.Resolve_PluginMetadataDependencies();
 benchmarks.Resolve_CircularDependencyDeep();
 benchmarks.Resolve_MissingDependencies();
 ```
+
+## PluginExecutionBenchmarks
+
+The `PluginExecutionBenchmarks` class provides a set of benchmarking methods to measure the performance of the plugin engine's execution logic. It includes methods to initialize and cleanup the engine, execute plugin operations, retrieve plugin details, and check plugin health.
+
+### Usage Example
+
+```csharp
+using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Running;
+
+public class PluginExecutionBenchmarks
+{
+    [Benchmark]
+    public async Task GlobalSetup()
+    {
+        await new PluginExecutionBenchmarks().GlobalSetup();
+    }
+
+    [Benchmark]
+    public async Task PluginLifecycle_Initialize()
+    {
+        await new PluginExecutionBenchmarks().PluginLifecycle_Initialize();
+    }
+
+    [Benchmark]
+    public async Task PluginLifecycle_Cleanup()
+    {
+        await new PluginExecutionBenchmarks().PluginLifecycle_Cleanup();
+    }
+
+    [Benchmark]
+    public async Task ExecutePluginOperation_Single()
+    {
+        await new PluginExecutionBenchmarks().ExecutePluginOperation_Single();
+    }
+
+    [Benchmark]
+    public async Task ExecuteOperations_Batch()
+    {
+        await new PluginExecutionBenchmarks().ExecuteOperations_Batch();
+    }
+
+    [Benchmark]
+    public async Task GetPluginDetails()
+    {
+        await new PluginExecutionBenchmarks().GetPluginDetails();
+    }
+
+    [Benchmark]
+    public async Task CheckPluginHealth()
+    {
+        await new PluginExecutionBenchmarks().CheckPluginHealth();
+    }
+
+    [Benchmark]
+    public async Task MultipleLifecycleOperations()
+    {
+        await new PluginExecutionBenchmarks().MultipleLifecycleOperations();
+    }
+}
+```
