@@ -1,79 +1,62 @@
-## DependencyResolutionServiceTestsExtensions
+## PluginEngineCoreBenchmarks
 
-The `DependencyResolutionServiceTestsExtensions` class provides utility methods for testing dependency resolution scenarios. It includes helpers to create test plugins/dependencies, configure loader services, and assert dependency resolution outcomes.
-
-### Usage Example
-
-```csharp
-using System;
-using System.Collections.Generic;
-
-public class DependencyResolutionTest
-{
-    public void TestDependencyResolution()
-    {
-        // Create test plugin with dependencies
-        var plugin = DependencyResolutionServiceTestsExtensions.CreateTestPlugin("MyPlugin");
-        var dep1 = DependencyResolutionServiceTestsExtensions.CreateTestDependency("Dep1");
-        var dep2 = DependencyResolutionServiceTestsExtensions.CreateTestDependency("Dep2");
-
-        // Setup loader service with plugin
-        DependencyResolutionServiceTestsExtensions.SetupLoaderServiceForPlugin(plugin);
-
-        // Assert dependency relationships
-        plugin.ShouldHaveDependencyCount(2);
-        plugin.ShouldHaveDependencyOn(dep1);
-        plugin.ShouldHaveDependencyOn(dep2);
-
-        // Resolve dependencies and verify
-        var resolver = DependencyResolutionServiceTestsExtensions.CreateResolver();
-        resolver.ShouldResolveTo(new[] { dep1.Id, dep2.Id });
-    }
-}
-```
-
-## PluginOperationResultTestsExtensions
-
-The `PluginOperationResultTestsExtensions` class offers a set of fluent helpers for creating, asserting, and inspecting `PluginOperationResult` and `PluginBatchOperationResult` objects in unit tests. It streamlines verification of success/failure states, messages, error codes, durations, result data, counts, and batch‑level details.
+The `PluginEngineCoreBenchmarks` class provides a set of benchmarking methods to measure the performance of the plugin engine. It includes methods to initialize the engine, load and unload plugins, and retrieve health and status information.
 
 ### Usage Example
 
 ```csharp
-using System;
-using PluginEngine.Results;
-using PluginEngine.Tests.Extensions; // Adjust the namespace to where the extensions are defined
+using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Running;
 
-public class PluginOperationResultTests
+public class PluginEngineBenchmarks
 {
-    public void VerifySuccessResult()
+    [Benchmark]
+    public async Task Initialize_Engine()
     {
-        // Create a successful result and assert its properties
-        var success = PluginOperationResultTestsExtensions.CreateAndAssertSuccess<string>();
-        PluginOperationResultTestsExtensions.ShouldBeSuccessfulWithMessage(success, "Operation completed successfully");
-        PluginOperationResultTestsExtensions.ShouldHaveDurationMs(success, 120);
-        PluginOperationResultTestsExtensions.ShouldHaveData(success, "ExpectedPayload");
+        await new PluginEngineCoreBenchmarks().Initialize_Engine();
     }
 
-    public void VerifyFailureResult()
+    [Benchmark]
+    public async Task LoadAllPlugins_ThroughEngine()
     {
-        // Create a failure result and assert its error details
-        var failure = PluginOperationResultTestsExtensions.CreateAndAssertFailure();
-        PluginOperationResultTestsExtensions.ShouldBeFailureWithErrorCode(failure, 404);
-        PluginOperationResultTestsExtensions.ShouldHaveErrorDetails(failure, "Resource not found");
-        PluginOperationResultTestsExtensions.ShouldHaveDurationMs(failure, 30);
+        await new PluginEngineCoreBenchmarks().LoadAllPlugins_ThroughEngine();
     }
 
-    public void VerifyBatchResult()
+    [Benchmark]
+    public async Task GetHealthInfo()
     {
-        // Build a batch result containing two successful operations
-        var batch = PluginOperationResultTestsExtensions.CreateBatchWithResults(
-            PluginOperationResultTestsExtensions.CreateAndAssertSuccess<int>(),
-            PluginOperationResultTestsExtensions.CreateAndAssertSuccess<int>()
-        );
+        await new PluginEngineCoreBenchmarks().GetHealthInfo();
+    }
 
-        PluginOperationResultTestsExtensions.ShouldHaveResultCount(batch, 2);
-        PluginOperationResultTestsExtensions.ShouldHaveCounts(batch, total: 2, successful: 2, failed: 0);
-        PluginOperationResultTestsExtensions.ShouldHaveTotalDurationMs(batch, 250);
+    [Benchmark]
+    public async Task UnloadAllPlugins_ThroughEngine()
+    {
+        await new PluginEngineCoreBenchmarks().UnloadAllPlugins_ThroughEngine();
+    }
+
+    [Benchmark]
+    public async Task GetLoadedPlugin_ThroughEngine()
+    {
+        await new PluginEngineCoreBenchmarks().GetLoadedPlugin_ThroughEngine();
+    }
+
+    [Benchmark]
+    public async Task Initialize_EngineWithExecution()
+    {
+        await new PluginEngineCoreBenchmarks().Initialize_EngineWithExecution();
+    }
+
+    [Benchmark]
+    public async Task GetHealthInfo_WithPlugins()
+    {
+        await new PluginEngineCoreBenchmarks().GetHealthInfo_WithPlugins();
+    }
+
+    [Benchmark]
+    public async Task SequentialPluginOperations()
+    {
+        await new PluginEngineCoreBenchmarks().SequentialPluginOperations();
     }
 }
 ```
+
