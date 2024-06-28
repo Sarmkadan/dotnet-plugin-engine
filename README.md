@@ -60,3 +60,28 @@ public class PluginEngineBenchmarks
 }
 ```
 
+## DependencyResolutionBenchmarks
+
+The `DependencyResolutionBenchmarks` class evaluates the performance of the plugin engine’s dependency resolution logic across a variety of graph structures. It includes benchmarks for empty graphs, linear chains, diamond patterns, circular dependencies, large graphs, version constraints, plugin metadata dependencies, deep circular dependencies, and missing dependencies.
+
+### Usage Example
+
+```csharp
+using DotNetPluginEngine.Benchmarks;
+
+var benchmarks = new DependencyResolutionBenchmarks();
+
+// Optional: perform any global setup required by the benchmarks
+benchmarks.GlobalSetup();
+
+// Run individual benchmark methods
+benchmarks.Resolve_EmptyGraph();
+benchmarks.Resolve_LinearChain();
+benchmarks.Resolve_DiamondPattern();
+benchmarks.Resolve_CircularDependency();
+benchmarks.Resolve_LargeGraph();
+benchmarks.Resolve_VersionConstraints();
+benchmarks.Resolve_PluginMetadataDependencies();
+benchmarks.Resolve_CircularDependencyDeep();
+benchmarks.Resolve_MissingDependencies();
+```
