@@ -1,3 +1,59 @@
+## PluginDiscoveryBenchmarks
+
+The `PluginDiscoveryBenchmarks` class evaluates the performance of the plugin engine's discovery logic across various scenarios. It includes benchmarks for discovering plugins in empty directories, large plugin sets, and validating plugin files.
+
+### Usage Example
+
+```csharp
+using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Running;
+
+public class PluginDiscoveryBenchmarks
+{
+    [Benchmark]
+    public async Task GlobalSetup()
+    {
+        await new PluginDiscoveryBenchmarks().GlobalSetup();
+    }
+
+    [Benchmark]
+    public async Task Discover_EmptyDirectory()
+    {
+        await new PluginDiscoveryBenchmarks().Discover_EmptyDirectory();
+    }
+
+    [Benchmark]
+    public async Task Discover_50Plugins()
+    {
+        await new PluginDiscoveryBenchmarks().Discover_50Plugins();
+    }
+
+    [Benchmark]
+    public async Task Discover_200Plugins()
+    {
+        await new PluginDiscoveryBenchmarks().Discover_200Plugins();
+    }
+
+    [Benchmark]
+    public async Task GetPluginMetadata_Single()
+    {
+        await new PluginDiscoveryBenchmarks().GetPluginMetadata_Single();
+    }
+
+    [Benchmark]
+    public void ValidatePluginFiles()
+    {
+        new PluginDiscoveryBenchmarks().ValidatePluginFiles();
+    }
+
+    [Benchmark]
+    public void FilterValidPlugins()
+    {
+        new PluginDiscoveryBenchmarks().FilterValidPlugins();
+    }
+}
+```
+
 ## PluginEngineCoreBenchmarks
 
 The `PluginEngineCoreBenchmarks` class provides a set of benchmarking methods to measure the performance of the plugin engine. It includes methods to initialize the engine, load and unload plugins, and retrieve health and status information.
