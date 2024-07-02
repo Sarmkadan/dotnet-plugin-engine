@@ -18,6 +18,54 @@ catch (PluginException ex)
 }
 ```
 
+## VersionMismatchException
+
+The `VersionMismatchException` is thrown when version constraints between components are not satisfied. It provides detailed information about the expected and actual versions, along with the component type and name that caused the mismatch.
+
+### Usage Example
+
+```csharp
+using PluginEngine.Exceptions;
+
+// Validate plugin version compatibility
+if (plugin.Version != expectedVersion)
+{
+    throw new VersionMismatchException(
+        message: $"Plugin version mismatch detected",
+        expectedVersion: expectedVersion,
+        actualVersion: plugin.Version,
+        componentType: "Plugin",
+        componentName: plugin.Name
+    );
+}
+
+// Or when validating assembly dependencies
+if (assembly.GetName().Version?.ToString() != requiredAssemblyVersion)
+{
+    throw new VersionMismatchException(
+        message: $"Assembly version constraint violated",
+        expectedVersion: requiredAssemblyVersion,
+        actualVersion: assembly.GetName().Version?.ToString() ?? "unknown",
+        componentType: "Assembly",
+        componentName: assembly.GetName().Name ?? "unknown"
+    );
+}
+
+// Catch and handle the exception
+try
+{
+    pluginEngine.LoadPlugin(pluginPath);
+}
+catch (VersionMismatchException ex)
+{
+    Console.WriteLine($"Version mismatch error: {ex.Message}");
+    Console.WriteLine(ex.ToString());
+    Console.WriteLine($"Expected: {ex.ExpectedVersion}");
+    Console.WriteLine($"Actual: {ex.ActualVersion}");
+    Console.WriteLine($"Component: {ex.ComponentType} - {ex.ComponentName}");
+}
+```
+
 ## PluginDiscoveryBenchmarks
 
 The `PluginDiscoveryBenchmarks` class evaluates the performance of the plugin engine's discovery logic across various scenarios. It includes benchmarks for discovering plugins in empty directories, large plugin sets, and validating plugin files.
