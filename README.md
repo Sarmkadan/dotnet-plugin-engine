@@ -1,3 +1,23 @@
+## PluginException
+
+The `PluginException` class represents a custom exception thrown by the plugin engine. It provides additional context and information about the error, including an error code, entity ID, and context dictionary.
+
+### Usage Example
+
+```csharp
+try
+{
+    // Code that may throw a PluginException
+}
+catch (PluginException ex)
+{
+    Console.WriteLine($"Error code: {ex.ErrorCode}");
+    Console.WriteLine($"Entity ID: {ex.EntityId}");
+    Console.WriteLine($"Context: {ex.Context}");
+    Console.WriteLine(ex.ToString());
+}
+```
+
 ## PluginDiscoveryBenchmarks
 
 The `PluginDiscoveryBenchmarks` class evaluates the performance of the plugin engine's discovery logic across various scenarios. It includes benchmarks for discovering plugins in empty directories, large plugin sets, and validating plugin files.
@@ -316,3 +336,4 @@ public class PluginExecutionBenchmarks
         await new PluginExecutionBenchmarks().MultipleLifecycleOperations();
     }
 }
+```
