@@ -4,6 +4,8 @@
 // CTO & Software Architect
 // =============================================================================
 
+global using System.Collections.Concurrent;
+global using System.Globalization;
 global using System.Reflection;
 global using System.Text;
 global using System.Xml;

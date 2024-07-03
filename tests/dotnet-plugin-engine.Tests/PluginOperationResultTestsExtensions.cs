@@ -6,8 +6,8 @@
 // =============================================================================
 
 using System;
+using System.Runtime.CompilerServices;
 using FluentAssertions;
-using JetBrains.Annotations;
 using PluginEngine.Results;
 using Xunit;
 
@@ -16,7 +16,6 @@ namespace PluginEngine.Tests;
 /// <summary>
 /// Extension methods for testing <see cref="PluginOperationResult"/> instances.
 /// </summary>
-[PublicAPI]
 public static class PluginOperationResultTestsExtensions
 {
     /// <summary>

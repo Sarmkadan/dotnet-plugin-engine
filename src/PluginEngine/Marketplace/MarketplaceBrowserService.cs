@@ -263,11 +263,15 @@ public sealed class MarketplaceBrowserService : IMarketplaceBrowserService
 
             await Task.WhenAll(categoriesTask, trendingTask, featuredTask);
 
+            var categories = await categoriesTask;
+            var trending   = await trendingTask;
+            var featured   = await featuredTask;
+
             var page = new MarketplaceHomePage
             {
-                Categories = categoriesTask.Result.Data ?? [],
-                Trending   = trendingTask.Result.Data   ?? [],
-                Featured   = featuredTask.Result.Data   ?? [],
+                Categories = categories.Data ?? [],
+                Trending   = trending.Data   ?? [],
+                Featured   = featured.Data   ?? [],
             };
 
             _cache.Set("mp_homepage", page, new MemoryCacheEntryOptions

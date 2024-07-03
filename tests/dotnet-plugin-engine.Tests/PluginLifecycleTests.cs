@@ -21,7 +21,7 @@ public sealed class PluginLifecycleTests
     /// <summary>
     /// A test double that records the order in which lifecycle methods are called.
     /// </summary>
-    private sealed class RecordingLifecycle : IPluginLifecycle
+    internal sealed class RecordingLifecycle : IPluginLifecycle
     {
         private readonly List<string> _callLog = [];
 

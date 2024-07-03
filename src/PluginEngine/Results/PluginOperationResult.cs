@@ -180,6 +180,11 @@ public sealed class PluginBatchOperationResult
     public bool IsSuccessful => FailureCount == 0 || SuccessCount > FailureCount;
 
     /// <summary>
+    /// Total number of operations recorded in the batch.
+    /// </summary>
+    public int TotalCount => Results.Count;
+
+    /// <summary>
     /// Total execution time in milliseconds.
     /// </summary>
     public long TotalDurationMs { get; set; }

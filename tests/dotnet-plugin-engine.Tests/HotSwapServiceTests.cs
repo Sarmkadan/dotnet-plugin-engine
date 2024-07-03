@@ -15,13 +15,32 @@ namespace PluginEngine.Tests;
 /// </summary>
 public sealed class HotSwapServiceTests : IDisposable
 {
-    private readonly Mock<IPluginLoaderService> _mockLoader = new();
-    private readonly Mock<ILogger<HotSwapService>> _mockLogger = new();
+    internal readonly Mock<IPluginLoaderService> _mockLoader;
+    internal readonly Mock<ILogger<HotSwapService>> _mockLogger;
     private readonly string _tempDir;
 
     public HotSwapServiceTests()
+        : this(new Mock<IPluginLoaderService>(), new Mock<ILogger<HotSwapService>>(), Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()))
     {
-        _tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+    }
+
+    /// <summary>
+    /// Creates a test instance with explicit mocks and temporary directory.
+    /// </summary>
+    /// <exception cref="ArgumentNullException">Thrown when any argument is null.</exception>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="tempDir"/> is blank.</exception>
+    internal HotSwapServiceTests(
+        Mock<IPluginLoaderService> mockLoader,
+        Mock<ILogger<HotSwapService>> mockLogger,
+        string tempDir)
+    {
+        ArgumentNullException.ThrowIfNull(mockLoader);
+        ArgumentNullException.ThrowIfNull(mockLogger);
+        ArgumentException.ThrowIfNullOrWhiteSpace(tempDir);
+
+        _mockLoader = mockLoader;
+        _mockLogger = mockLogger;
+        _tempDir = tempDir;
         Directory.CreateDirectory(_tempDir);
     }
 

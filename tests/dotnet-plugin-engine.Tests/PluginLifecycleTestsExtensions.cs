@@ -18,22 +18,21 @@ namespace PluginEngine.Tests;
 public static class PluginLifecycleTestsExtensions
 {
     /// <summary>
-    /// Verifies that lifecycle hooks properly handle null cancellation tokens.
+    /// Verifies that lifecycle hooks properly handle a default cancellation token.
     /// </summary>
     /// <param name="tests">The test instance.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="tests"/> is <see langword="null"/>.</exception>
-    public static async Task Hooks_HandleNullCancellationToken(this PluginLifecycleTests tests)
+    public static async Task Hooks_HandleDefaultCancellationToken(this PluginLifecycleTests tests)
     {
         ArgumentNullException.ThrowIfNull(tests);
 
         var lifecycle = new PluginLifecycleTests.RecordingLifecycle();
 
-        // Call hooks with null cancellation token (should use default)
-        await lifecycle.OnBeforeLoadAsync(null);
-        await lifecycle.OnAfterLoadAsync(null);
-        await lifecycle.OnBeforeUnloadAsync(null);
-        await lifecycle.OnAfterUnloadAsync(null);
+        await lifecycle.OnBeforeLoadAsync(CancellationToken.None);
+        await lifecycle.OnAfterLoadAsync(CancellationToken.None);
+        await lifecycle.OnBeforeUnloadAsync(CancellationToken.None);
+        await lifecycle.OnAfterUnloadAsync(CancellationToken.None);
 
         lifecycle.CallLog.Should().HaveCount(4);
         lifecycle.CallLog.Should().ContainInOrder(

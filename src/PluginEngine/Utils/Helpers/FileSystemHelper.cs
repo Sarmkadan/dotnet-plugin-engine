@@ -165,7 +165,7 @@ public sealed class FileSystemHelper
             if (!File.Exists(filePath))
                 return null;
 
-            var timestamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss");
+            var timestamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture);
             var backupPath = Path.Combine(
                 Path.GetDirectoryName(filePath) ?? ".",
                 $"{Path.GetFileNameWithoutExtension(filePath)}.backup.{timestamp}{Path.GetExtension(filePath)}");
