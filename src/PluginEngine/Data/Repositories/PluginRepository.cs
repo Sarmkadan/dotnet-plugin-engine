@@ -153,13 +153,12 @@ public sealed class PluginRepository : IPluginRepository
         if (string.IsNullOrWhiteSpace(searchTerm))
             return GetAllAsync(cancellationToken);
 
-        var term = searchTerm.ToLower();
         lock (_lockObject)
         {
             var results = _plugins.Values.Where(p =>
-                p.Name.Contains(term, StringComparison.OrdinalIgnoreCase) ||
-                p.Description.Contains(term, StringComparison.OrdinalIgnoreCase) ||
-                p.Author.Contains(term, StringComparison.OrdinalIgnoreCase)
+                p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                p.Description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                p.Author.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
             ).ToList();
 
             return Task.FromResult<IEnumerable<Plugin>>(results);

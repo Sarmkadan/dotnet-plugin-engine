@@ -28,7 +28,8 @@ public static class PluginEventPublisherExtensions
         ArgumentNullException.ThrowIfNull(publisher);
         ArgumentNullException.ThrowIfNull(@event);
 
-        publisher.PublishAsync(@event).GetAwaiter().GetResult();
+        // Offloaded to the thread pool so callers holding a synchronization context do not deadlock.
+        Task.Run(() => publisher.PublishAsync(@event)).GetAwaiter().GetResult();
     }
 
     /// <summary>

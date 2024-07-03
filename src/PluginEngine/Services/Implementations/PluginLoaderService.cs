@@ -53,10 +53,16 @@ public sealed class PluginLoaderService : IPluginLoaderService
     private readonly Dictionary<Guid, (Plugin Plugin, AssemblyLoadContext Context, List<IPluginLifecycle> Lifecycles)> _loadedPlugins = new();
     private readonly object _lockObject = new object();
     private readonly IServiceProvider? _serviceProvider;
+    private readonly ILogger<PluginLoaderService>? _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PluginLoaderService"/> class.
+    /// </summary>
+    /// <param name="serviceProvider">Optional provider used to resolve a logger and the versioning service.</param>
     public PluginLoaderService(IServiceProvider? serviceProvider = null)
     {
         _serviceProvider = serviceProvider;
+        _logger = serviceProvider?.GetService(typeof(ILogger<PluginLoaderService>)) as ILogger<PluginLoaderService>;
     }
 
     /// <summary>
@@ -122,9 +128,9 @@ public sealed class PluginLoaderService : IPluginLoaderService
                             }
                         }
                     }
-                    catch (System.Text.Json.JsonException)
+                    catch (System.Text.Json.JsonException ex)
                     {
-                        // Ignore invalid JSON or handle as needed
+                        _logger?.LogWarning(ex, "Invalid plugin metadata JSON, ignoring: {MetadataPath}", pluginJsonPath);
                     }
                 }
 
@@ -358,9 +364,9 @@ public sealed class PluginLoaderService : IPluginLoaderService
                     await ValidateEngineVersionConstraintAsync(plugin, pluginJsonPath);
                 }
             }
-            catch (System.Text.Json.JsonException)
+            catch (System.Text.Json.JsonException ex)
             {
-                // Ignore invalid JSON or handle as needed
+                _logger?.LogWarning(ex, "Invalid plugin metadata JSON, ignoring: {MetadataPath}", pluginJsonPath);
             }
         }
     }

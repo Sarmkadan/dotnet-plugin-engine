@@ -18,7 +18,7 @@ public sealed class DependencyResolutionServiceTests
 	/// <summary>
 	/// Mock service for loading plugins during testing.
 	/// </summary>
-	private readonly Mock<IPluginLoaderService> _mockLoaderService;
+	internal readonly Mock<IPluginLoaderService> _mockLoaderService;
 
 	/// <summary>
 	/// System under test - the dependency resolution service being tested.

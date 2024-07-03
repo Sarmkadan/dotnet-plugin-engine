@@ -17,12 +17,21 @@ public sealed class RemotePluginRegistry : IRemotePluginRegistry
     private readonly ILogger<RemotePluginRegistry> _logger;
     private readonly VersionHelper _versionHelper;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RemotePluginRegistry"/> class.
+    /// </summary>
+    /// <exception cref="ArgumentNullException">Thrown when any argument is null.</exception>
     public RemotePluginRegistry(
         HttpPluginClient httpClient,
         IMemoryCache cache,
         ILogger<RemotePluginRegistry> logger,
         VersionHelper versionHelper)
     {
+        ArgumentNullException.ThrowIfNull(httpClient);
+        ArgumentNullException.ThrowIfNull(cache);
+        ArgumentNullException.ThrowIfNull(logger);
+        ArgumentNullException.ThrowIfNull(versionHelper);
+
         _httpClient = httpClient;
         _cache = cache;
         _logger = logger;
@@ -32,23 +41,31 @@ public sealed class RemotePluginRegistry : IRemotePluginRegistry
     /// <summary>
     /// Searches the registry for plugins matching search criteria.
     /// </summary>
+    /// <param name="query">The free-text search query. Cannot be null or whitespace.</param>
+    /// <param name="limit">Maximum number of results. Must be greater than zero.</param>
+    /// <returns>The matching plugins, empty when the registry returns nothing.</returns>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="query"/> is null or whitespace.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="limit"/> is not positive.</exception>
     public async Task<List<PluginInfo>> SearchAsync(string query, int limit = 20)
     {
-        var cacheKey = $"registry_search_{query}_{limit}";
+        ArgumentException.ThrowIfNullOrWhiteSpace(query);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(limit);
+
+        var cacheKey = $"registry_search_{query}_{limit.ToString(CultureInfo.InvariantCulture)}";
 
         if (_cache.TryGetValue(cacheKey, out List<PluginInfo>? cached))
             return cached ?? [];
 
-        var results = new List<PluginInfo>();
+        var results = await _httpClient.SearchPluginsAsync(query, limit);
 
-        // In production, would call actual HTTP endpoint
-        // For now, returning empty list as foundation for real implementation
         var cacheOptions = new MemoryCacheEntryOptions
         {
             AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1)
         };
 
         _cache.Set(cacheKey, results, cacheOptions);
+        _logger.LogDebug("Registry search for '{Query}' returned {Count} result(s)", query, results.Count);
+
         return results;
     }
 
@@ -88,8 +105,7 @@ public sealed class RemotePluginRegistry : IRemotePluginRegistry
         if (_cache.TryGetValue(cacheKey, out List<PluginVersionInfo>? cached))
             return cached ?? [];
 
-        // Foundation for real HTTP-based retrieval
-        var versions = new List<PluginVersionInfo>();
+        var versions = await _httpClient.GetPluginVersionsAsync(pluginId);
 
         var cacheOptions = new MemoryCacheEntryOptions
         {
@@ -103,8 +119,12 @@ public sealed class RemotePluginRegistry : IRemotePluginRegistry
     /// <summary>
     /// Downloads a plugin from the registry.
     /// </summary>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="version"/> or <paramref name="downloadPath"/> is null or whitespace.</exception>
     public async Task<string?> DownloadPluginAsync(Guid pluginId, string version, string downloadPath)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(version);
+        ArgumentException.ThrowIfNullOrWhiteSpace(downloadPath);
+
         try
         {
             var pluginInfo = await GetPluginAsync(pluginId);
@@ -121,9 +141,13 @@ public sealed class RemotePluginRegistry : IRemotePluginRegistry
                 return null;
             }
 
+            Directory.CreateDirectory(downloadPath);
+
             var fileName = Path.Combine(downloadPath, $"{pluginInfo.Name}.{version}.dll");
-            using var fileStream = File.Create(fileName);
-            await response.Content.CopyToAsync(fileStream);
+            await using (var fileStream = File.Create(fileName))
+            {
+                await response.Content.CopyToAsync(fileStream);
+            }
 
             _logger.LogInformation("Downloaded plugin: {PluginId} v{Version} -> {FilePath}",
                 pluginId, version, fileName);
@@ -140,8 +164,13 @@ public sealed class RemotePluginRegistry : IRemotePluginRegistry
     /// <summary>
     /// Publishes a plugin to the registry.
     /// </summary>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="filePath"/> is null or whitespace.</exception>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="metadata"/> is null.</exception>
     public async Task<bool> PublishPluginAsync(string filePath, PluginPublishMetadata metadata)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(filePath);
+        ArgumentNullException.ThrowIfNull(metadata);
+
         try
         {
             if (!File.Exists(filePath))

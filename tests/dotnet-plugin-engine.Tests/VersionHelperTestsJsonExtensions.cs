@@ -20,6 +20,14 @@ public static class VersionHelperTestsJsonExtensions
         Converters = { new JsonStringEnumConverter() }
     };
 
+    private static readonly JsonSerializerOptions _indentedJsonOptions = new(JsonSerializerDefaults.Web)
+    {
+        WriteIndented = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        Converters = { new JsonStringEnumConverter() }
+    };
+
     /// <summary>
     /// Serializes a <see cref="VersionHelperTests"/> instance to a JSON string.
     /// </summary>
@@ -31,7 +39,7 @@ public static class VersionHelperTestsJsonExtensions
     {
         ArgumentNullException.ThrowIfNull(value);
 
-        return JsonSerializer.Serialize(value, indented ? _jsonOptions with { WriteIndented = true } : _jsonOptions);
+        return JsonSerializer.Serialize(value, indented ? _indentedJsonOptions : _jsonOptions);
     }
 
     /// <summary>
