@@ -117,3 +117,78 @@ var context = System.Runtime.Loader.AssemblyLoadContext.GetLoadContext(
 );
 subscriber.RemoveSubscribersForContext(context);
 ```
+## IIntegrationClient
+
+The `IIntegrationClient` interface defines the contract for external plugin integration and remote operations. It enables plugins to communicate with external systems, registries, and services for plugin discovery, notifications, and metadata synchronization.
+
+### Usage Example
+
+```csharp
+using PluginEngine.Integration;
+
+// Create an HTTP client implementation (typically injected via DI)
+var httpClient = new HttpClient();
+var logger = /* obtain ILogger<HttpPluginClient> */;
+var configuration = /* obtain IConfiguration */;
+var integrationClient = new HttpPluginClient(httpClient, logger, configuration);
+
+// Check if the integration is available
+bool isAvailable = await integrationClient.IsAvailableAsync();
+Console.WriteLine($"Integration available: {isAvailable}");
+
+// Send a notification about a plugin event
+var notification = new PluginNotification
+{
+    PluginId = Guid.NewGuid(),
+    PluginName = "MyPlugin",
+    EventType = "PluginLoaded",
+    OccurredAtUtc = DateTime.UtcNow,
+    Metadata = new Dictionary<string, object>
+    {
+        ["version"] = "1.0.0",
+        ["loadTimeMs"] = 150
+    }
+};
+await integrationClient.SendNotificationAsync("PluginLoaded", notification);
+
+// Retrieve plugin information from external source
+var pluginInfo = await integrationClient.GetPluginInfoAsync(Guid.NewGuid());
+if (pluginInfo != null)
+{
+    Console.WriteLine($"Plugin: {pluginInfo.Name} v{pluginInfo.Version}");
+    Console.WriteLine($"Author: {pluginInfo.Author ?? "Unknown"}");
+    Console.WriteLine($"Download: {pluginInfo.DownloadUrl ?? "N/A"}");
+}
+```
+
+## PluginInfo
+
+The `PluginInfo` class represents basic plugin metadata retrieved from external registries or integration services. It provides essential information about a plugin including its identity, version, and distribution details.
+
+### Usage Example
+
+```csharp
+using PluginEngine.Integration;
+
+// Create plugin info (typically deserialized from JSON)
+var pluginInfo = new PluginInfo
+{
+    Id = Guid.NewGuid(),
+    Name = "DataProcessor",
+    Version = "2.1.0",
+    Description = "A plugin for processing data streams",
+    Author = "Vladyslav Zaiets",
+    DownloadUrl = "https://registry.example.com/plugins/DataProcessor/2.1.0/download"
+};
+
+// Access plugin properties
+Console.WriteLine($"Plugin ID: {pluginInfo.Id}");
+Console.WriteLine($"Name: {pluginInfo.Name}");
+Console.WriteLine($"Version: {pluginInfo.Version}");
+Console.WriteLine($"Description: {pluginInfo.Description ?? "No description"}");
+Console.WriteLine($"Author: {pluginInfo.Author ?? "Unknown"}");
+Console.WriteLine($"Download URL: {pluginInfo.DownloadUrl ?? "N/A"}");
+
+// Serialize for transmission to external systems
+string json = System.Text.Json.JsonSerializer.Serialize(pluginInfo);
+```
