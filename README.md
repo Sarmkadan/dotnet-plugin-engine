@@ -44,3 +44,76 @@ publisher.RemoveSubscribersForContext(context);
 ```
 
 The example demonstrates creating the publisher, subscribing to an event, publishing that event, inspecting statistics, and cleaning up subscribers. All operations use only the public members listed in the class definition.
+
+
+## PluginEventSubscriber
+
+The `PluginEventSubscriber` class provides a fluent API for registering and managing event handlers in the plugin engine. It maintains a registry of subscriptions and offers convenience methods for common plugin lifecycle events, while delegating the actual event routing to a `PluginEventPublisher`.
+
+
+
+### Usage Example
+
+```csharp
+using System;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using PluginEngine.Events;
+
+// Setup (normally via dependency injection)
+var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+var logger = loggerFactory.CreateLogger<PluginEventSubscriber>();
+var publisher = new PluginEventPublisher(logger);
+var subscriber = new PluginEventSubscriber(publisher, logger);
+
+// Subscribe to plugin loaded events using the fluent API
+subscriber.OnPluginLoaded(async ev =>
+{
+    Console.WriteLine($"Plugin loaded: {ev.PluginName} v{ev.Version}");
+    await Task.CompletedTask;
+});
+
+// Subscribe to plugin unloaded events
+subscriber.OnPluginUnloaded(async ev =>
+{
+    Console.WriteLine($"Plugin unloaded: {ev.PluginName}");
+    await Task.CompletedTask;
+});
+
+// Subscribe to plugin error events
+subscriber.OnPluginError(async ev =>
+{
+    Console.WriteLine($"Plugin error in {ev.PluginName}: {ev.ErrorMessage}");
+    await Task.CompletedTask;
+});
+
+// Subscribe to dependencies resolved events
+subscriber.OnDependenciesResolved(async ev =>
+{
+    Console.WriteLine($"Dependencies resolved for plugin: {ev.PluginName}");
+    await Task.CompletedTask;
+});
+
+// Subscribe to plugin updated events
+subscriber.OnPluginUpdated(async ev =>
+{
+    Console.WriteLine($"Plugin updated: {ev.PluginName} from v{ev.PreviousVersion} to v{ev.NewVersion}");
+    await Task.CompletedTask;
+});
+
+// Get current subscription count
+int subscriptionCount = subscriber.GetSubscriptionCount();
+Console.WriteLine($"Active subscriptions: {subscriptionCount}");
+
+// Unsubscribe a specific handler
+subscriber.Unsubscribe<PluginLoadedEvent>(async ev => await Task.CompletedTask);
+
+// Unsubscribe all handlers for a specific event type
+subscriber.UnsubscribeAll<PluginUnloadedEvent>();
+
+// Remove all subscriptions for a specific AssemblyLoadContext
+var context = System.Runtime.Loader.AssemblyLoadContext.GetLoadContext(
+    typeof(PluginEventSubscriber).Assembly
+);
+subscriber.RemoveSubscribersForContext(context);
+```
