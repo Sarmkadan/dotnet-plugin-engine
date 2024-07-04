@@ -93,4 +93,30 @@ catch (PluginLoadException ex)
 }
 ```
 
-This example demonstrates catching a `PluginLoadException` and accessing its properties to log detailed error information.
+## DependencyResolutionException
+
+The `DependencyResolutionException` represents an error that occurs during the resolution of plugin dependencies. It provides details about the required dependency plugin ID, version constraint, and the reason for the resolution failure.
+
+### Usage Example
+
+```csharp
+try
+{
+    // Simulate a dependency resolution failure
+    throw new DependencyResolutionException(
+        message: "Failed to resolve dependency",
+        dependencyPluginId: Guid.NewGuid(),
+        versionConstraint: ">= 1.0.0",
+        reason: DependencyResolutionReason.DependencyNotFound
+    );
+}
+catch (DependencyResolutionException ex)
+{
+    Console.WriteLine($"Dependency resolution error: {ex.Message}");
+    Console.WriteLine($"Dependency ID: {ex.DependencyPluginId}");
+    Console.WriteLine($"Version constraint: {ex.VersionConstraint}");
+    Console.WriteLine($"Reason: {ex.Reason}");
+    Console.WriteLine($"Unresolved dependencies: {string.Join(", ", ex.UnresolvedDependencies)}");
+    Console.WriteLine(ex.ToString());
+}
+```
