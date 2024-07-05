@@ -34,6 +34,75 @@ webhookHandler.RegisterEventHandler("plugin.updated", async payload =>
     await Task.CompletedTask;
 });
 ```
+## HttpPluginClient
+
+The `HttpPluginClient` class is an HTTP client for communicating with remote plugin registries and services. It handles plugin updates, notifications, and metadata synchronization through a fluent interface that exposes plugin state and registry operations.
+
+### Usage Example
+
+```csharp
+using PluginEngine.Integration;
+using Microsoft.Extensions.Logging;
+
+// Create required dependencies (typically injected via DI)
+var httpClient = new HttpClient();
+var logger = LoggerFactory.Create(builder => builder.AddConsole())
+    .CreateLogger<HttpPluginClient>();
+var configuration = new ConfigurationBuilder()
+    .AddInMemoryCollection(new Dictionary<string, string?> 
+    {
+        ["PluginRegistry:BaseUrl"] = "https://plugins.example.com"
+    })
+    .Build();
+
+// Create an instance of HttpPluginClient
+var pluginClient = new HttpPluginClient(
+    httpClient: httpClient,
+    logger: logger,
+    configuration: configuration);
+
+// Configure plugin state
+pluginClient.PluginId = Guid.Parse("123e4567-e89b-12d3-a456-426614174000");
+pluginClient.CurrentVersion = "1.0.0";
+pluginClient.AvailableVersion = "1.1.0";
+pluginClient.DownloadUrl = "https://plugins.example.com/plugins/123e4567-e89b-12d3-a456-426614174000/1.1.0/download";
+pluginClient.IsSecurityUpdate = false;
+pluginClient.ReleaseNotes = "Bug fixes and performance improvements";
+
+// Check registry availability
+var isAvailable = await pluginClient.IsAvailableAsync();
+Console.WriteLine($"Registry available: {isAvailable}");
+
+// Get plugin information
+var pluginInfo = await pluginClient.GetPluginInfoAsync(pluginClient.PluginId);
+if (pluginInfo != null)
+{
+    Console.WriteLine($"Plugin: {pluginInfo.Name} by {pluginInfo.Author}");
+}
+
+// Send a notification
+var notification = new PluginNotification
+{
+    PluginId = pluginClient.PluginId,
+    PluginName = "Example Plugin",
+    OccurredAtUtc = DateTime.UtcNow,
+    Metadata = new Dictionary<string, object>()
+};
+await pluginClient.SendNotificationAsync("plugin.installed", notification);
+
+// Check for updates
+var updates = await pluginClient.CheckForUpdatesAsync(
+    new List<Guid> { pluginClient.PluginId });
+if (updates.Count > 0)
+{
+    Console.WriteLine($"Update available: {updates[0].AvailableVersion}");
+}
+
+// Upload a plugin
+var uploadSuccess = await pluginClient.UploadPluginAsync("./MyPlugin.dll", "Initial release");
+Console.WriteLine($"Upload successful: {uploadSuccess}");
+```
+
 ## RemotePluginRegistry
 
 The `RemotePluginRegistry` class manages interaction with a remote plugin registry for discovering, downloading, and publishing plugins. It provides caching capabilities to minimize network requests and includes methods for searching plugins, retrieving plugin information, managing versions, and handling plugin lifecycle operations.
