@@ -34,4 +34,69 @@ webhookHandler.RegisterEventHandler("plugin.updated", async payload =>
     await Task.CompletedTask;
 });
 ```
-// ... goes in between
+## RemotePluginRegistry
+
+The `RemotePluginRegistry` class manages interaction with a remote plugin registry for discovering, downloading, and publishing plugins. It provides caching capabilities to minimize network requests and includes methods for searching plugins, retrieving plugin information, managing versions, and handling plugin lifecycle operations.
+
+### Usage Example
+
+```csharp
+using PluginEngine.Integration;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
+
+// Create required dependencies (typically injected via DI)
+var httpClient = new HttpPluginClient(/* configuration */);
+var cache = new MemoryCache(new MemoryCacheOptions());
+var logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<RemotePluginRegistry>();
+var versionHelper = new VersionHelper();
+
+// Create an instance of RemotePluginRegistry
+var registry = new RemotePluginRegistry(
+    httpClient: httpClient,
+    cache: cache,
+    logger: logger,
+    versionHelper: versionHelper);
+
+// Search for plugins
+var plugins = await registry.SearchAsync("logging", limit: 10);
+Console.WriteLine($"Found {plugins.Count} plugins");
+
+// Get detailed information about a specific plugin
+var pluginId = Guid.NewGuid(); // Replace with actual plugin ID
+var pluginInfo = await registry.GetPluginAsync(pluginId);
+if (pluginInfo != null)
+{
+    Console.WriteLine($"Plugin: {pluginInfo.Name} by {pluginInfo.Author}");
+}
+
+// Get all available versions of a plugin
+var versions = await registry.GetVersionsAsync(pluginId);
+Console.WriteLine($"Available versions: {string.Join(", ", versions.Select(v => v.Version))}");
+
+// Download a specific plugin version
+var downloadPath = "./plugins";
+var downloadedFile = await registry.DownloadPluginAsync(pluginId, "1.0.0", downloadPath);
+if (downloadedFile != null)
+{
+    Console.WriteLine($"Downloaded to: {downloadedFile}");
+}
+
+// Publish a new plugin
+var publishMetadata = new PluginPublishMetadata
+{
+    PluginName = "MyAwesomePlugin",
+    Version = "1.0.0",
+    Description = "A plugin for doing awesome things",
+    Author = "My Name",
+    Company = "My Company",
+    Tags = new List<string> { "awesome", "utilities" },
+    LicenseType = "MIT"
+};
+
+var publishResult = await registry.PublishPluginAsync("./MyAwesomePlugin.dll", publishMetadata);
+Console.WriteLine(publishResult ? "Publish successful" : "Publish failed");
+
+// Invalidate cache for a plugin
+registry.InvalidateCache(pluginId);
+```
