@@ -169,3 +169,41 @@ Console.WriteLine(publishResult ? "Publish successful" : "Publish failed");
 // Invalidate cache for a plugin
 registry.InvalidateCache(pluginId);
 ```
+
+## PluginOperationResult
+
+The `PluginOperationResult` type and its generic variant `PluginOperationResult<T>` provide a standardized structure for handling plugin operation outcomes, including success/failure status, messages, and optional data. It simplifies error handling by encapsulating error codes, exception details, and operation timing in a consistent response wrapper.
+
+### Usage Example
+
+```csharp
+using PluginEngine.Results;
+
+// Create a successful result
+var successResult = PluginOperationResult.CreateSuccess("Plugin loaded successfully", durationMs: 150);
+
+// Create a result with data
+var dataResult = PluginOperationResult<string>.CreateSuccess("Plugin Data", "Operation completed", durationMs: 50);
+
+// Create a failure result
+var failureResult = PluginOperationResult.CreateFailure("Failed to load plugin", errorCode: 1001, details: "Missing dependency");
+
+// Handling exceptions
+try 
+{
+    // Simulate operation...
+    throw new Exception("Critical error");
+}
+catch (Exception ex)
+{
+    var exceptionResult = PluginOperationResult.FromException(ex);
+    Console.WriteLine($"Result status: {exceptionResult.Success}, Error Code: {exceptionResult.ErrorCode}");
+}
+
+// Working with batches
+var batchResult = new PluginBatchOperationResult();
+batchResult.AddResult(Guid.NewGuid(), "PluginA", successResult);
+batchResult.AddResult(Guid.NewGuid(), "PluginB", failureResult);
+
+Console.WriteLine(batchResult.GetSummary());
+```
