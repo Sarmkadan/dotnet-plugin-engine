@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -63,7 +64,7 @@ public interface IPluginMarketplaceService
 /// Default implementation of <see cref="IPluginMarketplaceService"/>, backed by the remote
 /// plugin registry. Compatibility matrices are cached in memory to reduce network overhead.
 /// </summary>
-public class PluginMarketplaceService : IPluginMarketplaceService
+public sealed class PluginMarketplaceService : IPluginMarketplaceService
 {
     private readonly IRemotePluginRegistry _registry;
     private readonly IMemoryCache _cache;

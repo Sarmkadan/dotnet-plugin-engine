@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -15,7 +16,7 @@ namespace PluginEngine.Examples;
 /// ErrorHandlingExample demonstrates comprehensive error handling and recovery strategies.
 /// Shows how to handle different exception types and implement recovery logic.
 /// </summary>
-public class ErrorHandlingExample
+public sealed class ErrorHandlingExample
 {
     public static async Task Main(string[] args)
     {
@@ -79,7 +80,7 @@ public class ErrorHandlingExample
             Console.WriteLine($"❌ Load failed at stage: {ex.LoadStage}");
             Console.WriteLine($"   Error: {ex.Message}");
 
-            if (ex.InnerException != null)
+            if (ex.InnerException is not null)
             {
                 Console.WriteLine($"   Details: {ex.InnerException.Message}");
             }

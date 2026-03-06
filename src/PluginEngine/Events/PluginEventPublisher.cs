@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -10,7 +11,7 @@ namespace PluginEngine.Events;
 /// Manages event routing to registered subscribers.
 /// Thread-safe with support for async event handling.
 /// </summary>
-public class PluginEventPublisher : IPluginEventPublisher
+public sealed class PluginEventPublisher : IPluginEventPublisher
 {
     private readonly ILogger<PluginEventPublisher> _logger;
     private readonly Dictionary<Type, List<Delegate>> _subscribers = [];
@@ -139,7 +140,7 @@ public class PluginEventPublisher : IPluginEventPublisher
 /// <summary>
 /// Statistics for the event publisher.
 /// </summary>
-public class EventPublisherStatistics
+public sealed class EventPublisherStatistics
 {
     public long EventsPublished { get; set; }
     public int RegisteredSubscribers { get; set; }

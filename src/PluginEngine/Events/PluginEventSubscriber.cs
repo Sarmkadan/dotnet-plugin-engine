@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -9,7 +10,7 @@ namespace PluginEngine.Events;
 /// Event subscriber for registering and managing event handlers.
 /// Provides a fluent API for subscribing to specific event types.
 /// </summary>
-public class PluginEventSubscriber : IPluginEventSubscriber
+public sealed class PluginEventSubscriber : IPluginEventSubscriber
 {
     private readonly PluginEventPublisher _publisher;
     private readonly ILogger<PluginEventSubscriber> _logger;

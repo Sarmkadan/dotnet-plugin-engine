@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -14,7 +15,7 @@ namespace PluginEngine.Examples;
 /// BasicPluginHost demonstrates the simplest way to use dotnet-plugin-engine.
 /// This example loads all plugins from a directory and displays their information.
 /// </summary>
-public class BasicPluginHost
+public sealed class BasicPluginHost
 {
     public static async Task Main(string[] args)
     {
@@ -62,12 +63,12 @@ public class BasicPluginHost
             Console.WriteLine($"📦 {plugin.Name} v{plugin.Version}");
             Console.WriteLine($"   ID: {plugin.Id}");
 
-            if (plugin.Metadata?.Description != null)
+            if (plugin.Metadata?.Description is not null)
             {
                 Console.WriteLine($"   Description: {plugin.Metadata.Description}");
             }
 
-            if (plugin.Metadata?.Author != null)
+            if (plugin.Metadata?.Author is not null)
             {
                 Console.WriteLine($"   Author: {plugin.Metadata.Author}");
             }

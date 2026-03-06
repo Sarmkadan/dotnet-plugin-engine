@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -9,7 +10,7 @@ namespace PluginEngine.Formatters;
 /// Formats plugin data as XML for configuration files and system integration.
 /// Provides structured output suitable for parsing and transformation.
 /// </summary>
-public class XmlPluginFormatter : IPluginFormatter
+public sealed class XmlPluginFormatter : IPluginFormatter
 {
     public string FormatType => "xml";
 
@@ -66,7 +67,7 @@ public class XmlPluginFormatter : IPluginFormatter
         xmlWriter.WriteEndElement();
 
         // Metadata
-        if (plugin.Metadata != null)
+        if (plugin.Metadata is not null)
         {
             xmlWriter.WriteStartElement("Metadata");
             xmlWriter.WriteElementString("Description", plugin.Metadata.Description);

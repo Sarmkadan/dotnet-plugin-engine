@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -11,7 +12,7 @@ namespace PluginEngine.Services.Implementations;
 /// <summary>
 /// Service implementation for managing the overall plugin lifecycle.
 /// </summary>
-public class PluginManagerService : IPluginManagerService
+public sealed class PluginManagerService : IPluginManagerService
 {
     private readonly IPluginLoaderService _pluginLoaderService;
     private readonly IDependencyResolutionService _dependencyResolutionService;
@@ -104,7 +105,7 @@ public class PluginManagerService : IPluginManagerService
     public async Task<bool> ActivatePluginAsync(Guid pluginId, CancellationToken cancellationToken = default)
     {
         var plugin = await _pluginLoaderService.GetLoadedPluginAsync(pluginId, cancellationToken);
-        if (plugin == null)
+        if (plugin is null)
             return false;
 
         if (!await _dependencyResolutionService.ValidateDependenciesAsync(plugin, cancellationToken))
@@ -120,7 +121,7 @@ public class PluginManagerService : IPluginManagerService
     public async Task<bool> DeactivatePluginAsync(Guid pluginId, CancellationToken cancellationToken = default)
     {
         var plugin = await _pluginLoaderService.GetLoadedPluginAsync(pluginId, cancellationToken);
-        if (plugin == null)
+        if (plugin is null)
             return false;
 
         plugin.Status = PluginStatus.Inactive;
@@ -133,7 +134,7 @@ public class PluginManagerService : IPluginManagerService
     public async Task<PluginDetails?> GetPluginDetailsAsync(Guid pluginId, CancellationToken cancellationToken = default)
     {
         var plugin = await _pluginLoaderService.GetLoadedPluginAsync(pluginId, cancellationToken);
-        if (plugin == null)
+        if (plugin is null)
             return null;
 
         var details = new PluginDetails

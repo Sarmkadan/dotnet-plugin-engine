@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -8,7 +9,7 @@ namespace PluginEngine.Configuration;
 /// <summary>
 /// Configuration options for the plugin engine.
 /// </summary>
-public class PluginEngineOptions
+public sealed class PluginEngineOptions
 {
     /// <summary>
     /// Gets or sets the plugin directory path.

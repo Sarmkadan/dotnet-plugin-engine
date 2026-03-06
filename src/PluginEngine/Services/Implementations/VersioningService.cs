@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -10,7 +11,7 @@ namespace PluginEngine.Services.Implementations;
 /// <summary>
 /// Service implementation for managing plugin and assembly versioning.
 /// </summary>
-public class VersioningService : IVersioningService
+public sealed class VersioningService : IVersioningService
 {
     /// <summary>
     /// Validates a version string.

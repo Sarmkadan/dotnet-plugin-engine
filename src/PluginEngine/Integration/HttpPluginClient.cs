@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -9,7 +10,7 @@ namespace PluginEngine.Integration;
 /// HTTP client for communicating with remote plugin registries and services.
 /// Handles plugin updates, notifications, and metadata synchronization.
 /// </summary>
-public class HttpPluginClient : IIntegrationClient
+public sealed class HttpPluginClient : IIntegrationClient
 {
     private readonly HttpClient _httpClient;
     private readonly ILogger<HttpPluginClient> _logger;
@@ -194,7 +195,7 @@ public class HttpPluginClient : IIntegrationClient
 /// <summary>
 /// Represents available update information for a plugin.
 /// </summary>
-public class PluginUpdateInfo
+public sealed class PluginUpdateInfo
 {
     public required Guid PluginId { get; set; }
     public required string CurrentVersion { get; set; }

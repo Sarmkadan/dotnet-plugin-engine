@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -10,7 +11,7 @@ namespace PluginEngine.Domain.Entities;
 /// <summary>
 /// Represents information about an AssemblyLoadContext used for plugin isolation.
 /// </summary>
-public class AssemblyLoadContextInfo
+public sealed class AssemblyLoadContextInfo
 {
     private List<string> _loadedAssemblies = new();
 

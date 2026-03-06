@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -10,7 +11,7 @@ using Xunit;
 
 namespace PluginEngine.Tests;
 
-public class PluginOperationResultTests
+public sealed class PluginOperationResultTests
 {
     // ── PluginOperationResult ──────────────────────────────────────────
 

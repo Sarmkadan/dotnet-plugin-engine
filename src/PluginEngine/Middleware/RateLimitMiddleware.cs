@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -10,7 +11,7 @@ namespace PluginEngine.Middleware;
 /// Prevents resource exhaustion by limiting the number of operations per time window.
 /// Uses a token bucket algorithm for fair rate limiting across plugins.
 /// </summary>
-public class RateLimitMiddleware : IPluginMiddleware
+public sealed class RateLimitMiddleware : IPluginMiddleware
 {
     private readonly Dictionary<Guid, TokenBucket> _buckets = [];
     private readonly int _maxTokensPerSecond;

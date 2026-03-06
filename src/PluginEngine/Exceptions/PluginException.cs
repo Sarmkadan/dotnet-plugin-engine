@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -80,7 +81,7 @@ public class PluginException : Exception
             result += contextItems;
         }
 
-        if (InnerException != null)
+        if (InnerException is not null)
             result += $"\nInner: {InnerException.Message}";
 
         return result;
