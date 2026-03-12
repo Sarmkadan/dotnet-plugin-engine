@@ -17,7 +17,6 @@ public sealed class MemoryPluginCache : IPluginCache
     private readonly ILogger<MemoryPluginCache> _logger;
     private long _hits;
     private long _misses;
-    private readonly object _statsLock = new();
 
     public MemoryPluginCache(IMemoryCache cache, ILogger<MemoryPluginCache> logger)
     {
@@ -31,19 +30,12 @@ public sealed class MemoryPluginCache : IPluginCache
         {
             if (_cache.TryGetValue(key, out T? value))
             {
-                lock (_statsLock)
-                {
-                    _hits++;
-                }
-
+                Interlocked.Increment(ref _hits);
                 _logger.LogDebug("Cache hit: {Key}", key);
                 return Task.FromResult(value);
             }
 
-            lock (_statsLock)
-            {
-                _misses++;
-            }
+            Interlocked.Increment(ref _misses);
 
             _logger.LogDebug("Cache miss: {Key}", key);
             return Task.FromResult<T?>(default);
@@ -104,11 +96,8 @@ public sealed class MemoryPluginCache : IPluginCache
     {
         try
         {
-            lock (_statsLock)
-            {
-                _hits = 0;
-                _misses = 0;
-            }
+            Interlocked.Exchange(ref _hits, 0);
+            Interlocked.Exchange(ref _misses, 0);
 
             // MemoryCache doesn't have a built-in clear method
             // In production, would use a wrapper or distributed cache
@@ -124,17 +113,14 @@ public sealed class MemoryPluginCache : IPluginCache
 
     public Task<CacheStatistics> GetStatisticsAsync()
     {
-        lock (_statsLock)
+        var stats = new CacheStatistics
         {
-            var stats = new CacheStatistics
-            {
-                TotalHits = _hits,
-                TotalMisses = _misses,
-                CurrentEntries = 0, // Can't easily get this from MemoryCache
-                TotalMemoryBytes = GC.GetTotalMemory(false)
-            };
+            TotalHits = Interlocked.Read(ref _hits),
+            TotalMisses = Interlocked.Read(ref _misses),
+            CurrentEntries = 0, // Can't easily get this from MemoryCache
+            TotalMemoryBytes = GC.GetTotalMemory(false)
+        };
 
-            return Task.FromResult(stats);
-        }
+        return Task.FromResult(stats);
     }
 }
