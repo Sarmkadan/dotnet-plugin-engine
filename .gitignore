@@ -1,0 +1,87 @@
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio cache/options
+.vs/
+.vscode/
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+
+# Output folder used by Nuke
+output/
+
+# Rider
+.idea/
+*.sln.iml
+*.swp
+*.swo
+*~
+
+# Cake
+tools/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test results
+TestResults/
+*.trx
+coverage/
+
+# Backup files
+*.bak
+*.tmp
+*.backup
+
+# Dependencies
+node_modules/
+package-lock.json
+packages/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+appsettings.Development.json
+
+# Plugins directory (commonly generated at runtime)
+plugins/
+plugin-cache/
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# IDE settings
+*.DotSettings.user
