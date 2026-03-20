@@ -17,6 +17,36 @@ namespace PluginEngine.Services.Implementations;
 /// </summary>
 public sealed class PluginLoaderService : IPluginLoaderService
 {
+    private sealed class PluginAssemblyLoadContext : AssemblyLoadContext
+    {
+        private readonly AssemblyDependencyResolver _resolver;
+
+        public PluginAssemblyLoadContext(string name, string pluginPath) : base(name, isCollectible: true)
+        {
+            _resolver = new AssemblyDependencyResolver(pluginPath);
+        }
+
+        protected override Assembly? Load(AssemblyName assemblyName)
+        {
+            string? assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName);
+            if (assemblyPath != null)
+            {
+                return LoadFromAssemblyPath(assemblyPath);
+            }
+            return null;
+        }
+
+        protected override IntPtr LoadUnmanagedDll(string unmanagedDllName)
+        {
+            string? libraryPath = _resolver.ResolveUnmanagedDllToPath(unmanagedDllName);
+            if (libraryPath != null)
+            {
+                return LoadUnmanagedDllFromPath(libraryPath);
+            }
+            return IntPtr.Zero;
+        }
+    }
+
     private readonly Dictionary<Guid, (Plugin Plugin, AssemblyLoadContext Context)> _loadedPlugins = new();
     private readonly object _lockObject = new object();
 
@@ -35,8 +65,9 @@ public sealed class PluginLoaderService : IPluginLoaderService
         {
             return await Task.Run(() =>
             {
-                var context = new AssemblyLoadContext($"PluginContext_{Guid.NewGuid()}", isCollectible: true);
-                var assembly = context.LoadFromAssemblyPath(Path.GetFullPath(assemblyPath));
+                var fullPath = Path.GetFullPath(assemblyPath);
+                var context = new PluginAssemblyLoadContext($"PluginContext_{Guid.NewGuid()}", fullPath);
+                var assembly = context.LoadFromAssemblyPath(fullPath);
 
                 var assemblyName = assembly.GetName();
                 var assemblyNameStr = assemblyName.Name ?? "Unknown";
