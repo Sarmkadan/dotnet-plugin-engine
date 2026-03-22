@@ -129,4 +129,28 @@ public sealed class PluginEventSubscriber : IPluginEventSubscriber
 
         _logger.LogInformation("Unsubscribed all handlers from event: {EventType}", typeof(T).Name);
     }
+
+    /// <summary>
+    /// Removes all subscriptions belonging to the specified AssemblyLoadContext.
+    /// </summary>
+    public void RemoveSubscribersForContext(System.Runtime.Loader.AssemblyLoadContext context)
+    {
+        lock (_subscriptionsLock)
+        {
+            foreach (var key in _subscriptions.Keys.ToList())
+            {
+                var handlers = _subscriptions[key];
+                handlers.RemoveAll(h => 
+                {
+                    var assembly = h.Method.DeclaringType?.Assembly;
+                    return assembly != null && System.Runtime.Loader.AssemblyLoadContext.GetLoadContext(assembly) == context;
+                });
+                
+                if (handlers.Count == 0)
+                {
+                    _subscriptions.Remove(key);
+                }
+            }
+        }
+    }
 }
