@@ -47,7 +47,7 @@ public sealed class PluginLoaderService : IPluginLoaderService
         }
     }
 
-    private readonly Dictionary<Guid, (Plugin Plugin, AssemblyLoadContext Context)> _loadedPlugins = new();
+    private readonly Dictionary<Guid, (Plugin Plugin, AssemblyLoadContext Context, List<global::PluginEngine.Execution.IPluginLifecycle> Lifecycles)> _loadedPlugins = new();
     private readonly object _lockObject = new object();
     private readonly IServiceProvider? _serviceProvider;
 
@@ -69,7 +69,9 @@ public sealed class PluginLoaderService : IPluginLoaderService
 
         try
         {
-            return await Task.Run(() =>
+            // Create context and load assembly outside Task.Run to keep async lifecycle invocation clean,
+            // but for safety we keep it inside or we await them inside Task.Run.
+            var result = await Task.Run(async () =>
             {
                 var fullPath = Path.GetFullPath(assemblyPath);
                 var context = new PluginAssemblyLoadContext($"PluginContext_{Guid.NewGuid()}", fullPath);
@@ -84,17 +86,43 @@ public sealed class PluginLoaderService : IPluginLoaderService
                     Name = assemblyNameStr,
                     AssemblyPath = assemblyPath,
                     LoadContextId = context.Name ?? "Unknown",
-                    Status = PluginStatus.Loaded,
+                    Status = PluginStatus.Loading,
                     Version = versionStr
                 };
 
+                var lifecycles = new List<global::PluginEngine.Execution.IPluginLifecycle>();
+                foreach (var type in assembly.GetTypes())
+                {
+                    if (typeof(global::PluginEngine.Execution.IPluginLifecycle).IsAssignableFrom(type) && !type.IsInterface && !type.IsAbstract)
+                    {
+                        if (Activator.CreateInstance(type) is global::PluginEngine.Execution.IPluginLifecycle instance)
+                        {
+                            lifecycles.Add(instance);
+                        }
+                    }
+                }
+
+                foreach (var lifecycle in lifecycles)
+                {
+                    await lifecycle.OnBeforeLoadAsync(cancellationToken);
+                }
+
+                plugin.Status = PluginStatus.Loaded;
+
                 lock (_lockObject)
                 {
-                    _loadedPlugins[plugin.Id] = (plugin, context);
+                    _loadedPlugins[plugin.Id] = (plugin, context, lifecycles);
+                }
+
+                foreach (var lifecycle in lifecycles)
+                {
+                    await lifecycle.OnAfterLoadAsync(cancellationToken);
                 }
 
                 return plugin;
             }, cancellationToken);
+            
+            return result;
         }
         catch (Exception ex) when (!(ex is PluginException))
         {
@@ -107,54 +135,69 @@ public sealed class PluginLoaderService : IPluginLoaderService
     /// </summary>
     public async Task<bool> UnloadPluginAsync(Guid pluginId, CancellationToken cancellationToken = default)
     {
-        return await Task.Run(() =>
+        var dataOptional = await Task.Run(() =>
         {
             lock (_lockObject)
             {
-                if (!_loadedPlugins.TryGetValue(pluginId, out var data))
-                    return false;
-
-                var (plugin, context) = data;
-                plugin.Status = PluginStatus.Unloading;
-
-                try
-                {
-                    context.Unload();
-
-                    // Hotfix: Explicitly dispose the AssemblyLoadContext to prevent memory leaks
-                    // The context.Unload() marks the context for unloading but doesn't immediately
-                    // release all resources. Disposing ensures proper cleanup.
-                    var contextField = context.GetType().GetField("_disposed", BindingFlags.NonPublic | BindingFlags.Instance);
-                    if (contextField?.GetValue(context) is bool disposed && !disposed)
-                    {
-                        context.Dispose();
-                    }
-
-                    if (_serviceProvider != null)
-                    {
-                        // Clean up event subscribers
-                        var publisher = _serviceProvider.GetService(typeof(PluginEngine.Events.IPluginEventPublisher)) as PluginEngine.Events.IPluginEventPublisher;
-                        publisher?.RemoveSubscribersForContext(context);
-
-                        var subscriber = _serviceProvider.GetService(typeof(PluginEngine.Events.IPluginEventSubscriber)) as PluginEngine.Events.IPluginEventSubscriber;
-                        subscriber?.RemoveSubscribersForContext(context);
-
-                        // Clean up hot reload callbacks
-                        var hotReloader = _serviceProvider.GetService(typeof(IHotReloadService)) as IHotReloadService;
-                        hotReloader?.RemoveCallbacksForContext(context);
-                    }
-
-                    _loadedPlugins.Remove(pluginId);
-                    plugin.Status = PluginStatus.Unloaded;
-                    return true;
-                }
-                catch
-                {
-                    plugin.Status = PluginStatus.Failed;
-                    return false;
-                }
+                return _loadedPlugins.TryGetValue(pluginId, out var data) ? (Plugin: data.Plugin, Context: data.Context, Lifecycles: data.Lifecycles) : ((Plugin, AssemblyLoadContext, List<global::PluginEngine.Execution.IPluginLifecycle>)?)(null);
             }
-        }, cancellationToken);
+        });
+
+        if (dataOptional == null)
+            return false;
+
+        var (plugin, context, lifecycles) = dataOptional.Value;
+        plugin.Status = PluginStatus.Unloading;
+
+        try
+        {
+            foreach (var lifecycle in lifecycles)
+            {
+                await lifecycle.OnBeforeUnloadAsync(cancellationToken);
+            }
+
+            await Task.Run(() =>
+            {
+                context.Unload();
+
+                // Hotfix: Explicitly dispose the AssemblyLoadContext to prevent memory leaks
+                var contextField = context.GetType().GetField("_disposed", BindingFlags.NonPublic | BindingFlags.Instance);
+                if (contextField?.GetValue(context) is bool disposed && !disposed)
+                {
+                    context.Dispose();
+                }
+
+                if (_serviceProvider != null)
+                {
+                    var publisher = _serviceProvider.GetService(typeof(PluginEngine.Events.IPluginEventPublisher)) as PluginEngine.Events.IPluginEventPublisher;
+                    publisher?.RemoveSubscribersForContext(context);
+
+                    var subscriber = _serviceProvider.GetService(typeof(PluginEngine.Events.IPluginEventSubscriber)) as PluginEngine.Events.IPluginEventSubscriber;
+                    subscriber?.RemoveSubscribersForContext(context);
+
+                    var hotReloader = _serviceProvider.GetService(typeof(IHotReloadService)) as IHotReloadService;
+                    hotReloader?.RemoveCallbacksForContext(context);
+                }
+
+                lock (_lockObject)
+                {
+                    _loadedPlugins.Remove(pluginId);
+                }
+            });
+
+            foreach (var lifecycle in lifecycles)
+            {
+                await lifecycle.OnAfterUnloadAsync(cancellationToken);
+            }
+
+            plugin.Status = PluginStatus.Unloaded;
+            return true;
+        }
+        catch
+        {
+            plugin.Status = PluginStatus.Failed;
+            return false;
+        }
     }
 
     /// <summary>
