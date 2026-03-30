@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -9,7 +10,7 @@ namespace PluginEngine.Configuration;
 /// Configuration options for plugin logging and diagnostics.
 /// Provides granular control over logging levels, outputs, and formats.
 /// </summary>
-public class LoggingConfiguration
+public sealed class LoggingConfiguration
 {
     /// <summary>
     /// Enables structured logging for plugin operations.

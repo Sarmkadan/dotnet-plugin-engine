@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -40,7 +41,7 @@ public interface IPluginFormatter
 /// <summary>
 /// Contains health information about a plugin.
 /// </summary>
-public class PluginHealthInfo
+public sealed class PluginHealthInfo
 {
     public required Guid PluginId { get; set; }
     public required string PluginName { get; set; }
@@ -56,7 +57,7 @@ public class PluginHealthInfo
 /// <summary>
 /// Factory for creating formatter instances based on format type.
 /// </summary>
-public class FormatterFactory
+public sealed class FormatterFactory
 {
     private readonly Dictionary<string, Func<IPluginFormatter>> _formatters;
 

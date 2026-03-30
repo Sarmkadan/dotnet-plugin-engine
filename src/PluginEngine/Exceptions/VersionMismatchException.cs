@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -8,7 +9,7 @@ namespace PluginEngine.Exceptions;
 /// <summary>
 /// Exception thrown when version constraints are not satisfied.
 /// </summary>
-public class VersionMismatchException : PluginException
+public sealed class VersionMismatchException : PluginException
 {
     /// <summary>
     /// Gets or sets the expected version constraint.

@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -8,7 +9,7 @@ namespace PluginEngine.Domain.Entities;
 /// <summary>
 /// Represents an assembly that belongs to a plugin.
 /// </summary>
-public class PluginAssembly
+public sealed class PluginAssembly
 {
     /// <summary>
     /// Gets the unique identifier for this assembly record.

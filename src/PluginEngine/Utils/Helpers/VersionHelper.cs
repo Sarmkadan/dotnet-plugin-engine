@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -10,7 +11,7 @@ namespace PluginEngine.Utils.Helpers;
 /// Parses, compares, and validates version specifications.
 /// Supports semantic versioning with prerelease and build metadata.
 /// </summary>
-public class VersionHelper
+public sealed class VersionHelper
 {
     private readonly ILogger<VersionHelper> _logger;
 
@@ -59,7 +60,7 @@ public class VersionHelper
         var v1 = ParseVersion(version1);
         var v2 = ParseVersion(version2);
 
-        if (v1 == null || v2 == null)
+        if (v1 is null || v2 is null)
             return -1;
 
         return v1.CompareTo(v2);
@@ -71,7 +72,7 @@ public class VersionHelper
     public bool SatisfiesConstraint(string version, string constraint)
     {
         var parsedVersion = ParseVersion(version);
-        if (parsedVersion == null)
+        if (parsedVersion is null)
             return false;
 
         constraint = constraint.Trim();
@@ -94,35 +95,35 @@ public class VersionHelper
         if (constraint.StartsWith(">="))
         {
             var target = ParseVersion(constraint[2..]);
-            return target != null && parsedVersion >= target;
+            return target is not null && parsedVersion >= target;
         }
 
         // Greater than
         if (constraint.StartsWith(">"))
         {
             var target = ParseVersion(constraint[1..]);
-            return target != null && parsedVersion > target;
+            return target is not null && parsedVersion > target;
         }
 
         // Less than or equal
         if (constraint.StartsWith("<="))
         {
             var target = ParseVersion(constraint[2..]);
-            return target != null && parsedVersion <= target;
+            return target is not null && parsedVersion <= target;
         }
 
         // Less than
         if (constraint.StartsWith("<"))
         {
             var target = ParseVersion(constraint[1..]);
-            return target != null && parsedVersion < target;
+            return target is not null && parsedVersion < target;
         }
 
         // Caret (compatible with version, allows patch updates)
         if (constraint.StartsWith("^"))
         {
             var target = ParseVersion(constraint[1..]);
-            if (target == null)
+            if (target is null)
                 return false;
 
             return parsedVersion.Major == target.Major &&
@@ -133,7 +134,7 @@ public class VersionHelper
         if (constraint.StartsWith("~"))
         {
             var target = ParseVersion(constraint[1..]);
-            if (target == null)
+            if (target is null)
                 return false;
 
             return parsedVersion.Major == target.Major &&
@@ -151,11 +152,11 @@ public class VersionHelper
     {
         var parsed = versions
             .Select(v => (Original: v, Parsed: ParseVersion(v)))
-            .Where(x => x.Parsed != null)
+            .Where(x => x.Parsed is not null)
             .OrderByDescending(x => x.Parsed)
             .FirstOrDefault();
 
-        return parsed.Parsed != null ? parsed.Original : null;
+        return parsed.Parsed is not null ? parsed.Original : null;
     }
 
     /// <summary>
@@ -182,14 +183,14 @@ public class VersionHelper
     public bool IsValidSemanticVersion(string version)
     {
         var parsed = ParseVersion(version);
-        return parsed != null && parsed.Major >= 0 && parsed.Minor >= 0;
+        return parsed is not null && parsed.Major >= 0 && parsed.Minor >= 0;
     }
 }
 
 /// <summary>
 /// Contains parsed version information.
 /// </summary>
-public class ParsedVersionInfo
+public sealed class ParsedVersionInfo
 {
     public required string Original { get; set; }
     public int Major { get; set; }

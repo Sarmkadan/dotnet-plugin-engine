@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -14,7 +15,7 @@ namespace PluginEngine.Examples;
 /// HotReloadExample demonstrates automatic plugin reloading when files change.
 /// This is useful for development and zero-downtime production updates.
 /// </summary>
-public class HotReloadExample
+public sealed class HotReloadExample
 {
     public static async Task Main(string[] args)
     {

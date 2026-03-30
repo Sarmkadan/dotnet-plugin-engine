@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -10,7 +11,7 @@ namespace PluginEngine.Middleware;
 /// Caches successful operations to reduce repeated processing.
 /// Automatically invalidates cache entries based on time or explicit invalidation.
 /// </summary>
-public class CachingMiddleware : IPluginMiddleware
+public sealed class CachingMiddleware : IPluginMiddleware
 {
     private readonly IMemoryCache _cache;
     private readonly TimeSpan _cacheDuration;
@@ -48,7 +49,7 @@ public class CachingMiddleware : IPluginMiddleware
             await next(context);
 
             // Cache successful result
-            if (context.IsSuccessful && context.Exception == null)
+            if (context.IsSuccessful && context.Exception is null)
             {
                 var cacheOptions = new MemoryCacheEntryOptions
                 {

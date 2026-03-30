@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -9,7 +10,7 @@ namespace PluginEngine.Utils.Helpers;
 /// Analyzes plugin dependency graphs for visualization and debugging.
 /// Provides tools for understanding complex dependency relationships.
 /// </summary>
-public class DependencyGraphAnalyzer
+public sealed class DependencyGraphAnalyzer
 {
     private readonly IDependencyResolutionService _dependencyResolver;
     private readonly ILogger<DependencyGraphAnalyzer> _logger;
@@ -168,7 +169,7 @@ public class DependencyGraphAnalyzer
 /// <summary>
 /// Report from dependency graph analysis.
 /// </summary>
-public class DependencyAnalysisReport
+public sealed class DependencyAnalysisReport
 {
     public required string PluginName { get; set; }
     public int DirectDependencies { get; set; }

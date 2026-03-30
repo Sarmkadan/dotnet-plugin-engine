@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -35,7 +36,7 @@ public interface IIntegrationClient
 /// <summary>
 /// Represents a plugin notification sent to external systems.
 /// </summary>
-public class PluginNotification
+public sealed class PluginNotification
 {
     public required Guid PluginId { get; set; }
     public required string PluginName { get; set; }
@@ -47,7 +48,7 @@ public class PluginNotification
 /// <summary>
 /// Basic plugin information structure for integration.
 /// </summary>
-public class PluginInfo
+public sealed class PluginInfo
 {
     public required Guid Id { get; set; }
     public required string Name { get; set; }

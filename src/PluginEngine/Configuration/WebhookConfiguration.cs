@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -9,7 +10,7 @@ namespace PluginEngine.Configuration;
 /// Configuration for webhook support in the plugin engine.
 /// Manages incoming webhooks from external systems and registries.
 /// </summary>
-public class WebhookConfiguration
+public sealed class WebhookConfiguration
 {
     /// <summary>
     /// Enables webhook support.
@@ -76,7 +77,7 @@ public class WebhookConfiguration
 /// <summary>
 /// Retry policy configuration for webhook processing failures.
 /// </summary>
-public class WebhookRetryPolicy
+public sealed class WebhookRetryPolicy
 {
     /// <summary>
     /// Maximum number of retry attempts.

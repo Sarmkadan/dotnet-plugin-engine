@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -10,7 +11,7 @@ namespace PluginEngine.Utils.Validators;
 /// Enforces naming conventions, version requirements, and dependency constraints.
 /// Provides detailed validation reports with specific error messages.
 /// </summary>
-public class PluginValidator
+public sealed class PluginValidator
 {
     private readonly ILogger<PluginValidator> _logger;
     private readonly VersionHelper _versionHelper;
@@ -103,7 +104,7 @@ public class PluginValidator
     /// </summary>
     private void ValidateMetadata(PluginMetadata? metadata, List<string> errors)
     {
-        if (metadata == null)
+        if (metadata is null)
         {
             errors.Add("Plugin metadata cannot be null");
             return;
@@ -177,7 +178,7 @@ public class PluginValidator
 /// <summary>
 /// Represents the result of a plugin validation.
 /// </summary>
-public class PluginValidationResult
+public sealed class PluginValidationResult
 {
     public required Guid PluginId { get; set; }
     public required string PluginName { get; set; }

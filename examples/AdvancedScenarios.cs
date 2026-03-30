@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -15,7 +16,7 @@ namespace PluginEngine.Examples;
 /// AdvancedScenarios demonstrates complex plugin engine usage patterns.
 /// Includes event handling, plugin composition, and custom integration.
 /// </summary>
-public class AdvancedScenarios
+public sealed class AdvancedScenarios
 {
     public static async Task Main(string[] args)
     {
@@ -173,7 +174,7 @@ public class AdvancedScenarios
             .OrderByDescending(p => p.Dependencies.Count)
             .FirstOrDefault();
 
-        if (mostDependencies != null)
+        if (mostDependencies is not null)
         {
             Console.WriteLine(
                 $"\nMost dependent plugin: {mostDependencies.Name} " +

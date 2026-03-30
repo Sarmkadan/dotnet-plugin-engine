@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -44,7 +45,7 @@ public static class TypeExtensions
         }
         catch (ReflectionTypeLoadException ex)
         {
-            return ex.Types.Where(t => t != null)!;
+            return ex.Types.Where(t => t is not null)!;
         }
     }
 
@@ -53,7 +54,7 @@ public static class TypeExtensions
     /// </summary>
     public static bool HasAttribute<T>(this Type type) where T : Attribute
     {
-        return type.GetCustomAttribute<T>() != null;
+        return type.GetCustomAttribute<T>() is not null;
     }
 
     /// <summary>
