@@ -94,7 +94,7 @@ public class Plugin
         if (dependency is null)
             throw new ArgumentNullException(nameof(dependency));
 
-        if (!_dependencies.Any(d => d.PluginId == dependency.PluginId))
+        if (!_dependencies.Any(d => d.DependencyPluginId == dependency.DependencyPluginId))
             _dependencies.Add(dependency);
     }
 
