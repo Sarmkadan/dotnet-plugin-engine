@@ -7,7 +7,7 @@ A production-grade, hot-reloadable plugin system for .NET with advanced Assembly
 
 [![Docker](https://img.shields.io/badge/Docker-ready-blue.svg)](https://github.com/Sarmkadan/dotnet-plugin-engine/pkgs/container/dotnet-plugin-engine)
 
-## v2.0 Features
+## v2.0.2 Features
 * Plugin sandboxing with resource limits and permission scopes
 
 ## Table of Contents
