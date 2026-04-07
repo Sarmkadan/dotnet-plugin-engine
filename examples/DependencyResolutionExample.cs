@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -15,7 +16,7 @@ namespace PluginEngine.Examples;
 /// DependencyResolutionExample demonstrates sophisticated dependency analysis.
 /// Includes transitive resolution, validation, and circular dependency detection.
 /// </summary>
-public class DependencyResolutionExample
+public sealed class DependencyResolutionExample
 {
     public static async Task Main(string[] args)
     {

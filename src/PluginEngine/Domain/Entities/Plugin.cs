@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -90,7 +91,7 @@ public class Plugin
     /// </summary>
     public void AddDependency(PluginDependency dependency)
     {
-        if (dependency == null)
+        if (dependency is null)
             throw new ArgumentNullException(nameof(dependency));
 
         if (!_dependencies.Any(d => d.PluginId == dependency.PluginId))
@@ -103,7 +104,7 @@ public class Plugin
     public bool RemoveDependency(Guid dependencyId)
     {
         var dependency = _dependencies.FirstOrDefault(d => d.Id == dependencyId);
-        if (dependency != null)
+        if (dependency is not null)
         {
             _dependencies.Remove(dependency);
             return true;
@@ -116,7 +117,7 @@ public class Plugin
     /// </summary>
     public void AddCapability(PluginCapability capability)
     {
-        if (capability == null)
+        if (capability is null)
             throw new ArgumentNullException(nameof(capability));
 
         if (!_capabilities.Any(c => c.Name == capability.Name))

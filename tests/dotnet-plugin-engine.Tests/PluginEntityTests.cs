@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -9,7 +10,7 @@ using Xunit;
 
 namespace PluginEngine.Tests;
 
-public class PluginEntityTests
+public sealed class PluginEntityTests
 {
     private static Plugin CreateValidPlugin(string name = "TestPlugin", string version = "1.0.0")
     {

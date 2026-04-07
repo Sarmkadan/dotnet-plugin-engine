@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -14,7 +15,7 @@ namespace PluginEngine.Services.Implementations;
 /// <summary>
 /// Service implementation for loading and unloading plugins.
 /// </summary>
-public class PluginLoaderService : IPluginLoaderService
+public sealed class PluginLoaderService : IPluginLoaderService
 {
     private readonly Dictionary<Guid, (Plugin Plugin, AssemblyLoadContext Context)> _loadedPlugins = new();
     private readonly object _lockObject = new object();
@@ -171,7 +172,7 @@ public class PluginLoaderService : IPluginLoaderService
     public async Task<Plugin> ReloadPluginAsync(Guid pluginId, CancellationToken cancellationToken = default)
     {
         Plugin? existingPlugin = await GetLoadedPluginAsync(pluginId, cancellationToken);
-        if (existingPlugin == null)
+        if (existingPlugin is null)
             throw new PluginException($"Plugin {pluginId} is not loaded.", "PLUGIN_NOT_FOUND");
 
         var assemblyPath = existingPlugin.AssemblyPath;

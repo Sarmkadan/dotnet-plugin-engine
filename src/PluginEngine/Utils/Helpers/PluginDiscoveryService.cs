@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -9,7 +10,7 @@ namespace PluginEngine.Utils.Helpers;
 /// Service for discovering plugins on the file system.
 /// Scans directories for valid plugin assemblies and extracts metadata.
 /// </summary>
-public class PluginDiscoveryService
+public sealed class PluginDiscoveryService
 {
     private readonly FileSystemHelper _fileSystemHelper;
     private readonly VersionHelper _versionHelper;
@@ -53,7 +54,7 @@ public class PluginDiscoveryService
             foreach (var filePath in pluginFiles)
             {
                 var candidate = await InspectPluginAsync(filePath);
-                if (candidate != null)
+                if (candidate is not null)
                 {
                     candidates.Add(candidate);
                 }
@@ -82,7 +83,7 @@ public class PluginDiscoveryService
             }
 
             var fileInfo = _fileSystemHelper.GetFileInfo(filePath);
-            if (fileInfo == null)
+            if (fileInfo is null)
                 return null;
 
             var assemblyName = Path.GetFileNameWithoutExtension(filePath);
@@ -106,11 +107,11 @@ public class PluginDiscoveryService
                 AssemblyName = assemblyName,
                 FileSize = size,
                 ModifiedAtUtc = modified,
-                IsValid = assembly != null,
+                IsValid = assembly is not null,
                 DiscoveredAtUtc = DateTime.UtcNow
             };
 
-            if (assembly != null)
+            if (assembly is not null)
             {
                 ExtractAssemblyMetadata(assembly, candidate);
             }
@@ -135,12 +136,12 @@ public class PluginDiscoveryService
 
         return candidates
             .Where(c => filter.ValidOnly ? c.IsValid : true)
-            .Where(c => filter.MinimumVersionInfo == null ||
-                       c.Version != null &&
+            .Where(c => filter.MinimumVersionInfo is null ||
+                       c.Version is not null &&
                        _versionHelper.CompareVersions(c.Version, filter.MinimumVersionInfo) >= 0)
-            .Where(c => filter.NamePattern == null ||
+            .Where(c => filter.NamePattern is null ||
                        System.Text.RegularExpressions.Regex.IsMatch(c.AssemblyName, filter.NamePattern))
-            .Where(c => filter.MaxFileSizeBytes == null || c.FileSize <= filter.MaxFileSizeBytes)
+            .Where(c => filter.MaxFileSizeBytes is null || c.FileSize <= filter.MaxFileSizeBytes)
             .ToList();
     }
 
@@ -150,28 +151,28 @@ public class PluginDiscoveryService
         {
             // Extract version
             var versionAttr = assembly.GetCustomAttribute<AssemblyVersionAttribute>();
-            if (versionAttr != null)
+            if (versionAttr is not null)
             {
                 candidate.Version = versionAttr.Version;
             }
 
             // Extract product name
             var productAttr = assembly.GetCustomAttribute<AssemblyProductAttribute>();
-            if (productAttr != null)
+            if (productAttr is not null)
             {
                 candidate.ProductName = productAttr.Product;
             }
 
             // Extract company
             var companyAttr = assembly.GetCustomAttribute<AssemblyCompanyAttribute>();
-            if (companyAttr != null)
+            if (companyAttr is not null)
             {
                 candidate.Company = companyAttr.Company;
             }
 
             // Extract description
             var descAttr = assembly.GetCustomAttribute<AssemblyDescriptionAttribute>();
-            if (descAttr != null)
+            if (descAttr is not null)
             {
                 candidate.Description = descAttr.Description;
             }
@@ -207,7 +208,7 @@ public class PluginDiscoveryService
 /// <summary>
 /// Information about a discovered plugin candidate.
 /// </summary>
-public class PluginCandidateInfo
+public sealed class PluginCandidateInfo
 {
     public required string FilePath { get; set; }
     public required string FileName { get; set; }
@@ -227,7 +228,7 @@ public class PluginCandidateInfo
 /// <summary>
 /// Filter criteria for plugin discovery.
 /// </summary>
-public class PluginDiscoveryFilter
+public sealed class PluginDiscoveryFilter
 {
     public bool ValidOnly { get; set; } = true;
     public string? MinimumVersionInfo { get; set; }
@@ -238,7 +239,7 @@ public class PluginDiscoveryFilter
 /// <summary>
 /// Statistics from plugin discovery.
 /// </summary>
-public class DiscoveryStatistics
+public sealed class DiscoveryStatistics
 {
     public int TotalCandidates { get; set; }
     public int ValidPlugins { get; set; }

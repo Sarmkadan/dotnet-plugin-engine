@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -9,7 +10,7 @@ namespace PluginEngine.Cli;
 /// Main CLI host for the plugin engine. Manages command execution and user interaction.
 /// Provides a command-line interface for plugin management operations.
 /// </summary>
-public class PluginEngineCliHost
+public sealed class PluginEngineCliHost
 {
     private readonly IPluginManagerService _pluginManager;
     private readonly IPluginLoaderService _pluginLoader;

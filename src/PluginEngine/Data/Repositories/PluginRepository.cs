@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -10,7 +11,7 @@ namespace PluginEngine.Data.Repositories;
 /// <summary>
 /// Repository implementation for plugin data operations using in-memory storage.
 /// </summary>
-public class PluginRepository : IPluginRepository
+public sealed class PluginRepository : IPluginRepository
 {
     private readonly Dictionary<Guid, Plugin> _plugins = new();
     private readonly Dictionary<Guid, List<PluginDependency>> _dependencies = new();
@@ -22,7 +23,7 @@ public class PluginRepository : IPluginRepository
     /// </summary>
     public Task<Plugin> AddAsync(Plugin plugin, CancellationToken cancellationToken = default)
     {
-        if (plugin == null)
+        if (plugin is null)
             throw new ArgumentNullException(nameof(plugin));
 
         if (plugin.Id == Guid.Empty)
@@ -43,7 +44,7 @@ public class PluginRepository : IPluginRepository
     /// </summary>
     public Task<bool> UpdateAsync(Plugin plugin, CancellationToken cancellationToken = default)
     {
-        if (plugin == null)
+        if (plugin is null)
             throw new ArgumentNullException(nameof(plugin));
 
         lock (_lockObject)
@@ -170,7 +171,7 @@ public class PluginRepository : IPluginRepository
     /// </summary>
     public Task<bool> AddDependencyAsync(Guid pluginId, PluginDependency dependency, CancellationToken cancellationToken = default)
     {
-        if (dependency == null)
+        if (dependency is null)
             throw new ArgumentNullException(nameof(dependency));
 
         lock (_lockObject)
@@ -194,7 +195,7 @@ public class PluginRepository : IPluginRepository
                 return Task.FromResult(false);
 
             var dependency = deps.FirstOrDefault(d => d.Id == dependencyId);
-            if (dependency == null)
+            if (dependency is null)
                 return Task.FromResult(false);
 
             deps.Remove(dependency);
@@ -221,7 +222,7 @@ public class PluginRepository : IPluginRepository
     /// </summary>
     public Task<bool> AddCapabilityAsync(Guid pluginId, PluginCapability capability, CancellationToken cancellationToken = default)
     {
-        if (capability == null)
+        if (capability is null)
             throw new ArgumentNullException(nameof(capability));
 
         lock (_lockObject)

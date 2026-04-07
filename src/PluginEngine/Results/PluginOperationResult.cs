@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -9,7 +10,7 @@ namespace PluginEngine.Results;
 /// Standard result wrapper for plugin operations.
 /// Provides consistent error handling and response formatting.
 /// </summary>
-public class PluginOperationResult
+public sealed class PluginOperationResult
 {
     /// <summary>
     /// Indicates whether the operation was successful.
@@ -93,7 +94,7 @@ public class PluginOperationResult
 /// <summary>
 /// Generic result wrapper for plugin operations that return data.
 /// </summary>
-public class PluginOperationResult<T> : PluginOperationResult
+public sealed class PluginOperationResult<T> : PluginOperationResult
 {
     /// <summary>
     /// Result data from the operation.
@@ -156,7 +157,7 @@ public class PluginOperationResult<T> : PluginOperationResult
 /// <summary>
 /// Batch result wrapper for operations affecting multiple plugins.
 /// </summary>
-public class PluginBatchOperationResult
+public sealed class PluginBatchOperationResult
 {
     /// <summary>
     /// Number of successful operations.

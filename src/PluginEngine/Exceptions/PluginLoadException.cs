@@ -1,3 +1,4 @@
+#nullable enable
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -8,7 +9,7 @@ namespace PluginEngine.Exceptions;
 /// <summary>
 /// Exception thrown when a plugin fails to load.
 /// </summary>
-public class PluginLoadException : PluginException
+public sealed class PluginLoadException : PluginException
 {
     /// <summary>
     /// Gets or sets the plugin name.
