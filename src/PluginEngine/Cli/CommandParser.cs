@@ -14,13 +14,16 @@ public sealed class CommandParser
 {
     private static readonly Dictionary<string, CommandType> CommandMap = new()
     {
-        ["load"] = CommandType.Load,
-        ["unload"] = CommandType.Unload,
-        ["list"] = CommandType.List,
-        ["status"] = CommandType.Status,
-        ["version"] = CommandType.Version,
-        ["--version"] = CommandType.Version,
-        ["-v"] = CommandType.Version,
+        ["load"]               = CommandType.Load,
+        ["unload"]             = CommandType.Unload,
+        ["list"]               = CommandType.List,
+        ["status"]             = CommandType.Status,
+        ["version"]            = CommandType.Version,
+        ["--version"]          = CommandType.Version,
+        ["-v"]                 = CommandType.Version,
+        ["marketplace"]        = CommandType.Marketplace,
+        ["swap"]               = CommandType.HotSwap,
+        ["resolve"]            = CommandType.Resolve,
     };
 
     /// <summary>
@@ -80,11 +83,14 @@ public sealed class CommandParser
 
     private static string[] GetRequiredArguments(CommandType commandType) => commandType switch
     {
-        CommandType.Load => ["path"],
-        CommandType.Unload => ["id"],
-        CommandType.List => [],
-        CommandType.Status => [],
-        CommandType.Version => [],
+        CommandType.Load        => ["path"],
+        CommandType.Unload      => ["id"],
+        CommandType.List        => [],
+        CommandType.Status      => [],
+        CommandType.Version     => [],
+        CommandType.Marketplace => [],
+        CommandType.HotSwap     => ["id", "path"],
+        CommandType.Resolve     => ["id"],
         _ => []
     };
 }
@@ -100,4 +106,7 @@ public enum CommandType
     List,
     Status,
     Version,
+    Marketplace,
+    HotSwap,
+    Resolve,
 }
