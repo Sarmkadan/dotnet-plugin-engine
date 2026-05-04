@@ -170,6 +170,67 @@ Console.WriteLine(publishResult ? "Publish successful" : "Publish failed");
 registry.InvalidateCache(pluginId);
 ```
 
+## Plugin
+
+The `Plugin` class represents a plugin entity within the plugin engine system. It encapsulates metadata, dependencies, capabilities, and lifecycle information for a plugin, including identification, versioning, assembly loading, and validation state. Plugins can declare dependencies on other plugins, expose capabilities, and support hot-reload scenarios.
+
+### Usage Example
+
+```csharp
+using PluginEngine.Domain.Entities;
+using System;
+
+// Create a new plugin instance
+var plugin = new Plugin
+{
+    Id = Guid.NewGuid(),
+    Name = "LoggingPlugin",
+    Description = "Provides structured logging capabilities for the application",
+    Version = "2.1.0",
+    Author = "PluginEngine Team",
+    AssemblyPath = "./bin/LoggingPlugin.dll",
+    Status = PluginStatus.Unloaded,
+    SupportsHotReload = true,
+    CreatedAt = DateTime.UtcNow,
+    ModifiedAt = DateTime.UtcNow
+};
+
+// Add dependencies to the plugin
+plugin.AddDependency(new PluginDependency
+{
+    DependencyPluginId = Guid.Parse("123e4567-e89b-12d3-a456-426614174000"),
+    Name = "CoreUtilities",
+    RequiredVersion = "1.0.0"
+});
+
+// Add capabilities that the plugin provides
+plugin.AddCapability(new PluginCapability
+{
+    Name = "structured-logging",
+    Description = "Provides ILogger integration"
+});
+
+// Validate the plugin
+if (plugin.IsValid())
+{
+    Console.WriteLine($"Plugin '{plugin.Name}' is valid and ready for loading");
+}
+else
+{
+    Console.WriteLine($"Validation error: {plugin.GetValidationError()}");
+}
+
+// Access metadata if available
+if (plugin.Metadata != null)
+{
+    Console.WriteLine($"Plugin metadata: {plugin.Metadata.Tags?.Count ?? 0} tags");
+}
+
+// Remove a dependency
+var removed = plugin.RemoveDependency(dependencyId);
+Console.WriteLine(removed ? "Dependency removed" : "Dependency not found");
+```
+
 ## PluginOperationResult
 
 The `PluginOperationResult` type and its generic variant `PluginOperationResult<T>` provide a standardized structure for handling plugin operation outcomes, including success/failure status, messages, and optional data. It simplifies error handling by encapsulating error codes, exception details, and operation timing in a consistent response wrapper.
