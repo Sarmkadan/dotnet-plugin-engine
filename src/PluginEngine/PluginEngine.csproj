@@ -12,7 +12,24 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="BackgroundServices\BackgroundPluginMonitor.cs" />
+    <Compile Remove="BackgroundServices\PluginHealthCheckService.cs" />
+    <Compile Remove="Cli\CommandParser.cs" />
+    <Compile Remove="Cli\PluginEngineCliHost.cs" />
+    <Compile Remove="Configuration\LoggingConfiguration.cs" />
+    <Compile Remove="Integration\WebhookHandler.cs" />
+    <Compile Remove="Middleware\ErrorHandlingMiddleware.cs" />
+    <Compile Remove="Middleware\LoggingMiddleware.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.0" />
   </ItemGroup>
 
 </Project>

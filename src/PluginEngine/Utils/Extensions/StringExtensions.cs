@@ -19,7 +19,7 @@ public static class StringExtensions
         if (string.IsNullOrWhiteSpace(path))
             return string.Empty;
 
-        var normalized = Path.Normalize(path).Replace('/', Path.DirectorySeparatorChar);
+        var normalized = path.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar);
         return Path.TrimEndingDirectorySeparator(normalized);
     }
 

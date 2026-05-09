@@ -27,6 +27,9 @@ public class HttpPluginClient : IIntegrationClient
         _registryBaseUrl = configuration?["PluginRegistry:BaseUrl"];
     }
 
+    public Task<HttpResponseMessage> GetAsync(string url)
+        => _httpClient.GetAsync(url);
+
     public async Task<bool> IsAvailableAsync()
     {
         if (string.IsNullOrEmpty(_registryBaseUrl))

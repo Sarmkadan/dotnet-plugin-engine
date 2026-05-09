@@ -161,11 +161,11 @@ public class VersionHelper
     /// <summary>
     /// Gets version statistics (major, minor, patch, preview/prerelease indicator).
     /// </summary>
-    public VersionInfo GetVersionInfo(string versionString)
+    public ParsedVersionInfo GetVersionInfo(string versionString)
     {
         var version = ParseVersion(versionString);
 
-        return new VersionInfo
+        return new ParsedVersionInfo
         {
             Original = versionString,
             Major = version?.Major ?? 0,
@@ -189,7 +189,7 @@ public class VersionHelper
 /// <summary>
 /// Contains parsed version information.
 /// </summary>
-public class VersionInfo
+public class ParsedVersionInfo
 {
     public required string Original { get; set; }
     public int Major { get; set; }

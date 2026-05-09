@@ -71,6 +71,11 @@ public class Plugin
     public string LoadContextId { get; set; } = string.Empty;
 
     /// <summary>
+    /// Gets or sets extended metadata for this plugin.
+    /// </summary>
+    public PluginMetadata? Metadata { get; set; }
+
+    /// <summary>
     /// Gets the collection of plugin dependencies.
     /// </summary>
     public IReadOnlyList<PluginDependency> Dependencies => new ReadOnlyCollection<PluginDependency>(_dependencies);

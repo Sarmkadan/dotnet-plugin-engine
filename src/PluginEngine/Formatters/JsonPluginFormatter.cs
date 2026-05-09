@@ -21,7 +21,7 @@ public class JsonPluginFormatter : IPluginFormatter
             name = plugin.Name,
             version = plugin.Version,
             status = plugin.Status.ToString(),
-            loadedAtUtc = plugin.LoadedAtUtc,
+            loadedAtUtc = plugin.ModifiedAt,
             dependencyCount = plugin.Dependencies.Count,
             capabilityCount = plugin.Capabilities.Count
         };
@@ -40,7 +40,7 @@ public class JsonPluginFormatter : IPluginFormatter
             name = p.Name,
             version = p.Version,
             status = p.Status.ToString(),
-            loadedAtUtc = p.LoadedAtUtc
+            loadedAtUtc = p.ModifiedAt
         }).ToList();
 
         var output = new
@@ -66,7 +66,7 @@ public class JsonPluginFormatter : IPluginFormatter
                 name = plugin.Name,
                 version = plugin.Version,
                 status = plugin.Status.ToString(),
-                loadedAtUtc = plugin.LoadedAtUtc
+                loadedAtUtc = plugin.ModifiedAt
             },
             metadata = plugin.Metadata != null ? new
             {
@@ -76,8 +76,8 @@ public class JsonPluginFormatter : IPluginFormatter
             } : null,
             dependencies = plugin.Dependencies.Select(d => new
             {
-                id = d.DependencyId,
-                requiredVersion = d.RequiredVersion,
+                id = d.DependencyPluginId,
+                requiredVersion = d.MinimumVersion,
                 isOptional = d.IsOptional
             }).ToList(),
             capabilities = plugin.Capabilities.Select(c => new

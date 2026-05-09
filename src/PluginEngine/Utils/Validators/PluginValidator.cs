@@ -123,7 +123,7 @@ public class PluginValidator
     /// <summary>
     /// Validates plugin dependencies for correctness.
     /// </summary>
-    private void ValidateDependencies(ICollection<PluginDependency> dependencies, List<string> errors)
+    private void ValidateDependencies(IReadOnlyList<PluginDependency> dependencies, List<string> errors)
     {
         if (dependencies.Count > 50)
         {
@@ -134,19 +134,19 @@ public class PluginValidator
 
         foreach (var dep in dependencies)
         {
-            if (string.IsNullOrWhiteSpace(dep.RequiredVersion))
+            if (string.IsNullOrWhiteSpace(dep.MinimumVersion))
             {
-                errors.Add($"Dependency {dep.DependencyId} has invalid version constraint");
+                errors.Add($"Dependency {dep.DependencyPluginId} has invalid version constraint");
             }
 
-            if (!_versionHelper.IsValidSemanticVersion(dep.RequiredVersion))
+            if (!_versionHelper.IsValidSemanticVersion(dep.MinimumVersion))
             {
-                errors.Add($"Dependency {dep.DependencyId} version constraint is not semantic version: {dep.RequiredVersion}");
+                errors.Add($"Dependency {dep.DependencyPluginId} version constraint is not semantic version: {dep.MinimumVersion}");
             }
 
-            if (!seenIds.Add(dep.DependencyId))
+            if (!seenIds.Add(dep.DependencyPluginId))
             {
-                errors.Add($"Duplicate dependency: {dep.DependencyId}");
+                errors.Add($"Duplicate dependency: {dep.DependencyPluginId}");
             }
         }
     }
@@ -162,11 +162,11 @@ public class PluginValidator
             return false;
         }
 
-        if (!_versionHelper.SatisfiesConstraint(dependency.Version, depSpec.RequiredVersion))
+        if (!_versionHelper.SatisfiesConstraint(dependency.Version, depSpec.MinimumVersion))
         {
             _logger.LogError(
                 "Dependency version mismatch: {DependentPlugin} requires {Constraint}, but {DependencyPlugin} is v{ActualVersion}",
-                dependent.Name, depSpec.RequiredVersion, dependency.Name, dependency.Version);
+                dependent.Name, depSpec.MinimumVersion, dependency.Name, dependency.Version);
             return false;
         }
 
