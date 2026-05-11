@@ -91,4 +91,4 @@ jobs:
       run: dotnet build -c Release --no-restore
 
     - name: Analyze with CodeQL
-      uses: github/codeql-action/analyze@v2
+      uses: github/codeql-action/analyze@v4
