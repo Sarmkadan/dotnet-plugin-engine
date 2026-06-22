@@ -23,8 +23,14 @@ public sealed class PluginEngine
     private readonly PluginEngineOptions _options;
 
     /// <summary>
-    /// Initializes a new instance of the PluginEngine class.
+    /// Initializes a new instance of the <see cref="PluginEngine"/> class.
     /// </summary>
+    /// <param name="pluginManagerService">The plugin manager service.</param>
+    /// <param name="pluginLoaderService">The plugin loader service.</param>
+    /// <param name="dependencyResolutionService">The dependency resolution service.</param>
+    /// <param name="versioningService">The versioning service.</param>
+    /// <param name="hotReloadService">The hot reload service.</param>
+    /// <param name="options">The plugin engine options.</param>
     public PluginEngine(
         IPluginManagerService pluginManagerService,
         IPluginLoaderService pluginLoaderService,
@@ -74,6 +80,8 @@ public sealed class PluginEngine
     /// <summary>
     /// Initializes the plugin engine.
     /// </summary>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
         await _pluginManagerService.InitializeAsync(cancellationToken);
@@ -82,6 +90,8 @@ public sealed class PluginEngine
     /// <summary>
     /// Shuts down the plugin engine and unloads all plugins.
     /// </summary>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public async Task ShutdownAsync(CancellationToken cancellationToken = default)
     {
         await _pluginManagerService.ShutdownAsync(cancellationToken);
@@ -90,6 +100,7 @@ public sealed class PluginEngine
     /// <summary>
     /// Gets the current engine status.
     /// </summary>
+    /// <returns>A task representing the asynchronous operation, containing the <see cref="Services.Abstractions.PluginManagerStatus"/>.</returns>
     public async Task<Services.Abstractions.PluginManagerStatus> GetStatusAsync()
     {
         return await _pluginManagerService.GetStatusAsync();
@@ -98,6 +109,8 @@ public sealed class PluginEngine
     /// <summary>
     /// Loads all plugins from the configured plugin directory.
     /// </summary>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <returns>A task representing the asynchronous operation, containing the count of loaded plugins.</returns>
     public async Task<int> LoadAllPluginsAsync(CancellationToken cancellationToken = default)
     {
         if (!Directory.Exists(_options.PluginDirectory))
@@ -110,6 +123,8 @@ public sealed class PluginEngine
     /// <summary>
     /// Unloads all plugins.
     /// </summary>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public async Task UnloadAllPluginsAsync(CancellationToken cancellationToken = default)
     {
         var plugins = await _pluginLoaderService.GetAllLoadedPluginsAsync(cancellationToken);
@@ -122,6 +137,7 @@ public sealed class PluginEngine
     /// <summary>
     /// Gets engine statistics and health information.
     /// </summary>
+    /// <returns>A task representing the asynchronous operation, containing the health information string.</returns>
     public async Task<string> GetHealthInfoAsync()
     {
         var status = await _pluginManagerService.GetStatusAsync();
