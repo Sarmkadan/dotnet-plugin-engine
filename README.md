@@ -321,75 +321,13 @@ foreach (var plugin in plugins)
 
 ## Usage Examples
 
-### Example 1: Basic Plugin Loading and Execution
+For complete, runnable projects demonstrating various features, check the [examples/](examples/) directory:
 
-```csharp
-var loader = serviceProvider.GetRequiredService<IPluginLoaderService>();
+- [BasicUsage.cs](examples/BasicUsage.cs): Minimal setup and plugin listing.
+- [AdvancedUsage.cs](examples/AdvancedUsage.cs): Configuration, error handling, and hot reload setup.
+- [IntegrationExample.cs](examples/IntegrationExample.cs): ASP.NET Core DI integration.
 
-try
-{
-    // Load a single plugin
-    var plugin = await loader.LoadPluginAsync("./plugins/MyPlugin.dll");
-    
-    Console.WriteLine($"Plugin: {plugin.Name}");
-    Console.WriteLine($"Version: {plugin.Version}");
-    Console.WriteLine($"Author: {plugin.Metadata?.Author}");
-    Console.WriteLine($"Description: {plugin.Metadata?.Description}");
-}
-catch (PluginLoadException ex)
-{
-    Console.WriteLine($"Failed to load plugin: {ex.Message}");
-}
-```
-
-### Example 2: Dependency Resolution and Validation
-
-```csharp
-var resolver = serviceProvider.GetRequiredService<IDependencyResolutionService>();
-var manager = serviceProvider.GetRequiredService<IPluginManagerService>();
-
-var plugin = await manager.GetPluginAsync("plugin-id");
-
-// Get all dependencies with transitive resolution
-var dependencies = await resolver.ResolveDependenciesAsync(plugin);
-Console.WriteLine($"Total dependencies: {dependencies.Count}");
-
-// Validate all dependencies are satisfied
-var isValid = await resolver.ValidateDependenciesAsync(plugin);
-Console.WriteLine($"Dependencies valid: {isValid}");
-
-// Detect circular dependencies
-var hasCircular = await resolver.HasCircularDependenciesAsync(plugin);
-Console.WriteLine($"Has circular deps: {hasCircular}");
-
-// Get full dependency graph
-var graph = await resolver.GetDependencyGraphAsync(plugin.Id);
-foreach (var dep in graph.Dependencies)
-{
-    Console.WriteLine($"  - {dep.Name}: {dep.VersionConstraint}");
-}
-```
-
-### Example 3: Hot Reload Configuration
-
-```csharp
-var hotReloader = serviceProvider.GetRequiredService<IHotReloadService>();
-
-// Start automatic monitoring
-await hotReloader.StartHotReloadMonitoringAsync();
-
-// Register reload callbacks
-await hotReloader.RegisterHotReloadCallback("plugin-id", async plugin =>
-{
-    Console.WriteLine($"Plugin {plugin.Name} was reloaded at {DateTime.UtcNow}");
-    // Perform any necessary cleanup or re-initialization
-});
-
-// Monitor hot reload statistics
-var stats = await hotReloader.GetStatisticsAsync();
-Console.WriteLine($"Total reloads: {stats.TotalReloads}");
-Console.WriteLine($"Average reload time: {stats.AverageReloadTimeMs}ms");
-```
+(Additional detailed examples below ...)
 
 ### Example 4: Version Constraint Validation
 
