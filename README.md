@@ -267,6 +267,45 @@ Then reference in your `.csproj`:
 </ItemGroup>
 ```
 
+## Docker Support
+
+The engine includes full support for containerized deployments.
+
+### Quick Start with Docker Compose
+
+1. **Start all services**:
+   ```bash
+   docker compose up -d
+   ```
+
+2. **View logs**:
+   ```bash
+   docker compose logs -f plugin-engine
+   ```
+
+3. **Stop services**:
+   ```bash
+   docker compose down
+   ```
+
+4. **Access plugin engine**:
+   `http://localhost:8080`
+
+5. **Add plugins**:
+   Copy plugin DLLs to the `./plugins/` directory on your host. The engine automatically detects and loads them.
+
+6. **Monitor health**:
+   ```bash
+   curl http://localhost:8080/health
+   ```
+
+7. **View all running services**:
+   ```bash
+   docker compose ps
+   ```
+
+For more details, see the [deployment guide](docs/deployment.md).
+
 ## Quick Start
 
 ### 1. Configure Dependency Injection
