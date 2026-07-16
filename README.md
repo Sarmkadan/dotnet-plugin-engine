@@ -119,6 +119,94 @@ public class VersionManagement
 }
 ```
 
+## PluginDiscoveryService
+
+The `PluginDiscoveryService` class provides functionality for discovering and inspecting plugin assemblies on the file system. It scans directories for valid plugin candidates, extracts metadata from assemblies, and provides filtering and statistics capabilities. The service integrates with `FileSystemHelper` for file operations and `VersionHelper` for version validation.
+
+
+Here's a realistic usage example leveraging its public members:
+
+```csharp
+using System;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using PluginEngine.Utils.Helpers;
+
+public class PluginDiscoveryExample
+{
+    private readonly PluginDiscoveryService _discoveryService;
+    private readonly ILogger<PluginDiscoveryExample> _logger;
+
+    public PluginDiscoveryExample(
+        PluginDiscoveryService discoveryService,
+        ILogger<PluginDiscoveryExample> logger)
+    {
+        _discoveryService = discoveryService;
+        _logger = logger;
+    }
+
+    public async Task DiscoverAndAnalyzePluginsAsync(string pluginDirectory)
+    {
+        // Discover all plugins in the directory
+        var candidates = await _discoveryService.DiscoverPluginsAsync(pluginDirectory);
+        _logger.LogInformation("Discovered {Count} plugin candidates", candidates.Count);
+
+        // Filter plugins to only valid ones
+        var validPlugins = _discoveryService.FilterPlugins(candidates, new PluginDiscoveryFilter
+        {
+            ValidOnly = true,
+            MinimumVersionInfo = "2.0.0"
+        });
+        _logger.LogInformation("Found {Count} valid plugins", validPlugins.Count);
+
+        // Inspect a specific plugin file
+        var specificPluginPath = Path.Combine(pluginDirectory, "MyPlugin.dll");
+        var specificCandidate = await _discoveryService.InspectPluginAsync(specificPluginPath);
+        
+        if (specificCandidate is not null)
+        {
+            _logger.LogInformation("Plugin Details:");
+            _logger.LogInformation("- File: {FileName}", specificCandidate.FileName);
+            _logger.LogInformation("- Assembly: {AssemblyName}", specificCandidate.AssemblyName);
+            _logger.LogInformation("- Size: {Size} bytes", specificCandidate.FileSize);
+            _logger.LogInformation("- Modified: {Modified}", specificCandidate.ModifiedAtUtc);
+            _logger.LogInformation("- Valid: {IsValid}", specificCandidate.IsValid);
+            
+            if (specificCandidate.Version is not null)
+            {
+                _logger.LogInformation("- Version: {Version}", specificCandidate.Version);
+            }
+            
+            if (specificCandidate.ProductName is not null)
+            {
+                _logger.LogInformation("- Product: {Product}", specificCandidate.ProductName);
+            }
+            
+            if (specificCandidate.Company is not null)
+            {
+                _logger.LogInformation("- Company: {Company}", specificCandidate.Company);
+            }
+            
+            if (specificCandidate.Description is not null)
+            {
+                _logger.LogInformation("- Description: {Description}", specificCandidate.Description);
+            }
+        }
+
+        // Get discovery statistics
+        var stats = _discoveryService.GetStatistics(candidates);
+        _logger.LogInformation("Discovery Statistics:");
+        _logger.LogInformation("- Total Candidates: {Total}", stats.TotalCandidates);
+        _logger.LogInformation("- Valid Plugins: {Valid}", stats.ValidPlugins);
+        _logger.LogInformation("- Invalid Plugins: {Invalid}", stats.InvalidPlugins);
+        _logger.LogInformation("- Valid Percentage: {Percentage:F2}%", stats.ValidPercentage);
+        _logger.LogInformation("- Total Size: {Size} bytes", stats.TotalSizeBytes);
+    }
+}
+```
+
 ## FileSystemHelper
 
 The `FileSystemHelper` class provides utilities for file system operations related to plugins. It abstracts directory management, file discovery, backup creation, and cleanup operations with built-in error handling and logging. The class is designed to handle cross-platform file system operations safely and provides detailed logging through `ILogger<FileSystemHelper>`.
