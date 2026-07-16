@@ -2,45 +2,48 @@
 
 // ...
 
-## AssemblyLoadContextInfo
+## PluginAssembly
 
-`AssemblyLoadContextInfo` represents information about an AssemblyLoadContext used for plugin isolation. It stores details such as the load context identifier, plugin ID, context name, creation and last activity timestamps, and memory usage statistics.
+`PluginAssembly` represents an assembly that belongs to a plugin. It stores details such as the assembly's unique identifier, plugin ID, assembly name, version, file path, and load status.
 
 ### Usage Example
 
 ```csharp
 using PluginEngine.Domain.Entities;
 
-// Create a new AssemblyLoadContextInfo instance
-var loadContextInfo = new AssemblyLoadContextInfo
+// Create a new PluginAssembly instance
+var assembly = new PluginAssembly
 {
-    ContextId = "my-load-context",
     PluginId = Guid.Parse("a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d"),
-    Name = "My Load Context",
-    CreatedAt = DateTime.UtcNow,
-    LastActivityAt = DateTime.UtcNow,
-    MemoryUsageBytes = 1024 * 1024 * 10, // 10 MB
-    LoadedTypeCount = 100,
-    IsActive = true
+    AssemblyName = "MyAssembly",
+    AssemblyVersion = "1.0.0",
+    FilePath = "/path/to/MyAssembly.dll",
+    FileSizeBytes = 1024 * 1024 * 10, // 10 MB
+    FileHash = "some-file-hash",
+    PublicKeyToken = "some-public-key-token",
+    IsMainAssembly = true,
+    LoadContextId = "my-load-context",
+    LastModifiedAt = DateTime.UtcNow,
+    LoadedAt = DateTime.UtcNow,
+    Status = AssemblyLoadStatus.Loaded
 };
 
-// Add an assembly to the loaded collection
-loadContextInfo.AddLoadedAssembly("MyAssembly.dll");
+// Validate the assembly
+bool isValid = assembly.IsValid();
+Console.WriteLine($"Is assembly valid? {isValid}");
 
-// Check if an assembly is loaded
-bool isLoaded = loadContextInfo.IsAssemblyLoaded("MyAssembly.dll");
-Console.WriteLine($"Is assembly loaded? {isLoaded}");
+// Get the assembly qualified name
+string qualifiedName = assembly.GetQualifiedName();
+Console.WriteLine($"Assembly qualified name: {qualifiedName}");
 
-// Get the total assembly count
-int assemblyCount = loadContextInfo.GetAssemblyCount();
-Console.WriteLine($"Assembly count: {assemblyCount}");
+// Update the assembly file information
+assembly.UpdateFileInfo("/path/to/new-assembly.dll", 1024 * 1024 * 20, "new-file-hash");
 
-// Update the activity timestamp
-loadContextInfo.UpdateActivity();
+// Mark the assembly as loaded
+assembly.MarkAsLoaded("my-load-context");
 
-// Get the status summary
-string statusSummary = loadContextInfo.GetStatusSummary();
-Console.WriteLine($"Status summary: {statusSummary}");
+// Mark the assembly as failed load
+assembly.MarkAsFailedLoad("some-error-message");
 ```
 
 // ... rest of content ...
