@@ -602,6 +602,150 @@ public class PluginEngineCoreTestsDemo : IDisposable
 }
 ```
 
+## HotSwapServiceTests
+
+The `HotSwapServiceTests` class contains unit tests for the `HotSwapService` class, which provides functionality for hot-swapping plugin assemblies at runtime. It tests various operations including checking if a plugin can be swapped, performing plugin swaps with validation, rolling back swaps, managing swap history, and handling post-swap callbacks. The tests validate that the hot swap functionality properly handles different plugin states, validates inputs, and maintains swap history.
+
+Here's a realistic usage example leveraging its public members:
+
+```csharp
+using FluentAssertions;
+using Microsoft.Extensions.Logging;
+using Moq;
+using PluginEngine.Domain.Entities;
+using PluginEngine.Services.Abstractions;
+using PluginEngine.Services.Implementations;
+using Xunit;
+
+public class HotSwapServiceTestsDemo : IDisposable
+{
+    private readonly Mock<IPluginLoaderService> _mockLoader = new();
+    private readonly Mock<ILogger<HotSwapService>> _mockLogger = new();
+    private readonly string _tempDir;
+    private readonly HotSwapService _service;
+
+    public HotSwapServiceTestsDemo()
+    {
+        _tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+        Directory.CreateDirectory(_tempDir);
+        
+        _service = new HotSwapService(_mockLoader.Object, _mockLogger.Object);
+    }
+
+    public void Dispose()
+    {
+        if (Directory.Exists(_tempDir))
+        {
+            Directory.Delete(_tempDir, true);
+        }
+    }
+
+    private string CreateTempDll(string name = "plugin.dll")
+    {
+        var path = Path.Combine(_tempDir, name);
+        File.WriteAllBytes(path, new byte[] { 0x4D, 0x5A }); // minimal PE header stub
+        return path;
+    }
+
+    private Plugin MakePlugin(PluginStatus status = PluginStatus.Active, string? assemblyPath = null)
+    {
+        return new Plugin
+        {
+            Id = Guid.NewGuid(),
+            Name = "TestPlugin",
+            Version = "1.0.0",
+            AssemblyPath = assemblyPath ?? CreateTempDll("current.dll"),
+            Status = status
+        };
+    }
+
+    [Fact]
+    public void CanSwap_ActiveOrLoadedPlugin_ReturnsTrue()
+    {
+        // Arrange
+        var plugin = MakePlugin(PluginStatus.Active);
+        
+        // Act
+        var result = _service.CanSwap(plugin);
+        
+        // Assert
+        result.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task SwapPluginAsync_Success_RecordsSwapHistory()
+    {
+        // Arrange
+        var plugin = MakePlugin();
+        var newDll = CreateTempDll("new.dll");
+        var newPlugin = MakePlugin(assemblyPath: newDll);
+        
+        _mockLoader
+            .Setup(l => l.GetLoadedPluginAsync(plugin.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(plugin);
+        _mockLoader
+            .Setup(l => l.UnloadPluginAsync(plugin.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+        _mockLoader
+            .Setup(l => l.LoadPluginAsync(newDll, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(newPlugin);
+
+        // Act
+        var swapResult = await _service.SwapPluginAsync(plugin.Id, newDll);
+        var historyResult = await _service.GetSwapHistoryAsync(plugin.Id);
+        
+        // Assert
+        swapResult.Success.Should().BeTrue();
+        historyResult.Data.Should().HaveCount(1);
+        historyResult.Data![0].NewAssemblyPath.Should().Be(newDll);
+        historyResult.Data[0].Success.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task RollbackSwapAsync_AfterSuccessfulSwap_ReloadsOldAssembly()
+    {
+        // Arrange
+        var oldDll = CreateTempDll("old.dll");
+        var newDll = CreateTempDll("new.dll");
+        var plugin = MakePlugin(assemblyPath: oldDll);
+        var newPlugin = MakePlugin(assemblyPath: newDll);
+        
+        _mockLoader
+            .Setup(l => l.GetLoadedPluginAsync(plugin.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(plugin);
+        _mockLoader
+            .Setup(l => l.UnloadPluginAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+        _mockLoader
+            .Setup(l => l.LoadPluginAsync(newDll, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(newPlugin);
+        _mockLoader
+            .Setup(l => l.LoadPluginAsync(oldDll, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(plugin);
+
+        // Act
+        await _service.SwapPluginAsync(plugin.Id, newDll);
+        var rollbackResult = await _service.RollbackSwapAsync(plugin.Id);
+        
+        // Assert
+        rollbackResult.Success.Should().BeTrue();
+    }
+
+    [Fact]
+    public void UnregisterPostSwapCallback_RemovesCallback()
+    {
+        // Arrange
+        var pluginId = Guid.NewGuid();
+        
+        // Act
+        _service.RegisterPostSwapCallback(pluginId, _ => Task.CompletedTask);
+        _service.UnregisterPostSwapCallback(pluginId);
+        
+        // Assert - no exception thrown
+    }
+}
+```
+
 ## MarketplaceBrowserTests
 
 The `MarketplaceBrowserTests` class contains unit tests for the `MarketplaceBrowserService` class, which provides functionality for browsing and searching the plugin marketplace. It tests various operations including retrieving categories, getting trending plugins, browsing specific categories, fetching featured plugins, and retrieving home page data with proper caching behavior.
