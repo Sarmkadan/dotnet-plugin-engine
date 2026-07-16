@@ -57,7 +57,6 @@ public class PluginExecutionContextDemo
         Console.WriteLine($"Items processed: {context.Metrics.CustomMetrics["itemsProcessed"]}");
     }
 }
-```
 
 ## PluginEntityTests
 
@@ -159,8 +158,44 @@ public class PluginEntityTestsDemo
         Console.WriteLine($"Remaining dependencies: {plugin.Dependencies.Count}");
     }
 }
-```
 
 ## HotSwapServiceTests
 
 The `HotSwapServiceTests` class contains unit tests for the `HotSwapService` class, which provides functionality for hot-swapping plugin assemblies at runtime. It tests various operations including checking if a plugin can be swapped, performing plugin swaps with validation, rolling back swaps, managing swap history, and handling post-swap callbacks. The tests validate that the hot swap functionality properly handles different plugin states, validates inputs, and maintains swap history.
+
+## PluginValidatorTests
+
+The `PluginValidatorTests` class contains unit tests for the `PluginValidator` class, which is responsible for validating plugin entities. It tests various validation scenarios, including plugin name validation, version validation, metadata validation, and dependency validation. Here's a realistic usage example leveraging its public members:
+
+```csharp
+using PluginEngine.Tests;
+using Xunit;
+
+public class PluginValidatorTestsDemo
+{
+    public void DemonstratePluginValidatorTests()
+    {
+        var tests = new PluginValidatorTests();
+
+        tests.Validate_WithValidPlugin_ReturnsValidResult();
+        tests.Validate_WithEmptyName_ReturnsInvalidWithError();
+        tests.Validate_WithWhitespaceName_ReturnsInvalidWithError();
+        tests.Validate_WithNameStartingWithSystemPrefix_ReturnsInvalidWithError();
+        tests.Validate_WithNameStartingWithMicrosoftPrefix_ReturnsInvalidWithError();
+        tests.Validate_WithNameExceedingMaxLength_ReturnsInvalidWithError();
+        tests.Validate_WithNameStartingWithSpecialCharacter_ReturnsInvalidWithError();
+        tests.Validate_WithNameContainingInvalidCharacters_ReturnsInvalidWithError();
+        tests.Validate_WithValidNames_ReturnsValidResult();
+        tests.Validate_WithEmptyVersion_ReturnsInvalidWithError();
+        tests.Validate_WithInvalidVersionFormat_ReturnsInvalidWithError();
+        tests.Validate_WithValidVersions_ReturnsValidResult();
+        tests.Validate_WithValidMetadata_ReturnsValidResult();
+        tests.Validate_WithEmptyMetadataAuthor_ReturnsInvalidWithError();
+        tests.Validate_WithValidDependencies_ReturnsValidResult();
+        tests.Validate_WithInvalidDependencyMinimumVersion_ReturnsInvalidWithError();
+        tests.Validate_WithDependencyMaximumVersionLowerThanMinimum_ReturnsInvalidWithError();
+        tests.Validate_WithMultipleErrors_ReturnsAllErrorMessages();
+        tests.Validate_IncludesPluginIdAndNameInResult();
+    }
+}
+```
