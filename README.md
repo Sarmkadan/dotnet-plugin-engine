@@ -1,6 +1,10 @@
-// entire file content ...
+# dotnet-plugin-engine
 
-// ...
+A plugin runtime for .NET: isolated assembly loading, dependency resolution, versioning, and hot reload.
+
+## Architecture
+
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full picture - component breakdown, data flow, design decisions and their trade-offs, extension points, and known limitations. Short version: each plugin loads into its own collectible `AssemblyLoadContext`, a set of singleton services (loader, dependency resolver, versioning, hot reload, manager) does the actual work, and a thin `PluginEngine` facade ties them together. Everything is wired through `AddPluginEngine()` / `AddPluginEngineStack()`.
 
 ## PluginAssembly
 
