@@ -57,6 +57,7 @@ public class PluginExecutionContextDemo
         Console.WriteLine($"Items processed: {context.Metrics.CustomMetrics["itemsProcessed"]}");
     }
 }
+```
 
 ## PluginEntityTests
 
@@ -158,6 +159,7 @@ public class PluginEntityTestsDemo
         Console.WriteLine($"Remaining dependencies: {plugin.Dependencies.Count}");
     }
 }
+```
 
 ## HotSwapServiceTests
 
@@ -199,3 +201,43 @@ public class PluginValidatorTestsDemo
     }
 }
 ```
+
+## DependencyGraphAnalyzerTests
+
+`DependencyGraphAnalyzerTests` provides a comprehensive test suite for the `DependencyGraphAnalyzer` service, verifying its ability to locate dependent plugins, analyze dependency graphs, generate visualizations, and assess complexity levels. The tests cover scenarios ranging from empty dependency sets to circular dependencies and ensure the analyzer reports accurate metrics and labels.
+
+Below is a realistic usage example that demonstrates how the test class can be instantiated and its public test methods invoked directly. This example assumes the test project references the required packages (`Moq`, `FluentAssertions`, `Microsoft.Extensions.Logging`) and runs in an async‑compatible context.
+
+```csharp
+using System;
+using System.Threading.Tasks;
+
+public class DependencyGraphAnalyzerDemo
+{
+    public static async Task Main()
+    {
+        // Create an instance of the test class
+        var tests = new DependencyGraphAnalyzerTests();
+
+        // Execute the async test methods
+        await tests.FindDependentsAsync_WithNoDependents_ReturnsEmpty();
+        await tests.FindDependentsAsync_WithOneDependentPlugin_ReturnsThatPlugin();
+        await tests.FindDependentsAsync_WithMultipleDependents_ReturnsAll();
+        await tests.FindDependentsAsync_WithEmptyPluginList_ReturnsEmpty();
+
+        await tests.AnalyzeAsync_WithNoDependencies_ReturnsZeroCounts();
+        await tests.AnalyzeAsync_WithCircularDependency_ReportsIssue();
+        await tests.AnalyzeAsync_WithFewDependencies_HasSimpleComplexityLevel();
+        await tests.AnalyzeAsync_ReturnsPluginName();
+
+        await tests.GenerateGraphVisualizationAsync_WithSimplePlugin_ReturnsNonEmptyString();
+
+        // Execute the synchronous test method
+        tests.GetComplexityLevel_MapsScoreToExpectedLabel();
+
+        Console.WriteLine("All DependencyGraphAnalyzerTests executed successfully.");
+    }
+}
+```
+
+This demo showcases how each test method can be called programmatically, allowing developers to reuse the verification logic outside of a traditional test runner when needed.
