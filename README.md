@@ -242,6 +242,51 @@ public class VersionHelperDemo
 }
 ```
 
+## StringExtensionsTests
+
+The `StringExtensionsTests` class contains unit tests for string extension methods in the `PluginEngine.Utils.Extensions` namespace. It tests various string manipulation and validation utilities used for plugin path handling, version validation, filename sanitization, and time/byte formatting. The tests validate that string operations properly handle edge cases and maintain expected behavior across different input scenarios.
+
+Here's a realistic usage example leveraging its public members:
+
+```csharp
+using PluginEngine.Utils.Extensions;
+using System;
+
+public class StringExtensionsDemo
+{
+    public void DemonstrateStringExtensions()
+    {
+        // Normalize plugin paths - convert forward slashes and remove trailing separators
+        var normalizedPath = "plugins/auth/MyPlugin.dll".NormalizePluginPath();
+        Console.WriteLine($"Normalized path: {normalizedPath}");
+        
+        // Validate plugin IDs (GUID strings)
+        var isValidPluginId = "550e8400-e29b-41d4-a716-446655440000".IsValidPluginId();
+        Console.WriteLine($"Is valid plugin ID: {isValidPluginId}");
+        
+        // Validate semantic versions
+        var isValidVersion = "2.1.0".IsValidVersion();
+        Console.WriteLine($"Is valid version: {isValidVersion}");
+        
+        // Sanitize strings for filenames
+        var sanitizedName = "My_Plugin-Name.txt".SanitizeForFilename();
+        Console.WriteLine($"Sanitized filename: {sanitizedName}");
+        
+        // Extract assembly names from paths
+        var assemblyName = "/opt/plugins/MyPlugin.dll".GetAssemblyName();
+        Console.WriteLine($"Assembly name: {assemblyName}");
+        
+        // Check if paths are assembly files
+        var isAssembly = "/plugins/Tool.exe".IsAssemblyPath();
+        Console.WriteLine($"Is assembly path: {isAssembly}");
+        
+        // Truncate strings with ellipsis
+        var truncated = "This is a very long string that needs truncation".TruncateWithEllipsis(20);
+        Console.WriteLine($"Truncated: {truncated}");
+    }
+}
+```
+
 ## PluginValidatorTests
 
 The `PluginValidatorTests` class contains unit tests for the `PluginValidator` class, which is responsible for validating plugin entities. It tests various validation scenarios, including plugin name validation, version validation, metadata validation, and dependency validation. Here's a realistic usage example leveraging its public members:
