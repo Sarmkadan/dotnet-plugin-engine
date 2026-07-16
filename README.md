@@ -197,3 +197,81 @@ public class HotReloadDemo
 }
 ```
 
+## IVersioningService
+
+The `IVersioningService` interface and its associated `SemanticVersion` class provide functionality for managing semantic versioning in the plugin system. The `SemanticVersion` class represents a semantic version with `Major`, `Minor`, `Patch`, `Prerelease`, and `Metadata` components, enabling version parsing, comparison, and formatting operations.
+
+
+Here's a realistic usage example that demonstrates version parsing and formatting:
+
+```csharp
+using PluginEngine.Services.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
+using System;
+
+public class VersioningDemo
+{
+    private readonly IVersioningService _versioningService;
+
+    public VersioningDemo(IVersioningService versioningService)
+    {
+        _versioningService = versioningService;
+    }
+
+    public void Run()
+    {
+        // Parse a version string into SemanticVersion
+        var versionString = "2.5.1-beta.1+20240716";
+        var semanticVersion = _versioningService.ParseVersion(versionString);
+
+        if (semanticVersion != null)
+        {
+            Console.WriteLine($"Parsed version: {semanticVersion}");
+            Console.WriteLine($"Major: {semanticVersion.Major}");
+            Console.WriteLine($"Minor: {semanticVersion.Minor}");
+            Console.WriteLine($"Patch: {semanticVersion.Patch}");
+            Console.WriteLine($"Prerelease: {semanticVersion.Prerelease}");
+            Console.WriteLine($"Metadata: {semanticVersion.Metadata}");
+        }
+
+        // Create a SemanticVersion directly
+        var customVersion = new SemanticVersion
+        {
+            Major = 3,
+            Minor = 0,
+            Patch = 0,
+            Prerelease = "rc.1",
+            Metadata = "build.12345"
+        };
+
+        Console.WriteLine($"Custom version: {customVersion}");
+
+        // Validate a version string
+        bool isValid = _versioningService.ValidateVersion("1.2.3");
+        Console.WriteLine($"Is '1.2.3' valid: {isValid}");
+
+        // Compare two versions
+        int comparison = _versioningService.CompareVersions("2.0.0", "1.9.9");
+        Console.WriteLine($"2.0.0 compared to 1.9.9: {comparison} (2.0.0 > 1.9.9)");
+
+        // Check version compatibility
+        bool isCompatible = _versioningService.AreCompatible("1.5.0", "1.5.2");
+        Console.WriteLine($"1.5.0 and 1.5.2 compatible: {isCompatible}");
+
+        // Increment a version
+        string incrementedVersion = _versioningService.IncrementVersion("1.2.3", VersionPart.Major);
+        Console.WriteLine($"Incremented major version: {incrementedVersion}");
+    }
+}
+
+// Usage in DI setup
+var services = new ServiceCollection();
+services.AddPluginEngine();
+
+var serviceProvider = services.BuildServiceProvider();
+var versioningService = serviceProvider.GetRequiredService<IVersioningService>();
+
+var demo = new VersioningDemo(versioningService);
+demo.Run();
+```
+
