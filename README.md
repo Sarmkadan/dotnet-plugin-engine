@@ -1216,6 +1216,118 @@ var serviceProvider = services.BuildServiceProvider();
 var loggingConfig = serviceProvider.GetRequiredService<LoggingConfiguration>();
 ```
 
+## PluginEngineOptions
+
+The `PluginEngineOptions` class provides configuration options for the plugin engine. It controls core behavior such as plugin discovery directories, hot reload settings, dependency management, timeout configurations, logging preferences, and resource limits. This configuration is typically used during service registration to customize plugin engine behavior according to application requirements.
+
+Here's a realistic usage example that demonstrates the complete configuration workflow:
+
+```csharp
+using PluginEngine.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Threading.Tasks;
+
+public class PluginEngineOptionsDemo
+{
+    private readonly PluginEngineOptions _options;
+    private readonly ILogger<PluginEngineOptionsDemo> _logger;
+
+    public PluginEngineOptionsDemo(PluginEngineOptions options, ILogger<PluginEngineOptionsDemo> logger)
+    {
+        _options = options;
+        _logger = logger;
+    }
+
+    public async Task RunAsync()
+    {
+        // Configure plugin engine options in DI
+        var services = new ServiceCollection();
+        services.AddLogging(configure => configure.AddConsole());
+        
+        services.AddPluginEngine(config =>
+        {
+            // Set the plugin directory path
+            config.PluginDirectory = @"./my-plugins";
+            
+            // Enable hot reload with custom interval
+            config.EnableHotReload = true;
+            config.HotReloadCheckIntervalMs = 3000; // 3 seconds
+            
+            // Enable dependency caching with custom TTL
+            config.EnableDependencyCaching = true;
+            config.DependencyCacheTtlMinutes = 120; // 2 hours
+            
+            // Configure operation timeout
+            config.OperationTimeoutMs = 60000; // 60 seconds
+            
+            // Configure logging
+            config.EnableLogging = true;
+            config.LogLevel = LogLevel.Debug;
+            
+            // Set resource limits
+            config.MaxConcurrentPluginLoads = 8;
+            config.MaxDependencyResolutionAttempts = 15;
+            
+            // Set target framework
+            config.TargetFramework = "net10.0";
+            
+            // Enable strict version checking and circular dependency detection
+            config.StrictVersionChecking = true;
+            config.EnableCircularDependencyDetection = true;
+        });
+
+        var serviceProvider = services.BuildServiceProvider();
+        var options = serviceProvider.GetRequiredService<PluginEngineOptions>();
+
+        // Display configuration
+        _logger.LogInformation("Plugin Engine Configuration:");
+        _logger.LogInformation($"Plugin Directory: {options.PluginDirectory}");
+        _logger.LogInformation($"Enable Hot Reload: {options.EnableHotReload}");
+        _logger.LogInformation($"Hot Reload Check Interval: {options.HotReloadCheckIntervalMs}ms");
+        _logger.LogInformation($"Enable Dependency Caching: {options.EnableDependencyCaching}");
+        _logger.LogInformation($"Dependency Cache TTL: {options.DependencyCacheTtlMinutes} minutes");
+        _logger.LogInformation($"Operation Timeout: {options.OperationTimeoutMs}ms");
+        _logger.LogInformation($"Enable Logging: {options.EnableLogging}");
+        _logger.LogInformation($"Log Level: {options.LogLevel}");
+        _logger.LogInformation($"Max Concurrent Plugin Loads: {options.MaxConcurrentPluginLoads}");
+        _logger.LogInformation($"Target Framework: {options.TargetFramework}");
+        _logger.LogInformation($"Strict Version Checking: {options.StrictVersionChecking}");
+        _logger.LogInformation($"Enable Circular Dependency Detection: {options.EnableCircularDependencyDetection}");
+        _logger.LogInformation($"Max Dependency Resolution Attempts: {options.MaxDependencyResolutionAttempts}");
+        
+        // Validate configuration
+        bool isValid = options.IsValid();
+        _logger.LogInformation($"Configuration valid: {isValid}");
+        
+        if (!isValid)
+        {
+            var errors = options.GetValidationErrors();
+            _logger.LogWarning("Validation errors:");
+            foreach (var error in errors)
+            {
+                _logger.LogWarning($" - {error}");
+            }
+        }
+    }
+}
+
+// Usage in DI setup
+var services = new ServiceCollection();
+services.AddLogging(configure => configure.AddConsole());
+services.AddPluginEngine(config =>
+{
+    config.PluginDirectory = @"./custom-plugins";
+    config.EnableHotReload = true;
+    config.HotReloadCheckIntervalMs = 2000;
+    config.MaxConcurrentPluginLoads = 6;
+});
+
+var serviceProvider = services.BuildServiceProvider();
+var options = serviceProvider.GetRequiredService<PluginEngineOptions>();
+```
+
 ## WebhookConfiguration
 
 The `WebhookConfiguration` class provides configuration for webhook support in the plugin engine. It manages incoming webhooks from external systems and registries, enabling integration with CI/CD pipelines, registries, and other external services that need to notify the plugin engine about events like plugin creation, updates, or security patches.
