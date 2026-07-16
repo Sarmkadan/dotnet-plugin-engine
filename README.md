@@ -763,6 +763,127 @@ public class PluginFormatterDemo
 }
 ```
 
+## JsonPluginFormatterTests
+
+The `JsonPluginFormatterTests` class contains unit tests for the `JsonPluginFormatter` class, which provides JSON serialization functionality for plugin data. It tests various formatting scenarios including individual plugin formatting, collections of plugins, detailed reports with metadata, and health reports. The tests validate that the JSON output is properly structured, contains expected fields, and maintains data integrity.
+
+Here's a realistic usage example leveraging its public members:
+
+```csharp
+using PluginEngine.Formatters;
+using PluginEngine.Domain.Entities;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+public class JsonPluginFormatterDemo
+{
+    public async Task DemonstrateJsonPluginFormatter()
+    {
+        // Create a plugin instance
+        var pluginId = Guid.NewGuid();
+        var plugin = new Plugin
+        {
+            Id = pluginId,
+            Name = "SamplePlugin",
+            Version = "1.2.3",
+            Status = PluginStatus.Loaded,
+            DependencyCount = 2,
+            CapabilityCount = 3,
+            LoadTimeMs = 125,
+            LastAccessedUtc = DateTime.UtcNow.AddMinutes(-5),
+            IsHealthy = true,
+            Issues = new List<string> { "Minor issue detected" }
+        };
+
+        // Create dependencies
+        plugin.AddDependency(new PluginDependency
+        {
+            PluginId = pluginId,
+            DependencyPluginId = Guid.NewGuid(),
+            MinimumVersion = "1.0.0"
+        });
+        
+        plugin.AddDependency(new PluginDependency
+        {
+            PluginId = pluginId,
+            DependencyPluginId = Guid.NewGuid(),
+            MinimumVersion = "2.0.0"
+        });
+
+        // Create capabilities
+        plugin.AddCapability(new PluginCapability
+        {
+            PluginId = pluginId,
+            Name = "DataTransform",
+            Version = "1.0.0",
+            InterfaceTypeName = "ITransform",
+            Tags = "data,transform"
+        });
+
+        plugin.AddCapability(new PluginCapability
+        {
+            PluginId = pluginId,
+            Name = "DataValidation",
+            Version = "1.1.0",
+            InterfaceTypeName = "IValidator",
+            Tags = "validation"
+        });
+
+        // Create the JSON formatter
+        var jsonFormatter = new JsonPluginFormatter();
+
+        // Test FormatPluginAsync - formats a single plugin as JSON
+        string pluginJson = await jsonFormatter.FormatPluginAsync(plugin);
+        Console.WriteLine("Single Plugin JSON:");
+        Console.WriteLine(pluginJson);
+
+        // Test FormatPluginsAsync - formats a collection of plugins
+        var plugins = new List<Plugin> { plugin };
+        string pluginsJson = await jsonFormatter.FormatPluginsAsync(plugins);
+        Console.WriteLine("\nMultiple Plugins JSON:");
+        Console.WriteLine(pluginsJson);
+
+        // Test FormatDetailedReportAsync - formats a detailed report with metadata
+        var metadata = new Dictionary<string, object>
+        {
+            { "author", "Sample Author" },
+            { "description", "A sample plugin for demonstration purposes" },
+            { "license", "MIT" },
+            { "repository", "https://github.com/sample/sample-plugin" }
+        };
+        
+        string detailedReportJson = await jsonFormatter.FormatDetailedReportAsync(plugins, metadata);
+        Console.WriteLine("\nDetailed Report JSON:");
+        Console.WriteLine(detailedReportJson);
+
+        // Test FormatHealthReportAsync - formats health information
+        var healthInfo = new PluginHealthInfo
+        {
+            PluginId = pluginId,
+            PluginName = plugin.Name,
+            Status = plugin.Status.ToString(),
+            DependencyCount = plugin.DependencyCount,
+            CapabilityCount = plugin.CapabilityCount,
+            LoadTimeMs = plugin.LoadTimeMs,
+            LastAccessedUtc = plugin.LastAccessedUtc,
+            IsHealthy = plugin.IsHealthy,
+            Issues = plugin.Issues
+        };
+        
+        string healthReportJson = await jsonFormatter.FormatHealthReportAsync(healthInfo);
+        Console.WriteLine("\nHealth Report JSON:");
+        Console.WriteLine(healthReportJson);
+
+        // Verify the JSON is valid by parsing it back
+        var parsedPlugin = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(pluginJson);
+        Console.WriteLine($"\nPlugin name in JSON: {parsedPlugin?["name"]}");
+        Console.WriteLine($"Plugin version in JSON: {parsedPlugin?["version"]}");
+        Console.WriteLine($"Plugin has {parsedPlugin?.Count} top-level properties");
+    }
+}
+```
+
 ## MemoryPluginCache
 
 [... existing content ...]
