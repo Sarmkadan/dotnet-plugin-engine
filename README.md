@@ -48,6 +48,78 @@ assembly.MarkAsFailedLoad("some-error-message");
 
 // ... rest of content ...
 
+## PluginExecutionContext
+
+`PluginExecutionContext` represents the execution context for a plugin operation. It tracks the entire lifecycle of a plugin execution including timing metrics, state management, data storage, and result handling. The context provides methods to mark execution as successful, failed, or cancelled, and includes comprehensive metrics collection.
+
+### Usage Example
+
+```csharp
+using PluginEngine.Execution;
+using PluginEngine.Domain.Entities;
+using System;
+using System.Collections.Generic;
+
+// Create a new execution context for a plugin operation
+var executionContext = new PluginExecutionContext
+{
+    ExecutionId = Guid.NewGuid(),
+    Plugin = new Plugin
+    {
+        Id = Guid.Parse("a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d"),
+        Name = "DataProcessorPlugin",
+        Version = "1.0.0",
+        Description = "Processes data files and generates reports"
+    },
+    OperationType = "DataProcessing",
+    StartedAtUtc = DateTime.UtcNow,
+    Data = new Dictionary<string, object>
+    {
+        { "InputFilePath", "/data/input/file.csv" },
+        { "OutputDirectory", "/data/output/" },
+        { "BatchSize", 1000 }
+    },
+    State = ExecutionState.Running,
+    CpuTimeMs = 0,
+    MemoryBytesAllocated = 0,
+    GarbageCollections = 0,
+    CollectedAtUtc = DateTime.UtcNow,
+    CustomMetrics = new Dictionary<string, long>()
+};
+
+// Track CPU time during execution
+for (int i = 0; i < 100; i++)
+{
+    // Simulate work
+    System.Threading.Thread.Sleep(10);
+    executionContext.CpuTimeMs += 10;
+    executionContext.MemoryBytesAllocated += 1024 * 1024; // 1MB
+}
+
+// Track garbage collections
+GC.Collect();
+executionContext.GarbageCollections++;
+
+// Add custom metrics
+if (executionContext.CustomMetrics.ContainsKey("FilesProcessed"))
+    executionContext.CustomMetrics["FilesProcessed"]++;
+else
+    executionContext.CustomMetrics.Add("FilesProcessed", 1);
+
+// Complete execution successfully with result
+var processingResult = new { Success = true, RecordsProcessed = 5000 };
+executionContext.CompleteSuccess(processingResult);
+
+Console.WriteLine($"Execution completed in {executionContext.CpuTimeMs}ms");
+Console.WriteLine($"Memory allocated: {executionContext.MemoryBytesAllocated / (1024 * 1024)}MB");
+Console.WriteLine($"Garbage collections: {executionContext.GarbageCollections}");
+
+// Get execution summary
+var summary = executionContext.GetSummary();
+Console.WriteLine($"Status: {summary.State}");
+Console.WriteLine($"Duration: {summary.Duration.TotalSeconds}s");
+```
+
 ## VersionInfo
 
 `VersionInfo` represents versioning information for plugins and assemblies. It stores details such as the version string, release date, compatibility information, pre-release status, and download metrics. The class provides methods for version manipulation, compatibility checking, and formatted display strings.
@@ -57,51 +129,5 @@ assembly.MarkAsFailedLoad("some-error-message");
 ```csharp
 using PluginEngine.Domain.Entities;
 using System;
-
-// Create a new VersionInfo instance for a plugin
-var versionInfo = new VersionInfo
-{
-    EntityId = Guid.Parse("a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d"),
-    Version = "2.1.0",
-    ReleaseDate = DateTime.UtcNow,
-    ReleaseNotes = "Added support for .NET 8 and new plugin API features",
-    IsPrerelease = false,
-    PrereleaseIdentifier = "beta",
-    BuildMetadata = "20260716",
-    Compatibility = ".NET 6.0, .NET 7.0, .NET 8.0",
-    IsActive = true,
-    DeprecationNotice = "",
-    DownloadCount = 1562
-};
-
-// Validate the version info
-bool isValid = versionInfo.IsValid();
-Console.WriteLine($"Is version valid? {isValid}");
-
-// Get the semantic version string
-string semanticVersion = versionInfo.GetSemanticVersion();
-Console.WriteLine($"Semantic version: {semanticVersion}");
-
-// Get the display string
-string displayString = versionInfo.GetDisplayString();
-Console.WriteLine($"Display string: {displayString}");
-
-// Check compatibility with another version
-bool isCompatible = versionInfo.IsCompatibleWith("2.0.0");
-Console.WriteLine($"Compatible with 2.0.0? {isCompatible}");
-
-// Increment version numbers
-versionInfo.IncrementPatch();
-Console.WriteLine($"After patch increment: {versionInfo.Version}");
-
-versionInfo.IncrementMinor();
-Console.WriteLine($"After minor increment: {versionInfo.Version}");
-
-versionInfo.IncrementMajor();
-Console.WriteLine($"After major increment: {versionInfo.Version}");
-
-// Update download count
-versionInfo.DownloadCount++;
-```
 
 // ... rest of content ...
