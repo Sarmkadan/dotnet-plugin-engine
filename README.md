@@ -456,6 +456,87 @@ public class PluginExecutionContextDemo
 }
 ```
 
+## MarketplaceBrowserTests
+
+The `MarketplaceBrowserTests` class contains unit tests for the `MarketplaceBrowserService` class, which provides functionality for browsing and searching the plugin marketplace. It tests various operations including retrieving categories, getting trending plugins, browsing specific categories, fetching featured plugins, and retrieving home page data with proper caching behavior.
+
+Here's a realistic usage example leveraging its public members:
+
+```csharp
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
+using Moq;
+using PluginEngine.Marketplace;
+using PluginEngine.Results;
+
+public class MarketplaceBrowserTestsDemo
+{
+    private readonly Mock<IPluginMarketplaceService> _mockMarketplace = new();
+    private readonly IMemoryCache _cache = new MemoryCache(new MemoryCacheOptions());
+    private readonly Mock<ILogger<MarketplaceBrowserService>> _mockLogger = new();
+
+    public async Task DemonstrateMarketplaceBrowserTests()
+    {
+        // Create the service under test
+        var service = new MarketplaceBrowserService(
+            _mockMarketplace.Object,
+            _cache,
+            _mockLogger.Object
+        );
+
+        // Test GetCategoriesAsync - retrieves built-in categories
+        var categoriesResult = await service.GetCategoriesAsync();
+        if (categoriesResult.Success)
+        {
+            Console.WriteLine($"Found {categoriesResult.Data?.Count} categories");
+            var loggingCategory = categoriesResult.Data?.FirstOrDefault(c => c.Id == "logging");
+            Console.WriteLine($"Logging category exists: {loggingCategory != null}");
+        }
+
+        // Test GetCategoriesAsync caching - second call returns same data without hitting marketplace
+        var cachedCategories = await service.GetCategoriesAsync();
+        Console.WriteLine($"Categories cached: {ReferenceEquals(categoriesResult.Data, cachedCategories.Data)}");
+
+        // Test GetTrendingAsync - gets trending plugins sorted by downloads
+        var trendingResult = await service.GetTrendingAsync(10);
+        if (trendingResult.Success)
+        {
+            Console.WriteLine($"Found {trendingResult.Data?.Count} trending plugins");
+        }
+
+        // Test GetTrendingAsync clamping - never exceeds 50 items
+        var largeTrendingResult = await service.GetTrendingAsync(100);
+        Console.WriteLine($"Trending limit clamped to 50: {largeTrendingResult.Data?.Count <= 50}");
+
+        // Test BrowseCategoryAsync - filters plugins by category tag
+        var loggingPluginsResult = await service.BrowseCategoryAsync("logging");
+        if (loggingPluginsResult.Success)
+        {
+            Console.WriteLine($"Found {loggingPluginsResult.Data?.Count} logging plugins");
+        }
+
+        // Test BrowseCategoryAsync with empty category - returns failure
+        var emptyCategoryResult = await service.BrowseCategoryAsync(string.Empty);
+        Console.WriteLine($"Empty category returns failure: {(!emptyCategoryResult.Success && emptyCategoryResult.ErrorCode == 400)}");
+
+        // Test GetFeaturedAsync - gets featured plugins that are verified and rated
+        var featuredResult = await service.GetFeaturedAsync();
+        if (featuredResult.Success)
+        {
+            Console.WriteLine($"Found {featuredResult.Data?.Count} featured plugins");
+        }
+
+        // Test GetHomePageAsync - returns aggregated home page data
+        var homePageResult = await service.GetHomePageAsync();
+        if (homePageResult.Success)
+        {
+            Console.WriteLine($"Home page has {homePageResult.Data?.Categories.Count} categories");
+            Console.WriteLine($"Home page generated at: {homePageResult.Data?.GeneratedAtUtc}");
+        }
+    }
+}
+```
+
 ## IPluginFormatter
 
 The `IPluginFormatter` interface defines the contract for formatting plugin data in various output formats. It provides methods for formatting individual plugins, collections of plugins, detailed reports, and health information. This interface enables consistent output formatting across different serialization formats like JSON, CSV, and XML.
