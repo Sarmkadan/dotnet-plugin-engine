@@ -75,6 +75,100 @@ pipeline.Use<LoggingMiddleware>();
 // The middleware pipeline can now process plugin operations with logging
 ```
 
+## IHotSwapService
+
+The `IHotSwapService` interface provides zero-downtime plugin hot-swapping capabilities, enabling replacement of a running plugin's assembly with a new version while maintaining host-application availability. It supports automatic rollback to the previous assembly if the new version fails to load, and maintains a complete history of all swap operations for audit and recovery purposes.
+
+Here's a realistic usage example that performs a hot swap with automatic rollback on failure:
+
+```csharp
+using PluginEngine.Services.Abstractions;
+using System;
+using System.Threading.Tasks;
+
+public class HotSwapDemo
+{
+    private readonly IHotSwapService _hotSwapService;
+
+    public HotSwapDemo(IHotSwapService hotSwapService)
+    {
+        _hotSwapService = hotSwapService;
+    }
+
+    public async Task RunAsync()
+    {
+        var pluginId = Guid.Parse("00000000-0000-0000-0000-000000000000"); // replace with real plugin id
+        var newAssemblyPath = @"./plugins/MyPlugin/v2.0.0/MyPlugin.dll";
+
+        // Register a callback to run after successful swap
+        _hotSwapService.RegisterPostSwapCallback(pluginId, async plugin =>
+        {
+            Console.WriteLine($"Plugin {plugin.Id} successfully swapped at {DateTime.UtcNow}");
+            await Task.CompletedTask;
+        });
+
+        // Check if the plugin can be swapped
+        var plugin = new Plugin { Id = pluginId, State = PluginState.Active };
+        if (_hotSwapService.CanSwap(plugin))
+        {
+            Console.WriteLine("Plugin is ready for hot-swapping");
+
+            // Perform the hot swap
+            var result = await _hotSwapService.SwapPluginAsync(pluginId, newAssemblyPath);
+            
+            if (result.Success)
+            {
+                Console.WriteLine($"Swap completed successfully in {result.Duration.TotalMilliseconds}ms");
+                Console.WriteLine($"Swapped at: {result.SwappedAtUtc}");
+                
+                // Get the swap record
+                var swapRecordResult = await _hotSwapService.GetLastSwapRecordAsync(pluginId);
+                if (swapRecordResult.Success && swapRecordResult.Data != null)
+                {
+                    var record = swapRecordResult.Data;
+                    Console.WriteLine($"Previous assembly: {record.PreviousAssemblyPath}");
+                    Console.WriteLine($"New assembly: {record.NewAssemblyPath}");
+                    Console.WriteLine($"Rolled back: {record.RolledBack}");
+                }
+            }
+            else
+            {
+                Console.WriteLine($"Swap failed: {result.ErrorMessage}");
+                
+                // Attempt rollback
+                var rollbackResult = await _hotSwapService.RollbackSwapAsync(pluginId);
+                if (rollbackResult.Success)
+                {
+                    Console.WriteLine("Successfully rolled back to previous assembly");
+                }
+                else
+                {
+                    Console.WriteLine($"Rollback failed: {rollbackResult.ErrorMessage}");
+                }
+            }
+        }
+        else
+        {
+            Console.WriteLine("Plugin cannot be swapped - check its state and assembly path");
+        }
+
+        // Get swap history
+        var historyResult = await _hotSwapService.GetSwapHistoryAsync(pluginId);
+        if (historyResult.Success)
+        {
+            Console.WriteLine($"Total swaps: {historyResult.Data?.Count ?? 0}");
+            foreach (var record in historyResult.Data ?? new List<SwapRecord>())
+            {
+                Console.WriteLine($"  {record.SwappedAtUtc:yyyy-MM-dd HH:mm:ss} - {(record.Success ? "Success" : "Failed")} - Duration: {record.Duration.TotalMilliseconds}ms");
+            }
+        }
+
+        // Unregister the callback when done
+        _hotSwapService.UnregisterPostSwapCallback(pluginId);
+    }
+}
+```
+
 ## IHotReloadService
 
 The `IHotReloadService` interface exposes operations for monitoring, triggering, and querying hot reloads of plugins at runtime. It allows starting and stopping a file‑watcher that automatically reloads changed assemblies, registering callbacks that run after a successful reload, and retrieving statistics and status information about reload activity.
