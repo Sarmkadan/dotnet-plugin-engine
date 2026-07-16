@@ -26,16 +26,9 @@ public static class ServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(services);
 
-        var options = new PluginEngineOptions();
-        configureOptions?.Invoke(options);
-
-        // Core services
-        services.AddPluginEngine(o =>
-        {
-            o.PluginDirectory = options.PluginDirectory;
-            o.EnableHotReload = options.EnableHotReload;
-            o.OperationTimeoutMs = options.OperationTimeoutMs;
-        });
+        // Core services - forward the caller's configuration as-is so no option
+        // fields get silently dropped on the way through
+        services.AddPluginEngine(configureOptions);
 
         // Middleware pipeline
         services.AddSingleton<PluginMiddlewarePipeline>();
