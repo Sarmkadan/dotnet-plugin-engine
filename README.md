@@ -399,6 +399,143 @@ The `IHotReloadService` interface exposes operations for monitoring, triggering,
 
 
 
+
+## HotReloadService
+
+The `HotReloadService` class provides runtime hot reload capabilities for plugins by implementing the `IHotReloadService` interface. It monitors plugin assemblies for changes and automatically reloads them without requiring application restarts, enabling zero-downtime plugin updates during development and production.
+
+### Key Features
+
+- File system watcher for automatic plugin assembly reloading
+- Manual hot reload triggering for specific plugins
+- Callback registration for post-reload actions
+- Statistics tracking for reload operations
+- Plugin-specific status monitoring
+- Graceful error handling and recovery
+
+### Public Members
+
+```csharp
+public HotReloadService(
+    IPluginLoaderService pluginLoader,
+    ILogger<HotReloadService> logger,
+    IHotReloadConfiguration configuration = null)
+
+public async Task StartHotReloadMonitoringAsync(CancellationToken cancellationToken = default)
+public async Task StopHotReloadMonitoringAsync(CancellationToken cancellationToken = default)
+public bool CanHotReload(Plugin plugin)
+public async Task<bool> HotReloadPluginAsync(Guid pluginId, CancellationToken cancellationToken = default)
+public async Task<HotReloadStatistics> GetStatisticsAsync(CancellationToken cancellationToken = default)
+public void RegisterHotReloadCallback(Guid pluginId, Func<Plugin, Task> callback)
+public void UnregisterHotReloadCallback(Guid pluginId)
+public void RemoveCallbacksForContext(object context)
+public async Task<HotReloadStatus?> GetHotReloadStatusAsync(Guid pluginId, CancellationToken cancellationToken = default)
+```
+
+Here's a realistic usage example that demonstrates the complete hot reload workflow:
+
+```csharp
+using PluginEngine.Services.Implementations;
+using PluginEngine.Services.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Threading.Tasks;
+
+public class HotReloadServiceDemo
+{
+    private readonly HotReloadService _hotReloadService;
+    private readonly ILogger<HotReloadServiceDemo> _logger;
+
+    public HotReloadServiceDemo(HotReloadService hotReloadService, ILogger<HotReloadServiceDemo> logger)
+    {
+        _hotReloadService = hotReloadService;
+        _logger = logger;
+    }
+
+    public async Task RunAsync()
+    {
+        // Get a plugin to work with
+        var pluginId = Guid.Parse("00000000-0000-0000-0000-000000000000"); // replace with real plugin id
+        var pluginLoader = _hotReloadService.GetRequiredService<IPluginLoaderService>();
+        var plugin = await pluginLoader.GetLoadedPluginAsync(pluginId);
+
+        if (plugin != null)
+        {
+            // Check if the plugin supports hot reload
+            if (_hotReloadService.CanHotReload(plugin))
+            {
+                _logger.LogInformation("Plugin {PluginName} supports hot reload", plugin.Name);
+
+                // Register a callback to run after successful reload
+                _hotReloadService.RegisterHotReloadCallback(plugin.Id, async reloadedPlugin =>
+                {
+                    _logger.LogInformation("Plugin {PluginId} successfully reloaded at {ReloadTime}",
+                        reloadedPlugin.Id, DateTime.UtcNow);
+                    await Task.CompletedTask;
+                });
+
+                // Start monitoring for changes
+                _logger.LogInformation("Starting hot reload monitoring...");
+                await _hotReloadService.StartHotReloadMonitoringAsync();
+
+                // Manually trigger a hot reload
+                _logger.LogInformation("Triggering hot reload for plugin...");
+                bool reloadSuccess = await _hotReloadService.HotReloadPluginAsync(plugin.Id);
+                _logger.LogInformation("Hot reload {(reloadSuccess ? "succeeded" : "failed")}");
+
+                // Get reload statistics
+                var stats = await _hotReloadService.GetStatisticsAsync();
+                _logger.LogInformation("\nHot Reload Statistics:");
+                _logger.LogInformation("Total reloads: {TotalReloads}", stats.TotalReloads);
+                _logger.LogInformation("Successful reloads: {SuccessfulReloads}", stats.SuccessfulReloads);
+                _logger.LogInformation("Failed reloads: {FailedReloads}", stats.FailedReloads);
+                _logger.LogInformation("Last reload time: {LastReloadTime:yyyy-MM-dd HH:mm:ss}", stats.LastReloadTime);
+                _logger.LogInformation("Average reload time: {AverageReloadTime:N2}ms", stats.AverageReloadTime);
+
+                // Get status for the specific plugin
+                var status = await _hotReloadService.GetHotReloadStatusAsync(plugin.Id);
+                if (status != null)
+                {
+                    _logger.LogInformation("\nPlugin Hot Reload Status:");
+                    _logger.LogInformation("Plugin ID: {PluginId}", status.PluginId);
+                    _logger.LogInformation("Supports hot reload: {SupportsHotReload}", status.SupportsHotReload);
+                    _logger.LogInformation("Reload count: {ReloadCount}", status.ReloadCount);
+                    _logger.LogInformation("Last reload time: {LastReloadTime:yyyy-MM-dd HH:mm:ss}", status.LastReloadTime);
+                    _logger.LogInformation("Is currently being reloaded: {IsReloading}", status.IsReloading);
+                }
+
+                // Stop monitoring when done
+                _logger.LogInformation("\nStopping hot reload monitoring...");
+                await _hotReloadService.StopHotReloadMonitoringAsync();
+
+                // Unregister the callback
+                _hotReloadService.UnregisterHotReloadCallback(plugin.Id);
+            }
+            else
+            {
+                _logger.LogWarning("Plugin {PluginName} does not support hot reload", plugin.Name);
+            }
+        }
+        else
+        {
+            _logger.LogError("Plugin not found with ID: {PluginId}", pluginId);
+        }
+    }
+}
+
+// Usage in DI setup
+var services = new ServiceCollection();
+services.AddLogging(configure => configure.AddConsole());
+services.AddPluginEngine();
+
+var serviceProvider = services.BuildServiceProvider();
+var hotReloadService = serviceProvider.GetRequiredService<HotReloadService>();
+
+var demo = new HotReloadServiceDemo(hotReloadService, serviceProvider.GetRequiredService<ILogger<HotReloadServiceDemo>>());
+await demo.RunAsync();
+```
+
 ## IPluginManagerService
 
 The `IPluginManagerService` interface serves as the central service for managing the entire plugin lifecycle within the plugin engine. It provides comprehensive functionality for discovering, loading, initializing, activating, deactivating, and monitoring plugins. The service maintains the overall system state through its status tracking capabilities and offers detailed insights into plugin operations through statistics and detailed plugin information retrieval.
