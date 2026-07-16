@@ -47,6 +47,9 @@ public static class DependencyInjectionSetup
         services.AddSingleton<IPluginDependencyResolver, PluginDependencyResolver>();
         services.AddSingleton<IPluginManagerService, PluginManagerService>();
 
+        // Register the facade so hosts can inject PluginEngine directly
+        services.AddSingleton<PluginEngine>();
+
         return services;
     }
 
