@@ -165,6 +165,83 @@ public class PluginEntityTestsDemo
 
 The `HotSwapServiceTests` class contains unit tests for the `HotSwapService` class, which provides functionality for hot-swapping plugin assemblies at runtime. It tests various operations including checking if a plugin can be swapped, performing plugin swaps with validation, rolling back swaps, managing swap history, and handling post-swap callbacks. The tests validate that the hot swap functionality properly handles different plugin states, validates inputs, and maintains swap history.
 
+## VersionHelperTests
+
+The `VersionHelperTests` class contains unit tests for the `VersionHelper` utility class, which provides functionality for parsing, comparing, and validating semantic version strings. It tests various version operations including parsing versions with and without version prefixes, handling invalid version strings, comparing version numbers, and validating version constraints using semantic versioning rules like caret (`^`) and tilde (`~`) operators.
+
+Here's a realistic usage example leveraging its public members:
+
+```csharp
+using PluginEngine.Helpers;
+using System;
+
+public class VersionHelperDemo
+{
+    public void DemonstrateVersionHelperTests()
+    {
+        // Parse version strings with different formats
+        var version1 = VersionHelper.ParseVersion("v1.2.3");
+        Console.WriteLine($"Parsed v1.2.3: {version1}");
+        
+        var version2 = VersionHelper.ParseVersion("2.5.1-beta");
+        Console.WriteLine($"Parsed 2.5.1-beta: {version2}");
+        
+        var version3 = VersionHelper.ParseVersion("  3.0.0  ");
+        Console.WriteLine($"Parsed '  3.0.0  ': {version3}");
+        
+        var version4 = VersionHelper.ParseVersion("invalid");
+        Console.WriteLine($"Parsed 'invalid': {version4}");
+        
+        // Compare versions
+        var comparison1 = VersionHelper.CompareVersions("2.0.0", "1.9.9");
+        Console.WriteLine($"Compare 2.0.0 vs 1.9.9: {comparison1} (positive means first is greater)");
+        
+        var comparison2 = VersionHelper.CompareVersions("1.5.0", "1.5.0");
+        Console.WriteLine($"Compare 1.5.0 vs 1.5.0: {comparison2} (zero means equal)");
+        
+        // Check version constraints
+        var satisfies1 = VersionHelper.SatisfiesConstraint("2.0.0", ">=1.5.0");
+        Console.WriteLine($"Does 2.0.0 satisfy >=1.5.0: {satisfies1}");
+        
+        var satisfies2 = VersionHelper.SatisfiesConstraint("1.0.0", ">=1.5.0");
+        Console.WriteLine($"Does 1.0.0 satisfy >=1.5.0: {satisfies2}");
+        
+        // Caret operator (^1.2.3) - allows patch and minor updates, but not major
+        var caret1 = VersionHelper.SatisfiesConstraint("1.3.0", "^1.2.3");
+        Console.WriteLine($"Does 1.3.0 satisfy ^1.2.3: {caret1}");
+        
+        var caret2 = VersionHelper.SatisfiesConstraint("2.0.0", "^1.2.3");
+        Console.WriteLine($"Does 2.0.0 satisfy ^1.2.3: {caret2}");
+        
+        // Tilde operator (~1.2.3) - allows patch updates only
+        var tilde1 = VersionHelper.SatisfiesConstraint("1.2.4", "~1.2.3");
+        Console.WriteLine($"Does 1.2.4 satisfy ~1.2.3: {tilde1}");
+        
+        var tilde2 = VersionHelper.SatisfiesConstraint("1.3.0", "~1.2.3");
+        Console.WriteLine($"Does 1.3.0 satisfy ~1.2.3: {tilde2}");
+        
+        // Get latest version from a list
+        var latest = VersionHelper.GetLatestVersion(new[] { "1.0.0", "2.3.1", "1.9.9", "2.0.0-alpha" });
+        Console.WriteLine($"Latest version from list: {latest}");
+        
+        // Check if a string is a valid semantic version
+        var isValid1 = VersionHelper.IsValidSemanticVersion("1.2.3");
+        Console.WriteLine($"Is '1.2.3' a valid semantic version: {isValid1}");
+        
+        var isValid2 = VersionHelper.IsValidSemanticVersion("1.2.3-beta.1+build.123");
+        Console.WriteLine($"Is '1.2.3-beta.1+build.123' a valid semantic version: {isValid2}");
+        
+        var isValid3 = VersionHelper.IsValidSemanticVersion("not-a-version");
+        Console.WriteLine($"Is 'not-a-version' a valid semantic version: {isValid3}");
+        
+        // Get version info for prerelease versions
+        var info = VersionHelper.GetVersionInfo("1.0.0-alpha.1");
+        Console.WriteLine($"Version 1.0.0-alpha.1 is prerelease: {info.IsPrerelease}");
+        Console.WriteLine($"Core version: {info.CoreVersion}");
+    }
+}
+```
+
 ## PluginValidatorTests
 
 The `PluginValidatorTests` class contains unit tests for the `PluginValidator` class, which is responsible for validating plugin entities. It tests various validation scenarios, including plugin name validation, version validation, metadata validation, and dependency validation. Here's a realistic usage example leveraging its public members:
