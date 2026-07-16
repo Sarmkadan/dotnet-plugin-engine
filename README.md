@@ -210,6 +210,109 @@ public class EnumExtensionsDemo
 }
 ```
 
+## ServiceCollectionExtensions
+
+The `ServiceCollectionExtensions` class provides extension methods for `IServiceCollection` that simplify the registration of plugin engine services. It offers a fluent API for configuring the complete plugin stack, middleware, caching, event systems, and custom repositories. These extensions make it easy to set up plugin processing pipelines with dependency injection.
+
+Here's a realistic usage example leveraging its public members:
+
+```csharp
+using Microsoft.Extensions.DependencyInjection;
+using PluginEngine;
+using PluginEngine.Utils.Extensions;
+
+public class PluginEngineDemo
+{
+    public void ConfigureServices(IServiceCollection services)
+    {
+        // Add the complete plugin engine stack with optional configuration
+        services.AddPluginEngineStack(options =>
+        {
+            options.PluginDirectory = "/var/plugins";
+            options.MaxConcurrentPlugins = 10;
+            options.PluginTimeout = TimeSpan.FromSeconds(30);
+        });
+
+        // Register custom middleware
+        services.AddPluginMiddleware<MyCustomMiddleware>();
+
+        // Configure the middleware pipeline
+        services.ConfigurePluginPipeline(pipeline =>
+        {
+            pipeline.AddMiddleware<LoggingMiddleware>();
+            pipeline.AddMiddleware<ValidationMiddleware>();
+            pipeline.AddMiddleware<ExecutionMiddleware>();
+        });
+
+        // Register a custom event handler
+        services.AddPluginEventHandler<PluginLoadedEvent, PluginLoadedEventHandler>();
+        services.AddPluginEventHandler<PluginFailedEvent, PluginFailedEventHandler>();
+
+        // Register a custom plugin repository
+        services.UsePluginRepository<CustomPluginRepository>();
+    }
+}
+
+// Example custom middleware
+public class MyCustomMiddleware : IPluginMiddleware
+{
+    public Task ProcessAsync(PluginContext context, PluginMiddlewareDelegate next)
+    {
+        Console.WriteLine($"Processing plugin: {context.Plugin.Name}");
+        return next(context);
+    }
+}
+
+// Example event types
+public class PluginLoadedEvent : IPluginEvent
+{
+    public string PluginName { get; set; }
+    public DateTime LoadedAt { get; set; }
+}
+
+public class PluginFailedEvent : IPluginEvent
+{
+    public string PluginName { get; set; }
+    public string ErrorMessage { get; set; }
+    public DateTime FailedAt { get; set; }
+}
+
+// Example event handlers
+public class PluginLoadedEventHandler : IPluginEventHandler<PluginLoadedEvent>
+{
+    public Task HandleAsync(PluginLoadedEvent @event)
+    {
+        Console.WriteLine($"Plugin loaded: {@event.PluginName} at {@event.LoadedAt}");
+        return Task.CompletedTask;
+    }
+}
+
+public class PluginFailedEventHandler : IPluginEventHandler<PluginFailedEvent>
+{
+    public Task HandleAsync(PluginFailedEvent @event)
+    {
+        Console.WriteLine($"Plugin failed: {@event.PluginName} - {@event.ErrorMessage}");
+        return Task.CompletedTask;
+    }
+}
+
+// Example custom repository
+public class CustomPluginRepository : IPluginRepository
+{
+    public Task<IEnumerable<PluginMetadata>> GetAvailablePluginsAsync()
+    {
+        // Custom implementation
+        return Task.FromResult(Enumerable.Empty<PluginMetadata>());
+    }
+
+    public Task<PluginMetadata?> GetPluginMetadataAsync(string pluginId)
+    {
+        // Custom implementation
+        return Task.FromResult<PluginMetadata?>(null);
+    }
+}
+```
+
 ## MemoryPluginCache
 
 [... existing content ...]
