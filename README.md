@@ -135,3 +135,70 @@ using PluginEngine.Domain.Entities;
 using System;
 
 // ... rest of content ...
+
+
+## MarketplaceEntry
+
+`MarketplaceEntry` represents a plugin listing in the marketplace, including discovery metadata and the list of published versions. It contains essential information for displaying plugins in a marketplace interface such as identification details, versioning information, author data, download statistics, ratings, and compatibility information.
+
+
+### Usage Example
+
+```csharp
+using PluginEngine.Marketplace;
+using System;
+
+// Create a new marketplace entry for a plugin listing
+var entry = new MarketplaceEntry
+{
+    Name = "DataProcessor",
+    Author = "Acme Corp",
+    Description = "A plugin for processing data files and generating reports",
+    LatestVersion = "2.1.0",
+    Tags = new List<string> { "data", "processing", "reports", "analytics" },
+    Downloads = 15423,
+    Rating = 4.7,
+    PublishedAtUtc = new DateTime(2024, 3, 15, 0, 0, 0, DateTimeKind.Utc),
+    UpdatedAtUtc = new DateTime(2024, 6, 10, 0, 0, 0, DateTimeKind.Utc),
+    IsVerified = true,
+    LicenseType = "MIT",
+    RepositoryUrl = "https://github.com/acme/DataProcessor",
+    AvailableVersions = new List<PluginVersionInfo>
+    {
+        new PluginVersionInfo
+        {
+            Version = "2.1.0",
+            ReleaseDate = new DateTime(2024, 6, 10, 0, 0, 0, DateTimeKind.Utc),
+            Prerelease = false,
+            Downloads = 5423,
+            FileSizeBytes = 2 * 1024 * 1024 // 2MB
+        },
+        new PluginVersionInfo
+        {
+            Version = "2.0.0",
+            ReleaseDate = new DateTime(2024, 3, 15, 0, 0, 0, DateTimeKind.Utc),
+            Prerelease = false,
+            Downloads = 10000,
+            FileSizeBytes = 1 * 1024 * 1024 // 1MB
+        }
+    }
+};
+
+// Access the plugin details
+Console.WriteLine($"Plugin: {entry.Name}");
+Console.WriteLine($"Author: {entry.Author}");
+Console.WriteLine($"Latest Version: {entry.LatestVersion}");
+Console.WriteLine($"Total Downloads: {entry.Downloads:N0}");
+Console.WriteLine($"Rating: {entry.Rating:F1}/5.0");
+Console.WriteLine($"Published: {entry.PublishedAtUtc:yyyy-MM-dd}");
+Console.WriteLine($"Updated: {entry.UpdatedAtUtc:yyyy-MM-dd}");
+Console.WriteLine($"Verified: {entry.IsVerified}");
+Console.WriteLine($"License: {entry.LicenseType}");
+Console.WriteLine($"Repository: {entry.RepositoryUrl}");
+
+// Access version history
+foreach (var version in entry.AvailableVersions.OrderByDescending(v => v.Version))
+{
+    Console.WriteLine($"  Version {version.Version} - {version.ReleaseDate:yyyy-MM-dd}, {version.Downloads:N0} downloads");
+}
+```
