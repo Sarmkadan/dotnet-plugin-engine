@@ -456,6 +456,152 @@ public class PluginExecutionContextDemo
 }
 ```
 
+## PluginEngineCoreTests
+
+The `PluginEngineCoreTests` class contains unit tests for the core `PluginEngine` functionality. It tests constructor validation with all required services, initialization and shutdown sequences, plugin loading and unloading operations, status retrieval, and health reporting. The tests validate that the plugin engine properly delegates to its dependencies and handles error conditions appropriately.
+
+Here's a realistic usage example leveraging its public members:
+
+```csharp
+using Microsoft.Extensions.DependencyInjection;
+using Moq;
+using PluginEngine;
+using PluginEngine.Configuration;
+using PluginEngine.Domain.Entities;
+using PluginEngine.Services.Abstractions;
+
+public class PluginEngineCoreTestsDemo : IDisposable
+{
+    private readonly Mock<IPluginManagerService> _pluginManagerMock = new();
+    private readonly Mock<IPluginLoaderService> _pluginLoaderMock = new();
+    private readonly Mock<IDependencyResolutionService> _dependencyResolverMock = new();
+    private readonly Mock<IVersioningService> _versioningMock = new();
+    private readonly Mock<IHotReloadService> _hotReloadMock = new();
+    private readonly PluginEngineOptions _options;
+    private readonly string _testDirectory;
+
+    public PluginEngineCoreTestsDemo()
+    {
+        // Setup test environment
+        _testDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+        Directory.CreateDirectory(_testDirectory);
+        _options = new PluginEngineOptions { PluginDirectory = _testDirectory };
+
+        // Configure mocks
+        _pluginManagerMock
+            .Setup(x => x.InitializeAsync(It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        _pluginManagerMock
+            .Setup(x => x.ShutdownAsync(It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        _pluginManagerMock
+            .Setup(x => x.GetStatusAsync())
+            .ReturnsAsync(new PluginManagerStatus
+            {
+                IsInitialized = true,
+                TotalPlugins = 5,
+                LoadedPlugins = 3,
+                ActivePlugins = 2,
+                FailedPlugins = 1
+            });
+
+        _pluginManagerMock
+            .Setup(x => x.GetStatisticsAsync())
+            .ReturnsAsync(new PluginManagerStatistics
+            {
+                TotalPlugins = 5,
+                LoadedPlugins = 3,
+                ActivePlugins = 2,
+                TotalMemoryUsageBytes = 1024 * 1024,
+                AverageLoadTimeMs = 150.5
+            });
+
+        var plugins = new List<Plugin> {
+            new Plugin { Id = Guid.NewGuid(), Name = "TestPlugin1", Status = PluginStatus.Loaded },
+            new Plugin { Id = Guid.NewGuid(), Name = "TestPlugin2", Status = PluginStatus.Loaded }
+        };
+
+        _pluginLoaderMock
+            .Setup(x => x.LoadPluginsFromDirectoryAsync(_options.PluginDirectory, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(plugins);
+
+        _pluginLoaderMock
+            .Setup(x => x.GetAllLoadedPluginsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(plugins);
+
+        _pluginLoaderMock
+            .Setup(x => x.UnloadPluginAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+    }
+
+    public void Dispose()
+    {
+        try
+        {
+            if (Directory.Exists(_testDirectory))
+            {
+                Directory.Delete(_testDirectory, true);
+            }
+        }
+        catch
+        {
+            // Best effort cleanup
+        }
+    }
+
+    public async Task DemonstratePluginEngineCoreTests()
+    {
+        // Create the plugin engine with mocked dependencies
+        var engine = new PluginEngine.PluginEngine(
+            _pluginManagerMock.Object,
+            _pluginLoaderMock.Object,
+            _dependencyResolverMock.Object,
+            _versioningMock.Object,
+            _hotReloadMock.Object,
+            _options
+        );
+
+        // Access the configured services through properties
+        var pluginManager = engine.PluginManager;
+        var pluginLoader = engine.PluginLoader;
+        var dependencyResolver = engine.DependencyResolver;
+        var versioningService = engine.VersioningService;
+        var hotReloader = engine.HotReloader;
+        var options = engine.Options;
+
+        Console.WriteLine("Plugin Engine services configured successfully");
+        Console.WriteLine($"Plugin Manager: {pluginManager.GetType().Name}");
+        Console.WriteLine($"Plugin Loader: {pluginLoader.GetType().Name}");
+
+        // Test initialization
+        await engine.InitializeAsync();
+        Console.WriteLine("Plugin engine initialized");
+
+        // Test status retrieval
+        var status = await engine.GetStatusAsync();
+        Console.WriteLine($"Status - Initialized: {status.IsInitialized}, Total Plugins: {status.TotalPlugins}");
+
+        // Test loading plugins
+        var loadedCount = await engine.LoadAllPluginsAsync();
+        Console.WriteLine($"Loaded {loadedCount} plugins from directory");
+
+        // Test getting health info
+        var healthInfo = await engine.GetHealthInfoAsync();
+        Console.WriteLine("Health report generated");
+
+        // Test unloading all plugins
+        await engine.UnloadAllPluginsAsync();
+        Console.WriteLine("All plugins unloaded");
+
+        // Test shutdown
+        await engine.ShutdownAsync();
+        Console.WriteLine("Plugin engine shut down");
+    }
+}
+```
+
 ## MarketplaceBrowserTests
 
 The `MarketplaceBrowserTests` class contains unit tests for the `MarketplaceBrowserService` class, which provides functionality for browsing and searching the plugin marketplace. It tests various operations including retrieving categories, getting trending plugins, browsing specific categories, fetching featured plugins, and retrieving home page data with proper caching behavior.
