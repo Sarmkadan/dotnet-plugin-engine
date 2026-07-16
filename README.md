@@ -175,6 +175,148 @@ The `IHotReloadService` interface exposes operations for monitoring, triggering,
 
 
 
+## IPluginManagerService
+
+The `IPluginManagerService` interface serves as the central service for managing the entire plugin lifecycle within the plugin engine. It provides comprehensive functionality for discovering, loading, initializing, activating, deactivating, and monitoring plugins. The service maintains the overall system state through its status tracking capabilities and offers detailed insights into plugin operations through statistics and detailed plugin information retrieval.
+
+Here's a realistic usage example that demonstrates the complete plugin management workflow:
+
+```csharp
+using PluginEngine.Services.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+
+public class PluginManagerDemo
+{
+    private readonly IPluginManagerService _pluginManager;
+    private readonly ILogger<PluginManagerDemo> _logger;
+
+    public PluginManagerDemo(IPluginManagerService pluginManager, ILogger<PluginManagerDemo> logger)
+    {
+        _pluginManager = pluginManager;
+        _logger = logger;
+    }
+
+    public async Task RunAsync()
+    {
+        try
+        {
+            // Initialize the plugin manager - discovers and loads all plugins from configured directories
+            _logger.LogInformation("Initializing plugin manager...");
+            await _pluginManager.InitializeAsync();
+            _logger.LogInformation("Plugin manager initialized successfully");
+
+            // Get current status
+            var status = await _pluginManager.GetStatusAsync();
+            _logger.LogInformation("Plugin Manager Status:");
+            _logger.LogInformation($"  IsInitialized: {status.IsInitialized}");
+            _logger.LogInformation($"  InitializedAt: {status.InitializedAt}");
+            _logger.LogInformation($"  TotalPlugins: {status.TotalPlugins}");
+            _logger.LogInformation($"  LoadedPlugins: {status.LoadedPlugins}");
+            _logger.LogInformation($"  ActivePlugins: {status.ActivePlugins}");
+            _logger.LogInformation($"  FailedPlugins: {status.FailedPlugins}");
+            _logger.LogInformation($"  LastError: {status.LastError ?? "None"}");
+
+            // Get all plugins
+            _logger.LogInformation($"\nDiscovered {status.TotalPlugins} plugins:");
+            var allPlugins = await _pluginManager.GetAllPluginsAsync();
+            foreach (var plugin in allPlugins.Take(5)) // Show first 5
+            {
+                _logger.LogInformation($"  - {plugin.Name} v{plugin.Version} ({plugin.State})");
+            }
+            if (allPlugins.Count() > 5)
+            {
+                _logger.LogInformation($"  ... and {allPlugins.Count() - 5} more");
+            }
+
+            // Search for specific plugins
+            var searchCriteria = new PluginSearchCriteria
+            {
+                Name = "Logging",
+                Status = PluginStatus.Active,
+                PageSize = 10
+            };
+            
+            var matchingPlugins = await _pluginManager.SearchPluginsAsync(searchCriteria);
+            _logger.LogInformation($"\nFound {matchingPlugins.Count()} active plugins matching 'Logging':");
+            foreach (var plugin in matchingPlugins)
+            {
+                _logger.LogInformation($"  - {plugin.Name} v{plugin.Version}");
+            }
+
+            // Get detailed information about a specific plugin
+            var firstPlugin = allPlugins.FirstOrDefault();
+            if (firstPlugin != null)
+            {
+                var details = await _pluginManager.GetPluginDetailsAsync(firstPlugin.Id);
+                if (details != null)
+                {
+                    _logger.LogInformation($"\nDetails for plugin: {details.Plugin.Name}");
+                    _logger.LogInformation($"  Author: {details.Metadata?.Author ?? "Unknown"}");
+                    _logger.LogInformation($"  Description: {details.Metadata?.Description ?? "N/A"}");
+                    _logger.LogInformation($"  Assemblies: {details.Assemblies.Count()}");
+                    _logger.LogInformation($"  Dependencies: {details.Dependencies.Count()}");
+                    _logger.LogInformation($"  Capabilities: {details.Capabilities.Count()}");
+                }
+            }
+
+            // Get aggregate statistics
+            var stats = await _pluginManager.GetStatisticsAsync();
+            _logger.LogInformation($"\nPlugin Manager Statistics:");
+            _logger.LogInformation($"  TotalPlugins: {stats.TotalPlugins}");
+            _logger.LogInformation($"  LoadedPlugins: {stats.LoadedPlugins}");
+            _logger.LogInformation($"  ActivePlugins: {stats.ActivePlugins}");
+            _logger.LogInformation($"  FailedPlugins: {stats.FailedPlugins}");
+            _logger.LogInformation($"  TotalMemoryUsage: {stats.TotalMemoryUsageBytes:N0} bytes");
+            _logger.LogInformation($"  TotalLoadContexts: {stats.TotalLoadContexts}");
+            _logger.LogInformation($"  AverageLoadTime: {stats.AverageLoadTimeMs:F2} ms");
+
+            // Activate a plugin if it's inactive
+            var inactivePlugin = allPlugins.FirstOrDefault(p => p.State == PluginState.Inactive);
+            if (inactivePlugin != null)
+            {
+                _logger.LogInformation($"\nAttempting to activate plugin: {inactivePlugin.Name}");
+                bool activated = await _pluginManager.ActivatePluginAsync(inactivePlugin.Id);
+                _logger.LogInformation($"Activation {(activated ? "succeeded" : "failed")}");
+            }
+
+            // Deactivate a plugin if it's active
+            var activePlugin = allPlugins.FirstOrDefault(p => p.State == PluginState.Active);
+            if (activePlugin != null)
+            {
+                _logger.LogInformation($"\nAttempting to deactivate plugin: {activePlugin.Name}");
+                bool deactivated = await _pluginManager.DeactivatePluginAsync(activePlugin.Id);
+                _logger.LogInformation($"Deactivation {(deactivated ? "succeeded" : "failed")}");
+            }
+
+            // Get plugins by status
+            var failedPlugins = await _pluginManager.GetPluginsByStatusAsync(PluginStatus.Failed);
+            _logger.LogInformation($"\nFailed plugins count: {failedPlugins.Count()}");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during plugin manager operations");
+            throw;
+        }
+    }
+}
+
+// Usage in DI setup
+var services = new ServiceCollection();
+services.AddLogging(configure => configure.AddConsole());
+services.AddPluginEngine();
+
+var serviceProvider = services.BuildServiceProvider();
+var pluginManager = serviceProvider.GetRequiredService<IPluginManagerService>();
+
+var demo = new PluginManagerDemo(pluginManager, 
+    serviceProvider.GetRequiredService<ILogger<PluginManagerDemo>>());
+await demo.RunAsync();
+```
+
 ## IDependencyResolutionService
 
 The `IDependencyResolutionService` interface provides functionality for resolving, validating, and analyzing plugin dependencies. It enables discovering all dependencies for a plugin, checking for circular dependencies, building dependency graphs for visualization, and managing the dependency resolution cache. This service is essential for plugin engines that need to ensure proper plugin loading order and detect dependency conflicts.
