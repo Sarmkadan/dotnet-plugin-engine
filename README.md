@@ -182,3 +182,78 @@ var pluginId = Guid.Parse("3fa85f64-5717-4562-b3fc-2c963f66afa6");
 var cachingMiddleware = pipeline.Middlewares.OfType<CachingMiddleware>().FirstOrDefault();
 cachingMiddleware?.InvalidatePluginCache(pluginId);
 ```
+
+## IPluginMiddleware
+
+The `IPluginMiddleware` interface defines the contract for plugin operation middleware components. Middleware processes plugin operations before and after execution, enabling cross-cutting concerns like logging, error handling, performance tracking, and validation. Middleware components are composed into a pipeline using `PluginMiddlewarePipeline`, allowing flexible middleware composition.
+
+
+Here's a realistic usage example implementing a custom logging middleware:
+
+
+```csharp
+using PluginEngine.Middleware;
+using Microsoft.Extensions.Logging;
+using System.Diagnostics;
+
+// Custom middleware that logs plugin operation timing and exceptions
+public class LoggingMiddleware : IPluginMiddleware
+{
+    private readonly ILogger<LoggingMiddleware> _logger;
+    
+    public LoggingMiddleware(ILogger<LoggingMiddleware> logger)
+    {
+        _logger = logger;
+    }
+
+    public async Task InvokeAsync(PluginOperationContext context, PluginOperationDelegate next)
+    {
+        var stopwatch = Stopwatch.StartNew();
+        context.StartTimeMs = stopwatch.ElapsedMilliseconds;
+        
+        try
+        {
+            await next(context);
+            context.IsSuccessful = true;
+        }
+        catch (Exception ex)
+        {
+            context.Exception = ex;
+            context.IsSuccessful = false;
+            _logger.LogError(ex, "Plugin operation failed: {OperationType}", context.OperationType);
+            throw;
+        }
+        finally
+        {
+            context.EndTimeMs = stopwatch.ElapsedMilliseconds;
+            
+            var durationMs = context.EndTimeMs - context.StartTimeMs;
+            _logger.LogInformation(
+                "Plugin operation {OperationType} for {PluginName} completed in {DurationMs}ms. Status: {(context.IsSuccessful ? "Success" : "Failed")}",
+                context.OperationType,
+                context.Plugin.Name,
+                durationMs,
+                context.IsSuccessful ? "Success" : "Failed"
+            );
+        }
+    }
+}
+
+// Usage in a plugin engine pipeline
+var services = new ServiceCollection();
+services.AddLogging(configure => configure.AddConsole());
+services.AddPluginEngine();
+
+var serviceProvider = services.BuildServiceProvider();
+var pipeline = serviceProvider.GetRequiredService<PluginMiddlewarePipeline>();
+
+// Add your custom logging middleware
+pipeline.Use(async (next) => 
+    new LoggingMiddleware(serviceProvider.GetRequiredService<ILogger<LoggingMiddleware>>())(context, next)
+);
+
+// Or use the middleware directly with the pipeline's Use method
+pipeline.Use<LoggingMiddleware>();
+
+// The middleware pipeline can now process plugin operations with logging
+```
