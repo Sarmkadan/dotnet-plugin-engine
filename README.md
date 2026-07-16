@@ -433,6 +433,119 @@ public class HotReloadDemo
 }
 ```
 
+## IPluginDependencyResolver
+
+The `IPluginDependencyResolver` interface provides advanced dependency resolution capabilities for plugin systems. It computes the topologically sorted installation order for plugins, detects version conflicts between plugins, and generates comprehensive resolution plans that include all transitive dependencies, conflict detection, and recommended actions. This resolver operates at a higher level than `IDependencyResolutionService`, producing actionable plans for plugin installation workflows.
+
+
+Here's a realistic usage example that builds a dependency resolution plan and handles conflicts:
+
+```csharp
+using PluginEngine.Services.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+
+public class PluginDependencyResolverDemo
+{
+    private readonly IPluginDependencyResolver _dependencyResolver;
+    private readonly ILogger<PluginDependencyResolverDemo> _logger;
+
+    public PluginDependencyResolverDemo(IPluginDependencyResolver dependencyResolver, ILogger<PluginDependencyResolverDemo> logger)
+    {
+        _dependencyResolver = dependencyResolver;
+        _logger = logger;
+    }
+
+    public async Task RunAsync()
+    {
+        try
+        {
+            // Build a resolution plan for a root plugin
+            var pluginId = Guid.Parse("00000000-0000-0000-0000-000000000000"); // replace with real plugin id
+            
+            _logger.LogInformation("Building dependency resolution plan...");
+            var planResult = await _dependencyResolver.BuildResolutionPlanAsync(pluginId);
+            
+            if (planResult.Success && planResult.Data != null)
+            {
+                var plan = planResult.Data;
+                _logger.LogInformation($"\nResolution Plan for Plugin: {plan.RootPluginId}");
+                _logger.LogInformation($"Generated at: {plan.GeneratedAtUtc:yyyy-MM-dd HH:mm:ss}");
+                _logger.LogInformation($"Total steps: {plan.Steps.Count}");
+                _logger.LogInformation($"Conflicts detected: {plan.Conflicts.Count}");
+                _logger.LogInformation($"Plan executable: {plan.IsExecutable}");
+
+                // Display installation steps
+                _logger.LogInformation("\nInstallation Steps:");
+                foreach (var step in plan.Steps.OrderBy(s => s.Order))
+                {
+                    _logger.LogInformation($" {step.Order}. [{step.Action}] {step.PluginName} v{step.Version} " +
+                                       $"{(step.IsOptional ? "(optional)" : "")}");
+                }
+
+                // Handle conflicts if any
+                if (plan.Conflicts.Any())
+                {
+                    _logger.LogWarning("\nConflicts detected - manual resolution required:");
+                    foreach (var conflict in plan.Conflicts)
+                    {
+                        _logger.LogWarning($"\nConflict in dependency: {conflict.DependencyName}");
+                        _logger.LogWarning($" Description: {conflict.Description}");
+                        
+                        foreach (var requirement in conflict.ConflictingRequirements)
+                        {
+                            _logger.LogWarning($"  - Plugin {requirement.RequiringPluginName} requires: {requirement.VersionConstraint}");
+                        }
+                    }
+                    
+                    // Get install order to see which plugins cause conflicts
+                    var orderResult = await _dependencyResolver.GetInstallOrderAsync(
+                        new[] { new Plugin { Id = pluginId } }
+                    );
+                    
+                    if (orderResult.Success && orderResult.Data != null)
+                    {
+                        _logger.LogInformation("\nPlugin installation order that reveals conflicts:");
+                        foreach (var plugin in orderResult.Data)
+                        {
+                            _logger.LogInformation($" - {plugin.Name} v{plugin.Version}");
+                        }
+                    }
+                }
+                else
+                {
+                    _logger.LogInformation("\nNo conflicts detected - plan is ready for execution!");
+                }
+            }
+            else
+            {
+                _logger.LogError($"Failed to build resolution plan: {planResult.ErrorMessage}");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during dependency resolution");
+            throw;
+        }
+    }
+}
+
+// Usage in DI setup
+var services = new ServiceCollection();
+services.AddLogging(configure => configure.AddConsole());
+services.AddPluginEngine();
+
+var serviceProvider = services.BuildServiceProvider();
+var dependencyResolver = serviceProvider.GetRequiredService<IPluginDependencyResolver>();
+
+var demo = new PluginDependencyResolverDemo(dependencyResolver,
+    serviceProvider.GetRequiredService<ILogger<PluginDependencyResolverDemo>>());
+await demo.RunAsync();
+```
+
 ## IVersioningService
 
 The `IVersioningService` interface and its associated `SemanticVersion` class provide functionality for managing semantic versioning in the plugin system. The `SemanticVersion` class represents a semantic version with `Major`, `Minor`, `Patch`, `Prerelease`, and `Metadata` components, enabling version parsing, comparison, and formatting operations.
