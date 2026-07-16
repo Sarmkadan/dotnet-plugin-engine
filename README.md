@@ -79,6 +79,71 @@ pipeline.Use<LoggingMiddleware>();
 
 The `IHotReloadService` interface exposes operations for monitoring, triggering, and querying hot reloads of plugins at runtime. It allows starting and stopping a file‑watcher that automatically reloads changed assemblies, registering callbacks that run after a successful reload, and retrieving statistics and status information about reload activity.
 
+
+
+## IDependencyResolutionService
+
+The `IDependencyResolutionService` interface provides functionality for resolving, validating, and analyzing plugin dependencies. It enables discovering all dependencies for a plugin, checking for circular dependencies, building dependency graphs for visualization, and managing the dependency resolution cache. This service is essential for plugin engines that need to ensure proper plugin loading order and detect dependency conflicts.
+
+Here's a realistic usage example that builds a dependency graph and validates dependencies:
+
+```csharp
+using PluginEngine.Services.Abstractions;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+
+public class DependencyResolutionDemo
+{
+    private readonly IDependencyResolutionService _dependencyService;
+
+    public DependencyResolutionDemo(IDependencyResolutionService dependencyService)
+    {
+        _dependencyService = dependencyService;
+    }
+
+    public async Task RunAsync()
+    {
+        // Get the dependency graph for a plugin
+        var graph = await _dependencyService.GetDependencyGraphAsync(
+            Guid.Parse("00000000-0000-0000-0000-000000000000"));
+        
+        Console.WriteLine($"Root Plugin: {graph.RootPluginId}");
+        Console.WriteLine($"Total Nodes: {graph.Nodes.Count}");
+        Console.WriteLine($"Total Edges: {graph.Edges.Count}");
+        
+        // Display dependency tree
+        foreach (var node in graph.Nodes.OrderBy(n => n.Level))
+        {
+            Console.WriteLine($"  Level {node.Level}: {node.PluginName} ({node.PluginId}) v{node.Version}");
+        }
+        
+        // Check for circular dependencies
+        bool hasCircular = await _dependencyService.HasCircularDependenciesAsync(
+            new Plugin { Id = Guid.Parse("00000000-0000-0000-0000-000000000000") });
+        Console.WriteLine($"Circular dependencies detected: {hasCircular}");
+        
+        // Validate dependencies
+        bool isValid = await _dependencyService.ValidateDependenciesAsync(
+            new Plugin { Id = Guid.Parse("00000000-0000-0000-0000-000000000000") });
+        Console.WriteLine($"Dependencies valid: {isValid}");
+        
+        // Get all plugins that depend on a specific plugin
+        var dependents = await _dependencyService.GetDependentsAsync(
+            Guid.Parse("00000000-0000-0000-0000-000000000000"));
+        Console.WriteLine($"Plugins depending on this: {dependents.Count()}");
+        
+        // Resolve all dependencies for a plugin
+        var dependencies = await _dependencyService.ResolveDependenciesAsync(
+            new Plugin { Id = Guid.Parse("00000000-0000-0000-0000-000000000000") });
+        Console.WriteLine($"Total dependencies resolved: {dependencies.Count()}");
+        
+        // Clear dependency cache when needed
+        await _dependencyService.ClearDependencyCacheAsync();
+    }
+}
+```
+
 ```csharp
 using PluginEngine.Services.Abstractions;
 using System;
