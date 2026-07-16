@@ -302,6 +302,97 @@ var demo = new HotSwapDemo(hotSwapService, serviceProvider.GetRequiredService<IL
 await demo.RunAsync();
 ```
 
+## DependencyResolutionService
+
+The `DependencyResolutionService` class provides concrete implementation for dependency resolution functionality in the plugin engine. It resolves all transitive dependencies for plugins, validates dependency constraints, detects circular dependencies, builds dependency graphs for visualization, and manages the dependency resolution cache. This service is the primary implementation of the `IDependencyResolutionService` interface and is responsible for the actual dependency resolution logic.
+
+
+
+
+
+Here's a realistic usage example that demonstrates dependency resolution with validation and graph building:
+
+```csharp
+using PluginEngine.Services.Implementations;
+using PluginEngine.Services.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+
+public class DependencyResolutionDemo
+{
+    private readonly DependencyResolutionService _dependencyService;
+    private readonly ILogger<DependencyResolutionDemo> _logger;
+
+    public DependencyResolutionDemo(DependencyResolutionService dependencyService, ILogger<DependencyResolutionDemo> logger)
+    {
+        _dependencyService = dependencyService;
+        _logger = logger;
+    }
+
+    public async Task RunAsync()
+    {
+        // Initialize the dependency service
+        var services = new ServiceCollection();
+        services.AddLogging(configure => configure.AddConsole());
+        services.AddPluginEngine();
+        
+        var serviceProvider = services.BuildServiceProvider();
+        var pluginLoader = serviceProvider.GetRequiredService<IPluginLoaderService>();
+        _dependencyService = new DependencyResolutionService(pluginLoader);
+
+        // Get a plugin (replace with actual plugin ID from your system)
+        var pluginId = Guid.Parse("00000000-0000-0000-0000-000000000000");
+        var plugin = await pluginLoader.GetLoadedPluginAsync(pluginId);
+        
+        if (plugin != null)
+        {
+            // Resolve all dependencies for the plugin
+            _logger.LogInformation("Resolving dependencies for plugin: {PluginName}", plugin.Name);
+            var dependencies = await _dependencyService.ResolveDependenciesAsync(plugin);
+            _logger.LogInformation("Total dependencies resolved: {Count}", dependencies.Count());
+
+            // Validate dependencies
+            bool isValid = await _dependencyService.ValidateDependenciesAsync(plugin);
+            _logger.LogInformation("Dependencies valid: {IsValid}", isValid);
+
+            // Check for circular dependencies
+            bool hasCircular = await _dependencyService.HasCircularDependenciesAsync(plugin);
+            _logger.LogInformation("Circular dependencies detected: {HasCircular}", hasCircular);
+
+            // Get dependency graph for visualization
+            var graph = await _dependencyService.GetDependencyGraphAsync(plugin.Id);
+            _logger.LogInformation("\nDependency Graph:");
+            _logger.LogInformation("Root Plugin: {RootPluginId}", graph.RootPluginId);
+            _logger.LogInformation("Total Nodes: {Count}", graph.Nodes.Count);
+            _logger.LogInformation("Total Edges: {Count}", graph.Edges.Count);
+
+            // Display dependency tree
+            foreach (var node in graph.Nodes.OrderBy(n => n.Level))
+            {
+                _logger.LogInformation(" Level {Level}: {PluginName} ({PluginId}) v{Version}",
+                    node.Level, node.PluginName, node.PluginId, node.Version);
+            }
+
+            // Get plugins that depend on this plugin
+            var dependents = await _dependencyService.GetDependentsAsync(plugin.Id);
+            _logger.LogInformation("\nPlugins depending on this: {Count}", dependents.Count());
+
+            // Clear cache when needed
+            await _dependencyService.ClearDependencyCacheAsync();
+            _logger.LogInformation("Dependency cache cleared");
+        }
+        else
+        {
+            _logger.LogError("Plugin not found: {PluginId}", pluginId);
+        }
+    }
+}
+
+```
+
 ## IHotReloadService
 
 The `IHotReloadService` interface exposes operations for monitoring, triggering, and querying hot reloads of plugins at runtime. It allows starting and stopping a file‑watcher that automatically reloads changed assemblies, registering callbacks that run after a successful reload, and retrieving statistics and status information about reload activity.
@@ -448,6 +539,97 @@ var pluginManager = serviceProvider.GetRequiredService<IPluginManagerService>();
 var demo = new PluginManagerDemo(pluginManager, 
     serviceProvider.GetRequiredService<ILogger<PluginManagerDemo>>());
 await demo.RunAsync();
+```
+
+## DependencyResolutionService
+
+The `DependencyResolutionService` class provides concrete implementation for dependency resolution functionality in the plugin engine. It resolves all transitive dependencies for plugins, validates dependency constraints, detects circular dependencies, builds dependency graphs for visualization, and manages the dependency resolution cache. This service is the primary implementation of the `IDependencyResolutionService` interface and is responsible for the actual dependency resolution logic.
+
+
+
+
+
+Here's a realistic usage example that demonstrates dependency resolution with validation and graph building:
+
+```csharp
+using PluginEngine.Services.Implementations;
+using PluginEngine.Services.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+
+public class DependencyResolutionDemo
+{
+    private readonly DependencyResolutionService _dependencyService;
+    private readonly ILogger<DependencyResolutionDemo> _logger;
+
+    public DependencyResolutionDemo(DependencyResolutionService dependencyService, ILogger<DependencyResolutionDemo> logger)
+    {
+        _dependencyService = dependencyService;
+        _logger = logger;
+    }
+
+    public async Task RunAsync()
+    {
+        // Initialize the dependency service
+        var services = new ServiceCollection();
+        services.AddLogging(configure => configure.AddConsole());
+        services.AddPluginEngine();
+        
+        var serviceProvider = services.BuildServiceProvider();
+        var pluginLoader = serviceProvider.GetRequiredService<IPluginLoaderService>();
+        _dependencyService = new DependencyResolutionService(pluginLoader);
+
+        // Get a plugin (replace with actual plugin ID from your system)
+        var pluginId = Guid.Parse("00000000-0000-0000-0000-000000000000");
+        var plugin = await pluginLoader.GetLoadedPluginAsync(pluginId);
+        
+        if (plugin != null)
+        {
+            // Resolve all dependencies for the plugin
+            _logger.LogInformation("Resolving dependencies for plugin: {PluginName}", plugin.Name);
+            var dependencies = await _dependencyService.ResolveDependenciesAsync(plugin);
+            _logger.LogInformation("Total dependencies resolved: {Count}", dependencies.Count());
+
+            // Validate dependencies
+            bool isValid = await _dependencyService.ValidateDependenciesAsync(plugin);
+            _logger.LogInformation("Dependencies valid: {IsValid}", isValid);
+
+            // Check for circular dependencies
+            bool hasCircular = await _dependencyService.HasCircularDependenciesAsync(plugin);
+            _logger.LogInformation("Circular dependencies detected: {HasCircular}", hasCircular);
+
+            // Get dependency graph for visualization
+            var graph = await _dependencyService.GetDependencyGraphAsync(plugin.Id);
+            _logger.LogInformation("\nDependency Graph:");
+            _logger.LogInformation("Root Plugin: {RootPluginId}", graph.RootPluginId);
+            _logger.LogInformation("Total Nodes: {Count}", graph.Nodes.Count);
+            _logger.LogInformation("Total Edges: {Count}", graph.Edges.Count);
+
+            // Display dependency tree
+            foreach (var node in graph.Nodes.OrderBy(n => n.Level))
+            {
+                _logger.LogInformation(" Level {Level}: {PluginName} ({PluginId}) v{Version}",
+                    node.Level, node.PluginName, node.PluginId, node.Version);
+            }
+
+            // Get plugins that depend on this plugin
+            var dependents = await _dependencyService.GetDependentsAsync(plugin.Id);
+            _logger.LogInformation("\nPlugins depending on this: {Count}", dependents.Count());
+
+            // Clear cache when needed
+            await _dependencyService.ClearDependencyCacheAsync();
+            _logger.LogInformation("Dependency cache cleared");
+        }
+        else
+        {
+            _logger.LogError("Plugin not found: {PluginId}", pluginId);
+        }
+    }
+}
+
 ```
 
 ## IDependencyResolutionService
@@ -707,6 +889,97 @@ var demo = new PluginManagerDemo(pluginManager, serviceProvider.GetRequiredServi
 await demo.RunAsync();
 ```
 
+## DependencyResolutionService
+
+The `DependencyResolutionService` class provides concrete implementation for dependency resolution functionality in the plugin engine. It resolves all transitive dependencies for plugins, validates dependency constraints, detects circular dependencies, builds dependency graphs for visualization, and manages the dependency resolution cache. This service is the primary implementation of the `IDependencyResolutionService` interface and is responsible for the actual dependency resolution logic.
+
+
+
+
+
+Here's a realistic usage example that demonstrates dependency resolution with validation and graph building:
+
+```csharp
+using PluginEngine.Services.Implementations;
+using PluginEngine.Services.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+
+public class DependencyResolutionDemo
+{
+    private readonly DependencyResolutionService _dependencyService;
+    private readonly ILogger<DependencyResolutionDemo> _logger;
+
+    public DependencyResolutionDemo(DependencyResolutionService dependencyService, ILogger<DependencyResolutionDemo> logger)
+    {
+        _dependencyService = dependencyService;
+        _logger = logger;
+    }
+
+    public async Task RunAsync()
+    {
+        // Initialize the dependency service
+        var services = new ServiceCollection();
+        services.AddLogging(configure => configure.AddConsole());
+        services.AddPluginEngine();
+        
+        var serviceProvider = services.BuildServiceProvider();
+        var pluginLoader = serviceProvider.GetRequiredService<IPluginLoaderService>();
+        _dependencyService = new DependencyResolutionService(pluginLoader);
+
+        // Get a plugin (replace with actual plugin ID from your system)
+        var pluginId = Guid.Parse("00000000-0000-0000-0000-000000000000");
+        var plugin = await pluginLoader.GetLoadedPluginAsync(pluginId);
+        
+        if (plugin != null)
+        {
+            // Resolve all dependencies for the plugin
+            _logger.LogInformation("Resolving dependencies for plugin: {PluginName}", plugin.Name);
+            var dependencies = await _dependencyService.ResolveDependenciesAsync(plugin);
+            _logger.LogInformation("Total dependencies resolved: {Count}", dependencies.Count());
+
+            // Validate dependencies
+            bool isValid = await _dependencyService.ValidateDependenciesAsync(plugin);
+            _logger.LogInformation("Dependencies valid: {IsValid}", isValid);
+
+            // Check for circular dependencies
+            bool hasCircular = await _dependencyService.HasCircularDependenciesAsync(plugin);
+            _logger.LogInformation("Circular dependencies detected: {HasCircular}", hasCircular);
+
+            // Get dependency graph for visualization
+            var graph = await _dependencyService.GetDependencyGraphAsync(plugin.Id);
+            _logger.LogInformation("\nDependency Graph:");
+            _logger.LogInformation("Root Plugin: {RootPluginId}", graph.RootPluginId);
+            _logger.LogInformation("Total Nodes: {Count}", graph.Nodes.Count);
+            _logger.LogInformation("Total Edges: {Count}", graph.Edges.Count);
+
+            // Display dependency tree
+            foreach (var node in graph.Nodes.OrderBy(n => n.Level))
+            {
+                _logger.LogInformation(" Level {Level}: {PluginName} ({PluginId}) v{Version}",
+                    node.Level, node.PluginName, node.PluginId, node.Version);
+            }
+
+            // Get plugins that depend on this plugin
+            var dependents = await _dependencyService.GetDependentsAsync(plugin.Id);
+            _logger.LogInformation("\nPlugins depending on this: {Count}", dependents.Count());
+
+            // Clear cache when needed
+            await _dependencyService.ClearDependencyCacheAsync();
+            _logger.LogInformation("Dependency cache cleared");
+        }
+        else
+        {
+            _logger.LogError("Plugin not found: {PluginId}", pluginId);
+        }
+    }
+}
+
+```
+
 ## IPluginDependencyResolver
 
 The `IPluginDependencyResolver` interface provides advanced dependency resolution capabilities for plugin systems. It computes the topologically sorted installation order for plugins, detects version conflicts between plugins, and generates comprehensive resolution plans that include all transitive dependencies, conflict detection, and recommended actions. This resolver operates at a higher level than `IDependencyResolutionService`, producing actionable plans for plugin installation workflows.
@@ -818,6 +1091,97 @@ var dependencyResolver = serviceProvider.GetRequiredService<IPluginDependencyRes
 var demo = new PluginDependencyResolverDemo(dependencyResolver,
     serviceProvider.GetRequiredService<ILogger<PluginDependencyResolverDemo>>());
 await demo.RunAsync();
+```
+
+## DependencyResolutionService
+
+The `DependencyResolutionService` class provides concrete implementation for dependency resolution functionality in the plugin engine. It resolves all transitive dependencies for plugins, validates dependency constraints, detects circular dependencies, builds dependency graphs for visualization, and manages the dependency resolution cache. This service is the primary implementation of the `IDependencyResolutionService` interface and is responsible for the actual dependency resolution logic.
+
+
+
+
+
+Here's a realistic usage example that demonstrates dependency resolution with validation and graph building:
+
+```csharp
+using PluginEngine.Services.Implementations;
+using PluginEngine.Services.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+
+public class DependencyResolutionDemo
+{
+    private readonly DependencyResolutionService _dependencyService;
+    private readonly ILogger<DependencyResolutionDemo> _logger;
+
+    public DependencyResolutionDemo(DependencyResolutionService dependencyService, ILogger<DependencyResolutionDemo> logger)
+    {
+        _dependencyService = dependencyService;
+        _logger = logger;
+    }
+
+    public async Task RunAsync()
+    {
+        // Initialize the dependency service
+        var services = new ServiceCollection();
+        services.AddLogging(configure => configure.AddConsole());
+        services.AddPluginEngine();
+        
+        var serviceProvider = services.BuildServiceProvider();
+        var pluginLoader = serviceProvider.GetRequiredService<IPluginLoaderService>();
+        _dependencyService = new DependencyResolutionService(pluginLoader);
+
+        // Get a plugin (replace with actual plugin ID from your system)
+        var pluginId = Guid.Parse("00000000-0000-0000-0000-000000000000");
+        var plugin = await pluginLoader.GetLoadedPluginAsync(pluginId);
+        
+        if (plugin != null)
+        {
+            // Resolve all dependencies for the plugin
+            _logger.LogInformation("Resolving dependencies for plugin: {PluginName}", plugin.Name);
+            var dependencies = await _dependencyService.ResolveDependenciesAsync(plugin);
+            _logger.LogInformation("Total dependencies resolved: {Count}", dependencies.Count());
+
+            // Validate dependencies
+            bool isValid = await _dependencyService.ValidateDependenciesAsync(plugin);
+            _logger.LogInformation("Dependencies valid: {IsValid}", isValid);
+
+            // Check for circular dependencies
+            bool hasCircular = await _dependencyService.HasCircularDependenciesAsync(plugin);
+            _logger.LogInformation("Circular dependencies detected: {HasCircular}", hasCircular);
+
+            // Get dependency graph for visualization
+            var graph = await _dependencyService.GetDependencyGraphAsync(plugin.Id);
+            _logger.LogInformation("\nDependency Graph:");
+            _logger.LogInformation("Root Plugin: {RootPluginId}", graph.RootPluginId);
+            _logger.LogInformation("Total Nodes: {Count}", graph.Nodes.Count);
+            _logger.LogInformation("Total Edges: {Count}", graph.Edges.Count);
+
+            // Display dependency tree
+            foreach (var node in graph.Nodes.OrderBy(n => n.Level))
+            {
+                _logger.LogInformation(" Level {Level}: {PluginName} ({PluginId}) v{Version}",
+                    node.Level, node.PluginName, node.PluginId, node.Version);
+            }
+
+            // Get plugins that depend on this plugin
+            var dependents = await _dependencyService.GetDependentsAsync(plugin.Id);
+            _logger.LogInformation("\nPlugins depending on this: {Count}", dependents.Count());
+
+            // Clear cache when needed
+            await _dependencyService.ClearDependencyCacheAsync();
+            _logger.LogInformation("Dependency cache cleared");
+        }
+        else
+        {
+            _logger.LogError("Plugin not found: {PluginId}", pluginId);
+        }
+    }
+}
+
 ```
 
 
@@ -934,5 +1298,96 @@ var versioningService = serviceProvider.GetRequiredService<VersioningService>();
 
 var demo = new VersioningDemo(versioningService);
 await demo.RunAsync();
+```
+
+## DependencyResolutionService
+
+The `DependencyResolutionService` class provides concrete implementation for dependency resolution functionality in the plugin engine. It resolves all transitive dependencies for plugins, validates dependency constraints, detects circular dependencies, builds dependency graphs for visualization, and manages the dependency resolution cache. This service is the primary implementation of the `IDependencyResolutionService` interface and is responsible for the actual dependency resolution logic.
+
+
+
+
+
+Here's a realistic usage example that demonstrates dependency resolution with validation and graph building:
+
+```csharp
+using PluginEngine.Services.Implementations;
+using PluginEngine.Services.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+
+public class DependencyResolutionDemo
+{
+    private readonly DependencyResolutionService _dependencyService;
+    private readonly ILogger<DependencyResolutionDemo> _logger;
+
+    public DependencyResolutionDemo(DependencyResolutionService dependencyService, ILogger<DependencyResolutionDemo> logger)
+    {
+        _dependencyService = dependencyService;
+        _logger = logger;
+    }
+
+    public async Task RunAsync()
+    {
+        // Initialize the dependency service
+        var services = new ServiceCollection();
+        services.AddLogging(configure => configure.AddConsole());
+        services.AddPluginEngine();
+        
+        var serviceProvider = services.BuildServiceProvider();
+        var pluginLoader = serviceProvider.GetRequiredService<IPluginLoaderService>();
+        _dependencyService = new DependencyResolutionService(pluginLoader);
+
+        // Get a plugin (replace with actual plugin ID from your system)
+        var pluginId = Guid.Parse("00000000-0000-0000-0000-000000000000");
+        var plugin = await pluginLoader.GetLoadedPluginAsync(pluginId);
+        
+        if (plugin != null)
+        {
+            // Resolve all dependencies for the plugin
+            _logger.LogInformation("Resolving dependencies for plugin: {PluginName}", plugin.Name);
+            var dependencies = await _dependencyService.ResolveDependenciesAsync(plugin);
+            _logger.LogInformation("Total dependencies resolved: {Count}", dependencies.Count());
+
+            // Validate dependencies
+            bool isValid = await _dependencyService.ValidateDependenciesAsync(plugin);
+            _logger.LogInformation("Dependencies valid: {IsValid}", isValid);
+
+            // Check for circular dependencies
+            bool hasCircular = await _dependencyService.HasCircularDependenciesAsync(plugin);
+            _logger.LogInformation("Circular dependencies detected: {HasCircular}", hasCircular);
+
+            // Get dependency graph for visualization
+            var graph = await _dependencyService.GetDependencyGraphAsync(plugin.Id);
+            _logger.LogInformation("\nDependency Graph:");
+            _logger.LogInformation("Root Plugin: {RootPluginId}", graph.RootPluginId);
+            _logger.LogInformation("Total Nodes: {Count}", graph.Nodes.Count);
+            _logger.LogInformation("Total Edges: {Count}", graph.Edges.Count);
+
+            // Display dependency tree
+            foreach (var node in graph.Nodes.OrderBy(n => n.Level))
+            {
+                _logger.LogInformation(" Level {Level}: {PluginName} ({PluginId}) v{Version}",
+                    node.Level, node.PluginName, node.PluginId, node.Version);
+            }
+
+            // Get plugins that depend on this plugin
+            var dependents = await _dependencyService.GetDependentsAsync(plugin.Id);
+            _logger.LogInformation("\nPlugins depending on this: {Count}", dependents.Count());
+
+            // Clear cache when needed
+            await _dependencyService.ClearDependencyCacheAsync();
+            _logger.LogInformation("Dependency cache cleared");
+        }
+        else
+        {
+            _logger.LogError("Plugin not found: {PluginId}", pluginId);
+        }
+    }
+}
+
 ```
 
