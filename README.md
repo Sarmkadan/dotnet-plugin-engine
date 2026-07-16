@@ -304,6 +304,95 @@ public class PluginFileOperations
 }
 ```
 
+## PluginValidator
+
+The `PluginValidator` class provides comprehensive validation for plugin metadata, versioning, and dependency relationships. It enforces naming conventions, semantic versioning rules, and dependency constraints while generating detailed validation reports with specific error messages.
+
+Here's a realistic usage example leveraging its public members:
+
+```csharp
+using System;
+using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
+using PluginEngine;
+using PluginEngine.Utils.Validators;
+
+public class PluginValidationExample
+{
+    private readonly PluginValidator _validator;
+    private readonly ILogger<PluginValidationExample> _logger;
+
+    public PluginValidationExample(PluginValidator validator, ILogger<PluginValidationExample> logger)
+    {
+        _validator = validator;
+        _logger = logger;
+    }
+
+    public void ValidatePluginMetadata(Plugin plugin)
+    {
+        // Validate plugin metadata and dependencies
+        var validationResult = _validator.Validate(plugin);
+        
+        _logger.LogInformation("Validating plugin: {PluginName} ({PluginId})", 
+            validationResult.PluginName, validationResult.PluginId);
+        
+        if (validationResult.IsValid)
+        {
+            _logger.LogInformation("✓ Plugin validation passed");
+        }
+        else
+        {
+            _logger.LogWarning("✗ Plugin validation failed with {Count} errors", 
+                validationResult.Errors.Count);
+            _logger.LogWarning("Error summary:\n{Summary}", validationResult.GetErrorSummary());
+        }
+    }
+
+    public bool ValidateDependency(Plugin dependentPlugin, Plugin dependencyPlugin, 
+        PluginDependency dependencySpec)
+    {
+        // Validate a specific dependency relationship
+        bool isValid = _validator.ValidateDependencyRelationship(
+            dependentPlugin, dependencyPlugin, dependencySpec);
+        
+        if (isValid)
+        {
+            _logger.LogInformation("✓ Dependency relationship is valid: {Dependent} -> {Dependency}",
+                dependentPlugin.Name, dependencyPlugin.Name);
+        }
+        else
+        {
+            _logger.LogError("✗ Dependency relationship failed validation");
+        }
+        
+        return isValid;
+    }
+
+    public void ValidateMultiplePlugins(IEnumerable<Plugin> plugins)
+    {
+        // Batch validate multiple plugins
+        foreach (var plugin in plugins)
+        {
+            var result = _validator.Validate(plugin);
+            
+            Console.WriteLine($"Plugin: {result.PluginName}");
+            Console.WriteLine($"  Valid: {result.IsValid}");
+            Console.WriteLine($"  Errors: {result.Errors.Count}");
+            
+            if (!result.IsValid)
+            {
+                Console.WriteLine("  Error details:");
+                foreach (var error in result.Errors)
+                {
+                    Console.WriteLine($"    - {error}");
+                }
+            }
+            Console.WriteLine();
+        }
+    }
+}
+```
+
 ## DependencyGraphAnalyzer
 
 `DependencyGraphAnalyzer` helps visualise and analyse plugin dependency graphs. It can generate a textual graph representation, produce a detailed `DependencyAnalysisReport`, and find plugins that depend on a given plugin.
