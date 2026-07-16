@@ -1117,6 +1117,86 @@ public class DependencyResolutionDemo
 
 ```
 
+## WebhookConfiguration
+
+The `WebhookConfiguration` class provides configuration for webhook support in the plugin engine. It manages incoming webhooks from external systems and registries, enabling integration with CI/CD pipelines, registries, and other external services that need to notify the plugin engine about events like plugin creation, updates, or security patches.
+
+Here's a realistic usage example that configures webhook support with custom event filters and retry policy:
+
+```csharp
+using PluginEngine.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Threading.Tasks;
+
+public class WebhookConfigurationDemo
+{
+    private readonly WebhookConfiguration _webhookConfig;
+    private readonly ILogger<WebhookConfigurationDemo> _logger;
+
+    public WebhookConfigurationDemo(WebhookConfiguration webhookConfig, ILogger<WebhookConfigurationDemo> logger)
+    {
+        _webhookConfig = webhookConfig;
+        _logger = logger;
+    }
+
+    public async Task RunAsync()
+    {
+        // Configure webhook support in DI
+        var services = new ServiceCollection();
+        services.AddLogging(configure => configure.AddConsole());
+        services.AddWebhookSupport(config =>
+        {
+            config.Enabled = true;
+            config.Secret = "your-webhook-secret-key-here";
+            config.MaxPayloadSizeBytes = 2 * 1024 * 1024; // 2MB
+            config.EndpointPath = "/api/webhooks/plugins";
+            config.ProcessingTimeoutMs = 60000; // 60 seconds
+            config.EnableDetailedLogging = true;
+            
+            // Configure event filters
+            config.WithEventFilters("plugin.created", "plugin.updated", "plugin.deleted");
+            
+            // Configure aggressive retry policy
+            config.WithAggressiveRetry();
+        });
+
+        var serviceProvider = services.BuildServiceProvider();
+        var config = serviceProvider.GetRequiredService<WebhookConfiguration>();
+
+        _logger.LogInformation("Webhook Configuration:");
+        _logger.LogInformation($"Enabled: {config.Enabled}");
+        _logger.LogInformation($"Endpoint: {config.EndpointPath}");
+        _logger.LogInformation($"Max Payload: {config.MaxPayloadSizeBytes} bytes");
+        _logger.LogInformation($"Timeout: {config.ProcessingTimeoutMs}ms");
+        _logger.LogInformation($"Event Filters: {string.Join(", ", config.EventFilters)}");
+        _logger.LogInformation($"Retry Policy - Max Retries: {config.RetryPolicy.MaxRetries}");
+        _logger.LogInformation($"Retry Policy - Initial Delay: {config.RetryPolicy.InitialDelayMs}ms");
+        _logger.LogInformation($"Retry Policy - Backoff Multiplier: {config.RetryPolicy.BackoffMultiplier}");
+        _logger.LogInformation($"Retry Policy - Max Delay: {config.RetryPolicy.MaxDelayMs}ms");
+        _logger.LogInformation($"Detailed Logging: {config.EnableDetailedLogging}");
+
+        // Validate configuration
+        bool isValid = config.IsValid();
+        _logger.LogInformation($"Configuration valid: {isValid}");
+    }
+}
+
+// Usage
+var services = new ServiceCollection();
+services.AddLogging(configure => configure.AddConsole());
+services.AddWebhookSupport(config =>
+{
+    config.Enabled = true;
+    config.Secret = "your-secret-key";
+    config.WithAllEvents();
+});
+
+var serviceProvider = services.BuildServiceProvider();
+var webhookConfig = serviceProvider.GetRequiredService<WebhookConfiguration>();
+```
+
 ## PluginLoaderService
 
 The `PluginLoaderService` class provides the core functionality for loading, unloading, and managing plugins within the plugin engine. It handles plugin discovery from directories, individual plugin loading with proper assembly isolation using `AssemblyLoadContext`, plugin lifecycle management through `IPluginLifecycle` interfaces, and provides comprehensive querying capabilities for loaded plugins. The service supports both synchronous and asynchronous operations and maintains a registry of all currently loaded plugins.
