@@ -152,3 +152,33 @@ pipeline.UseRateLimit(maxTokensPerSecond: 50, windowSizeSeconds: 2);
 // You can also configure it globally with default values (100 operations per second)
 pipeline.UseRateLimit();
 ```
+
+## CachingMiddleware
+
+The `CachingMiddleware` caches successful plugin operation results to reduce repeated processing and improve performance. It automatically caches operations like `GetMetadata`, `ResolveDependencies`, and `ValidateVersion`, and provides methods to invalidate cache entries either by plugin or globally.
+
+Here's a realistic usage example:
+
+```csharp
+using PluginEngine.Middleware;
+using Microsoft.Extensions.DependencyInjection;
+
+// Setup dependency injection with memory cache
+var services = new ServiceCollection();
+services.AddMemoryCache();
+services.AddPluginEngine();
+
+var serviceProvider = services.BuildServiceProvider();
+var pipeline = serviceProvider.GetRequiredService<PluginMiddlewarePipeline>();
+
+// Add caching middleware with default 5-minute cache duration
+pipeline.UseCaching();
+
+// You can also customize the cache duration
+pipeline.UseCaching(TimeSpan.FromMinutes(10));
+
+// To manually invalidate cache for a specific plugin
+var pluginId = Guid.Parse("3fa85f64-5717-4562-b3fc-2c963f66afa6");
+var cachingMiddleware = pipeline.Middlewares.OfType<CachingMiddleware>().FirstOrDefault();
+cachingMiddleware?.InvalidatePluginCache(pluginId);
+```
