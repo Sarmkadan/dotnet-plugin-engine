@@ -836,6 +836,152 @@ public class HotSwapServiceTestsDemo : IDisposable
 }
 ```
 
+## PluginSystemIntegrationTests
+
+The `PluginSystemIntegrationTests` class contains comprehensive end-to-end integration scenarios covering the main library use cases: event-driven workflows, formatter pipelines, configuration combinations, and concurrent multi-plugin scenarios. It tests critical functionality such as validating plugins, resolving dependencies, publishing and subscribing to plugin events, formatting plugin data in different output formats, and handling concurrent operations across multiple plugins.
+
+Here's a realistic usage example leveraging its public members:
+
+```csharp
+using Microsoft.Extensions.Logging;
+using Moq;
+using PluginEngine.Domain.Entities;
+using PluginEngine.Events;
+using PluginEngine.Formatters;
+using PluginEngine.Services.Abstractions;
+using PluginEngine.Services.Implementations;
+using PluginEngine.Utils.Helpers;
+using PluginEngine.Utils.Validators;
+
+public class PluginSystemIntegrationDemo
+{
+    private readonly Mock<ILogger<DependencyResolutionService>> _mockDepLogger = new();
+    private readonly Mock<ILogger<PluginValidator>> _mockValLogger = new();
+    private readonly Mock<ILogger<VersionHelper>> _mockVerLogger = new();
+    private readonly Mock<ILogger<PluginEventPublisher>> _mockPubLogger = new();
+    private readonly Mock<ILogger<PluginEventSubscriber>> _mockSubLogger = new();
+    private readonly Mock<IPluginLoaderService> _mockLoaderService = new();
+
+    public void DemonstratePluginSystemIntegration()
+    {
+        // Create plugin instances
+        var pluginId = Guid.NewGuid();
+        var dependencyId = Guid.NewGuid();
+
+        var mainPlugin = new Plugin
+        {
+            Id = pluginId,
+            Name = "MainApplication",
+            Version = "1.0.0",
+            AssemblyPath = "/plugins/MainApplication.dll",
+            Status = PluginStatus.Active
+        };
+
+        var coreDependency = new Plugin
+        {
+            Id = dependencyId,
+            Name = "CoreServices",
+            Version = "2.0.0",
+            AssemblyPath = "/plugins/CoreServices.dll",
+            Status = PluginStatus.Loaded
+        };
+
+        // Add dependency
+        mainPlugin.AddDependency(new PluginDependency
+        {
+            PluginId = pluginId,
+            DependencyPluginId = dependencyId,
+            MinimumVersion = "2.0.0"
+        });
+
+        // Setup mock services
+        _mockLoaderService
+            .Setup(x => x.GetAllLoadedPluginsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new[] { coreDependency });
+
+        // Create validator and resolver
+        var versionHelper = new VersionHelper(_mockVerLogger.Object);
+        var validator = new PluginValidator(_mockValLogger.Object, versionHelper);
+        var resolver = new DependencyResolutionService(_mockLoaderService.Object);
+
+        // Validate plugin
+        var validationResult = validator.Validate(mainPlugin);
+        Console.WriteLine($"Plugin validation successful: {validationResult.IsValid}");
+
+        // Resolve dependencies
+        var dependenciesValid = resolver.ValidateDependenciesAsync(mainPlugin).Result;
+        Console.WriteLine($"Dependencies valid: {dependenciesValid}");
+
+        var resolvedDependencies = resolver.ResolveDependenciesAsync(mainPlugin).Result;
+        Console.WriteLine($"Resolved {resolvedDependencies.Count} dependencies");
+
+        // Create event publisher and subscriber
+        var publisher = new PluginEventPublisher(_mockPubLogger.Object);
+        var subscriber = new PluginEventSubscriber(publisher, _mockSubLogger.Object);
+
+        // Subscribe to events
+        subscriber.OnPluginLoaded(e => {
+            Console.WriteLine($"Plugin loaded: {e.PluginName} v{e.Version}");
+            return Task.CompletedTask;
+        });
+
+        subscriber.OnPluginError(e => {
+            Console.WriteLine($"Plugin error: {e.ErrorMessage}");
+            return Task.CompletedTask;
+        });
+
+        // Publish events
+        publisher.PublishAsync(new PluginLoadedEvent
+        {
+            PluginId = pluginId,
+            PluginName = mainPlugin.Name,
+            Version = mainPlugin.Version,
+            LoadTimeMs = 150
+        }).Wait();
+
+        publisher.PublishAsync(new PluginErrorEvent
+        {
+            PluginId = pluginId,
+            ErrorMessage = "Something went wrong"
+        }).Wait();
+
+        // Test formatter factory
+        var jsonFormatter = new JsonPluginFormatter();
+        var csvFormatter = new CsvPluginFormatter();
+        var xmlFormatter = new XmlPluginFormatter();
+        var formatterFactory = new FormatterFactory(jsonFormatter, csvFormatter, xmlFormatter);
+
+        var supportedFormats = formatterFactory.GetSupportedFormats();
+        Console.WriteLine($"Supported formats: {string.Join(", ", supportedFormats)}");
+
+        var jsonFormatterInstance = formatterFactory.GetFormatter("json");
+        if (jsonFormatterInstance != null)
+        {
+            var jsonOutput = jsonFormatterInstance.FormatPluginAsync(mainPlugin).Result;
+            Console.WriteLine($"JSON output length: {jsonOutput.Length} characters");
+        }
+
+        // Test concurrent operations
+        var plugins = Enumerable.Range(0, 5)
+            .Select(i => new Plugin
+            {
+                Id = Guid.NewGuid(),
+                Name = $"Plugin{i}",
+                Version = "1.0.0",
+                Status = PluginStatus.Active
+            })
+            .ToList();
+
+        var concurrentValidationTasks = plugins
+            .Select(p => Task.Run(() => validator.Validate(p)))
+            .ToList();
+
+        var validationResults = Task.WhenAll(concurrentValidationTasks).Result;
+        Console.WriteLine($"Concurrent validation: {validationResults.Count(r => r.IsValid)} valid plugins");
+    }
+}
+```
+
 ## MarketplaceBrowserTests
 
 The `MarketplaceBrowserTests` class contains unit tests for the `MarketplaceBrowserService` class, which provides functionality for browsing and searching the plugin marketplace. It tests various operations including retrieving categories, getting trending plugins, browsing specific categories, fetching featured plugins, and retrieving home page data with proper caching behavior.
