@@ -115,6 +115,101 @@ public class TypeExtensionsDemo
     }
 }
 
+## EnumExtensions
+
+The `EnumExtensions` class provides a set of extension methods for enum operations in the plugin system. It offers utilities for converting enums to user-friendly strings, extracting descriptions from attributes, parsing enum values, and checking enum states. These extensions simplify tasks such as displaying plugin statuses, converting states to CSS classes, and working with enum collections.
+
+Here's a realistic usage example leveraging its public members:
+
+```csharp
+using PluginEngine.Utils.Extensions;
+using System.ComponentModel;
+
+public class EnumExtensionsDemo
+{
+    public enum PluginStatus
+    {
+        [Description("Not Loaded")]
+        Unloaded,
+        [Description("Loading...")]
+        Loading,
+        [Description("Loaded")]
+        Loaded,
+        [Description("Unloading...")]
+        Unloading,
+        [Description("Error")]
+        Failed,
+        [Description("Disabled")]
+        Inactive
+    }
+
+    public enum ExecutionState
+    {
+        Running,
+        Completed,
+        Failed,
+        Cancelled,
+        Timeout
+    }
+
+    public void DemonstrateEnumExtensions()
+    {
+        // Get description from Display attribute
+        PluginStatus status = PluginStatus.Loaded;
+        string description = status.GetDescription();
+        Console.WriteLine($"Status description: {description}");
+
+        // Get display name from Display attribute
+        string displayName = status.GetDisplayName();
+        Console.WriteLine($"Display name: {displayName}");
+
+        // Convert to user-friendly string
+        string friendlyString = status.ToUserFriendlyString();
+        Console.WriteLine($"User-friendly string: {friendlyString}");
+
+        // Convert to CSS class
+        string cssClass = status.ToCssClass();
+        Console.WriteLine($"CSS class: {cssClass}");
+
+        // Check if status is healthy
+        bool isHealthy = status.IsHealthy();
+        Console.WriteLine($"Is healthy: {isHealthy}");
+
+        // Check if status is transient
+        bool isTransient = status.IsTransient();
+        Console.WriteLine($"Is transient: {isTransient}");
+
+        // Get all enum values
+        var allValues = EnumExtensions.GetAllValues<PluginStatus>();
+        Console.WriteLine($"All status values: {string.Join(", ", allValues)}");
+
+        // Try parse enum from string
+        PluginStatus? parsedStatus = EnumExtensions.TryParse<PluginStatus>("loaded");
+        Console.WriteLine($"Parsed status: {parsedStatus}");
+
+        // Get int value of enum
+        int intValue = status.GetIntValue();
+        Console.WriteLine($"Int value: {intValue}");
+
+        // Get value descriptions
+        var valueDescriptions = EnumExtensions.GetValueDescriptions<ExecutionState>();
+        foreach (var (Value, Description) in valueDescriptions)
+        {
+            Console.WriteLine($"{Value}: {Description}");
+        }
+
+        // Convert execution state to color hex
+        ExecutionState state = ExecutionState.Completed;
+        string colorHex = state.ToColorHex();
+        Console.WriteLine($"Color hex: {colorHex}");
+
+        // Check if state is terminal
+        bool isTerminal = state.IsTerminal();
+        Console.WriteLine($"Is terminal: {isTerminal}");
+    }
+}
+```
+
 ## MemoryPluginCache
 
 [... existing content ...]
