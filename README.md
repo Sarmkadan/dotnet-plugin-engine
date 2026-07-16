@@ -126,3 +126,29 @@ else
     logger.LogError("Installation failed: {Message}", installResult.Message);
 }
 ```
+## RateLimitMiddleware
+
+The `RateLimitMiddleware` provides rate limiting for plugin operations to prevent resource exhaustion. It uses a token bucket algorithm to enforce fair rate limiting across different plugins, allowing a configurable number of operations per time window.
+
+Here's a realistic usage example:
+
+```csharp
+using PluginEngine.Middleware;
+using Microsoft.Extensions.DependencyInjection;
+
+// Setup dependency injection
+var services = new ServiceCollection();
+services.AddPluginEngine();
+
+var serviceProvider = services.BuildServiceProvider();
+var pipeline = serviceProvider.GetRequiredService<PluginMiddlewarePipeline>();
+
+// Configure rate limiting: 50 operations per second with a 2-second window
+pipeline.UseRateLimit(maxTokensPerSecond: 50, windowSizeSeconds: 2);
+
+// The middleware will now enforce rate limits on all plugin operations
+// Each plugin gets its own token bucket, and tokens refill at the configured rate
+
+// You can also configure it globally with default values (100 operations per second)
+pipeline.UseRateLimit();
+```
