@@ -313,6 +313,92 @@ public class CustomPluginRepository : IPluginRepository
 }
 ```
 
+## IntegrationTests
+
+The `IntegrationTests` class contains comprehensive integration tests for the plugin engine system, validating end-to-end workflows including dependency resolution, version validation, file system operations, and plugin lifecycle management. It tests critical functionality such as loading plugins with dependencies, validating version constraints, detecting circular dependencies, and managing plugin capabilities.
+
+Here's a realistic usage example leveraging its public members:
+
+```csharp
+using PluginEngine.Domain.Entities;
+using PluginEngine.Services.Implementations;
+using PluginEngine.Utils.Helpers;
+using PluginEngine.Utils.Validators;
+using Microsoft.Extensions.Logging;
+using Moq;
+
+public class IntegrationTestsDemo
+{
+private readonly Mock<ILogger<DependencyResolutionService>> _mockDepLogger;
+private readonly Mock<ILogger<PluginValidator>> _mockValLogger;
+private readonly Mock<ILogger<VersionHelper>> _mockVerLogger;
+private readonly Mock<ILogger<FileSystemHelper>> _mockFsLogger;
+private readonly Mock<IPluginLoaderService> _mockLoaderService;
+
+public IntegrationTestsDemo()
+{
+_mockDepLogger = new Mock<ILogger<DependencyResolutionService>>();
+_mockValLogger = new Mock<ILogger<PluginValidator>>();
+_mockVerLogger = new Mock<ILogger<VersionHelper>>();
+_mockFsLogger = new Mock<ILogger<FileSystemHelper>>();
+_mockLoaderService = new Mock<IPluginLoaderService>();
+}
+
+public void DemonstrateIntegrationTests()
+{
+// Test plugin creation and dependency resolution
+var pluginId = Guid.NewGuid();
+var plugin = new Plugin
+{
+Id = pluginId,
+Name = "MainPlugin",
+Version = "1.0.0",
+AssemblyPath = $"/plugins/MainPlugin.dll"
+};
+
+var dependency = new PluginDependency
+{
+PluginId = pluginId,
+DependencyPluginId = Guid.NewGuid(),
+MinimumVersion = "1.0.0"
+};
+plugin.AddDependency(dependency);
+
+// Test version validation
+var versionHelper = new VersionHelper(_mockVerLogger.Object);
+bool satisfiesConstraint = versionHelper.SatisfiesConstraint("1.5.0", ">=1.0.0");
+Console.WriteLine($"Version constraint satisfied: {satisfiesConstraint}");
+
+// Test file system operations
+var fsHelper = new FileSystemHelper(_mockFsLogger.Object);
+string testDir = Path.Combine(Path.GetTempPath(), $"plugin-test-{Guid.NewGuid()}");
+bool directoryCreated = fsHelper.EnsureDirectoryExists(testDir);
+Console.WriteLine($"Directory created: {directoryCreated}");
+
+// Test plugin capabilities
+var capability = new PluginCapability
+{
+PluginId = pluginId,
+Name = "DataTransform",
+Version = "1.0.0",
+InterfaceTypeName = "ITransform",
+Tags = "data,transform"
+};
+plugin.AddCapability(capability);
+
+var transformCapabilities = plugin.Capabilities
+.Where(c => c.Tags?.Contains("transform") == true)
+.ToList();
+Console.WriteLine($"Found {transformCapabilities.Count} transform capabilities");
+
+// Test circular dependency detection
+var resolutionService = new DependencyResolutionService(_mockLoaderService.Object);
+bool hasCircular = resolutionService.HasCircularDependenciesAsync(plugin).Result;
+Console.WriteLine($"Has circular dependencies: {hasCircular}");
+}
+}
+```
+
 ## IPluginFormatter
 
 The `IPluginFormatter` interface defines the contract for formatting plugin data in various output formats. It provides methods for formatting individual plugins, collections of plugins, detailed reports, and health information. This interface enables consistent output formatting across different serialization formats like JSON, CSV, and XML.
