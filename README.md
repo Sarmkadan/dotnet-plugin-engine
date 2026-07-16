@@ -313,6 +313,86 @@ public class CustomPluginRepository : IPluginRepository
 }
 ```
 
+## IPluginFormatter
+
+The `IPluginFormatter` interface defines the contract for formatting plugin data in various output formats. It provides methods for formatting individual plugins, collections of plugins, detailed reports, and health information. This interface enables consistent output formatting across different serialization formats like JSON, CSV, and XML.
+
+Here's a realistic usage example leveraging its public members:
+
+```csharp
+using PluginEngine.Formatters;
+using PluginEngine.Domain.Entities;
+using System;
+using System.Collections.Generic;
+
+public class PluginFormatterDemo
+{
+    public void DemonstratePluginFormatter()
+    {
+        // Create a plugin instance
+        var plugin = new Plugin
+        {
+            Id = Guid.NewGuid(),
+            Name = "SamplePlugin",
+            Status = PluginStatus.Loaded,
+            DependencyCount = 3,
+            CapabilityCount = 2,
+            LoadTimeMs = 150,
+            LastAccessedUtc = DateTime.UtcNow,
+            IsHealthy = true,
+            Issues = new List<string>()
+        };
+
+        // Create formatter factory
+        var formatterFactory = new FormatterFactory(
+            new JsonPluginFormatter(),
+            new CsvPluginFormatter(),
+            new XmlPluginFormatter()
+        );
+
+        // Get a formatter for JSON output
+        var jsonFormatter = formatterFactory.GetFormatter("json");
+        if (jsonFormatter != null)
+        {
+            string jsonOutput = jsonFormatter.FormatPluginAsync(plugin).Result;
+            Console.WriteLine("JSON Output:");
+            Console.WriteLine(jsonOutput);
+        }
+
+        // Get a formatter for CSV output
+        var csvFormatter = formatterFactory.GetFormatter("csv");
+        if (csvFormatter != null)
+        {
+            string csvOutput = csvFormatter.FormatPluginAsync(plugin).Result;
+            Console.WriteLine("\nCSV Output:");
+            Console.WriteLine(csvOutput);
+        }
+
+        // Get all supported formats
+        var supportedFormats = formatterFactory.GetSupportedFormats();
+        Console.WriteLine($"\nSupported formats: {string.Join(", ", supportedFormats)}");
+
+        // Format a health report
+        var healthInfo = new PluginHealthInfo
+        {
+            PluginId = plugin.Id,
+            PluginName = plugin.Name,
+            Status = plugin.Status.ToString(),
+            DependencyCount = plugin.DependencyCount,
+            CapabilityCount = plugin.CapabilityCount,
+            LoadTimeMs = plugin.LoadTimeMs,
+            LastAccessedUtc = plugin.LastAccessedUtc,
+            IsHealthy = plugin.IsHealthy,
+            Issues = plugin.Issues
+        };
+
+        string healthReport = formatterFactory.GetFormatter("json")?.FormatHealthReportAsync(healthInfo).Result;
+        Console.WriteLine("\nHealth Report:");
+        Console.WriteLine(healthReport);
+    }
+}
+```
+
 ## MemoryPluginCache
 
 [... existing content ...]
