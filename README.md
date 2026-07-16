@@ -980,6 +980,90 @@ public class DependencyResolutionDemo
 
 ```
 
+## PluginLoaderService
+
+The `PluginLoaderService` class provides the core functionality for loading, unloading, and managing plugins within the plugin engine. It handles plugin discovery from directories, individual plugin loading with proper assembly isolation using `AssemblyLoadContext`, plugin lifecycle management through `IPluginLifecycle` interfaces, and provides comprehensive querying capabilities for loaded plugins. The service supports both synchronous and asynchronous operations and maintains a registry of all currently loaded plugins.
+
+Here's a realistic usage example that demonstrates the complete plugin loading workflow:
+
+```csharp
+using PluginEngine.Services.Implementations;
+using PluginEngine.Services.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+
+public class PluginLoaderDemo
+{
+    private readonly IPluginLoaderService _pluginLoader;
+    private readonly ILogger<PluginLoaderDemo> _logger;
+
+    public PluginLoaderDemo(IPluginLoaderService pluginLoader, ILogger<PluginLoaderDemo> logger)
+    {
+        _pluginLoader = pluginLoader;
+        _logger = logger;
+    }
+
+    public async Task RunAsync()
+    {
+        try
+        {
+            // Load a single plugin from a specific assembly path
+            var pluginPath = @"./plugins/MyPlugin/MyPlugin.dll";
+            _logger.LogInformation("Loading plugin from: {PluginPath}", pluginPath);
+            
+            var plugin = await _pluginLoader.LoadPluginAsync(pluginPath);
+            _logger.LogInformation("Successfully loaded plugin: {PluginName} v{PluginVersion} (ID: {PluginId})",
+                plugin.Name, plugin.Version, plugin.Id);
+
+            // Check if plugin is loaded
+            bool isLoaded = await _pluginLoader.IsPluginLoadedAsync(plugin.Id);
+            _logger.LogInformation("Plugin is loaded: {IsLoaded}", isLoaded);
+
+            // Get loaded plugin details
+            var loadedPlugin = await _pluginLoader.GetLoadedPluginAsync(plugin.Id);
+            _logger.LogInformation("Loaded plugin details: {PluginName} ({PluginStatus})", 
+                loadedPlugin?.Name, loadedPlugin?.Status);
+
+            // Get all loaded plugins
+            var allPlugins = await _pluginLoader.GetAllLoadedPluginsAsync();
+            _logger.LogInformation("Total plugins loaded: {Count}", allPlugins.Count());
+
+            // Load all plugins from a directory
+            var pluginsDirectory = @"./plugins";
+            var directoryPlugins = await _pluginLoader.LoadPluginsFromDirectoryAsync(pluginsDirectory);
+            _logger.LogInformation("Loaded {Count} plugins from directory", directoryPlugins.Count());
+
+            // Reload a plugin
+            var reloadedPlugin = await _pluginLoader.ReloadPluginAsync(plugin.Id);
+            _logger.LogInformation("Plugin reloaded successfully: {PluginName}", reloadedPlugin.Name);
+
+            // Unload a plugin
+            bool unloaded = await _pluginLoader.UnloadPluginAsync(plugin.Id);
+            _logger.LogInformation("Plugin unloaded: {Unloaded}", unloaded);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during plugin loading operations");
+            throw;
+        }
+    }
+}
+
+// Usage in DI setup
+var services = new ServiceCollection();
+services.AddLogging(configure => configure.AddConsole());
+services.AddPluginEngine();
+
+var serviceProvider = services.BuildServiceProvider();
+var pluginLoader = serviceProvider.GetRequiredService<IPluginLoaderService>();
+
+var demo = new PluginLoaderDemo(pluginLoader, serviceProvider.GetRequiredService<ILogger<PluginLoaderDemo>>());
+await demo.RunAsync();
+```
+
 ## IPluginDependencyResolver
 
 The `IPluginDependencyResolver` interface provides advanced dependency resolution capabilities for plugin systems. It computes the topologically sorted installation order for plugins, detects version conflicts between plugins, and generates comprehensive resolution plans that include all transitive dependencies, conflict detection, and recommended actions. This resolver operates at a higher level than `IDependencyResolutionService`, producing actionable plans for plugin installation workflows.
