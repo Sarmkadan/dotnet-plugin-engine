@@ -59,7 +59,61 @@ public class StringExtensionsDemo
         Console.WriteLine($"Formatted bytes: {formattedBytes}");
     }
 }
-```
+
+## TypeExtensions
+
+The `TypeExtensions` class provides a set of extension methods for type operations in the plugin system. It offers utilities for discovering interfaces, attributes, and type metadata. These extensions simplify tasks such as checking if a type implements an interface, getting types that implement an interface, and getting type metadata.
+
+Here's a realistic usage example leveraging its public members:
+
+```csharp
+using PluginEngine.Utils.Extensions;
+using System;
+using System.Reflection;
+
+public class TypeExtensionsDemo
+{
+    public void DemonstrateTypeExtensions()
+    {
+        // Check if a type implements an interface
+        Type type = typeof(string);
+        bool implementsInterface = type.ImplementsInterface<IComparable>();
+        Console.WriteLine($"Implements IComparable: {implementsInterface}");
+
+        // Get types that implement an interface
+        Assembly assembly = Assembly.GetExecutingAssembly();
+        var typesImplementingInterface = assembly.GetTypesImplementing<IComparable>();
+        Console.WriteLine($"Types implementing IComparable: {string.Join(", ", typesImplementingInterface)}");
+
+        // Get loadable types from an assembly
+        var loadableTypes = assembly.GetLoadableTypes();
+        Console.WriteLine($"Loadable types: {string.Join(", ", loadableTypes)}");
+
+        // Check if a type has an attribute
+        bool hasAttribute = type.HasAttribute<SerializableAttribute>();
+        Console.WriteLine($"Has SerializableAttribute: {hasAttribute}");
+
+        // Get an attribute from a type
+        var attribute = type.GetAttribute<SerializableAttribute>();
+        Console.WriteLine($"SerializableAttribute: {attribute}");
+
+        // Check if a type is a concrete class
+        bool isConcreteClass = type.IsConcreteClass();
+        Console.WriteLine($"Is concrete class: {isConcreteClass}");
+
+        // Get full metadata about a type
+        string fullMetadata = type.GetFullMetadata();
+        Console.WriteLine($"Full metadata: {fullMetadata}");
+
+        // Check if a type is JSON serializable
+        bool isJsonSerializable = type.IsJsonSerializable();
+        Console.WriteLine($"Is JSON serializable: {isJsonSerializable}");
+
+        // Get public property values from an object
+        var propertyValues = new object().GetPropertyValues();
+        Console.WriteLine($"Property values: {string.Join(", ", propertyValues)}");
+    }
+}
 
 ## MemoryPluginCache
 
