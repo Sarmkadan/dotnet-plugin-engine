@@ -610,6 +610,96 @@ Here's a realistic usage example leveraging its public members:
 
 ```csharp
 using FluentAssertions;
+
+## FileSystemHelperTests
+
+The `FileSystemHelperTests` class contains unit tests for the `FileSystemHelper` class, which provides utility methods for file system operations commonly used in plugin processing. It tests directory creation, file discovery, file operations, directory size calculations, and recursive directory deletion. These tests validate that file system operations handle various edge cases including invalid paths, non-existent files, and permission scenarios.
+
+Here's a realistic usage example leveraging its public members:
+
+```csharp
+using Microsoft.Extensions.Logging;
+using Moq;
+using PluginEngine.Utils.Helpers;
+using System;
+using System.IO;
+
+public class FileSystemHelperTestsDemo : IDisposable
+{
+    private readonly Mock<ILogger<FileSystemHelper>> _mockLogger = new();
+    private readonly FileSystemHelper _fileSystemHelper;
+    private readonly string _testDirectory;
+    private readonly string _testFile;
+
+    public FileSystemHelperTestsDemo()
+    {
+        _testDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+        _testFile = Path.Combine(_testDirectory, "test-plugin.dll");
+        
+        _fileSystemHelper = new FileSystemHelper(_mockLogger.Object);
+    }
+
+    public void Dispose()
+    {
+        try
+        {
+            if (Directory.Exists(_testDirectory))
+            {
+                Directory.Delete(_testDirectory, true);
+            }
+        }
+        catch
+        {
+            // Best effort cleanup
+        }
+    }
+
+    public void DemonstrateFileSystemHelperTests()
+    {
+        // Test ensuring directory exists
+        bool directoryCreated = _fileSystemHelper.EnsureDirectoryExists(_testDirectory);
+        Console.WriteLine($"Directory created: {directoryCreated}");
+        
+        // Test discovering plugins in directory
+        var plugins = _fileSystemHelper.DiscoverPlugins(_testDirectory);
+        Console.WriteLine($"Plugins discovered: {plugins.Count}");
+        
+        // Create a test file
+        Directory.CreateDirectory(_testDirectory);
+        File.WriteAllText(_testFile, "test content");
+        
+        // Test getting file info
+        var fileInfo = _fileSystemHelper.GetFileInfo(_testFile);
+        if (fileInfo != null)
+        {
+            Console.WriteLine($"File size: {fileInfo.Size} bytes");
+            Console.WriteLine($"Modified time: {fileInfo.ModifiedTime}");
+        }
+        
+        // Test safe file copy
+        string destinationFile = Path.Combine(_testDirectory, "copied-plugin.dll");
+        bool copied = _fileSystemHelper.SafeCopyFile(_testFile, destinationFile, overwrite: true);
+        Console.WriteLine($"File copied successfully: {copied}");
+        
+        // Test directory size calculation
+        long directorySize = _fileSystemHelper.GetDirectorySize(_testDirectory);
+        Console.WriteLine($"Directory size: {directorySize} bytes");
+        
+        // Test recursive directory deletion
+        bool deleted = _fileSystemHelper.DeleteDirectoryRecursive(_testDirectory);
+        Console.WriteLine($"Directory deleted: {deleted}");
+    }
+}
+```
+
+## HotSwapServiceTests
+
+The `HotSwapServiceTests` class contains unit tests for the `HotSwapService` class, which provides functionality for hot-swapping plugin assemblies at runtime. It tests various operations including checking if a plugin can be swapped, performing plugin swaps with validation, rolling back swaps, managing swap history, and handling post-swap callbacks. The tests validate that the hot swap functionality properly handles different plugin states, validates inputs, and maintains swap history.
+
+Here's a realistic usage example leveraging its public members:
+
+```csharp
+using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using PluginEngine.Domain.Entities;
