@@ -546,70 +546,108 @@ var demo = new PluginDependencyResolverDemo(dependencyResolver,
 await demo.RunAsync();
 ```
 
-## IVersioningService
 
-The `IVersioningService` interface and its associated `SemanticVersion` class provide functionality for managing semantic versioning in the plugin system. The `SemanticVersion` class represents a semantic version with `Major`, `Minor`, `Patch`, `Prerelease`, and `Metadata` components, enabling version parsing, comparison, and formatting operations.
+The `VersioningService` class provides comprehensive version management functionality for the plugin engine, implementing the `IVersioningService` interface. It handles semantic version validation, parsing, comparison, and manipulation operations essential for plugin versioning and compatibility checking.
 
+### Key Features
 
-Here's a realistic usage example that demonstrates version parsing and formatting:
+- Validates version strings using standard .NET `Version` parsing
+- Parses semantic versions with support for prerelease labels and build metadata
+- Compares versions to determine ordering and compatibility
+- Increments versions by major, minor, or patch components
+- Checks version constraint satisfaction for dependency management
+- Retrieves version history and latest versions for entities
+
+### Public Members
+
+```
+public bool ValidateVersion(string version)
+public bool IsSatisfiedBy(string constraint, string version)
+public int CompareVersions(string version1, string version2)
+public SemanticVersion ParseVersion(string versionString)
+public Task<IEnumerable<Domain.Entities.VersionInfo>> GetVersionHistoryAsync(Guid entityId, CancellationToken cancellationToken = default)
+public string IncrementVersion(string currentVersion, VersionPart part)
+public bool AreCompatible(string version1, string version2)
+public Task<Domain.Entities.VersionInfo?> GetLatestVersionAsync(Guid entityId, CancellationToken cancellationToken = default)
+```
+
+Here's a realistic usage example that demonstrates the complete versioning workflow:
 
 ```csharp
+using PluginEngine.Services.Implementations;
 using PluginEngine.Services.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 public class VersioningDemo
 {
-    private readonly IVersioningService _versioningService;
+    private readonly VersioningService _versioningService;
 
-    public VersioningDemo(IVersioningService versioningService)
+    public VersioningDemo(VersioningService versioningService)
     {
         _versioningService = versioningService;
     }
 
-    public void Run()
+    public async Task RunAsync()
     {
-        // Parse a version string into SemanticVersion
-        var versionString = "2.5.1-beta.1+20240716";
-        var semanticVersion = _versioningService.ParseVersion(versionString);
+        // Validate version strings
+        bool isValid1 = _versioningService.ValidateVersion("2.5.1");
+        bool isValid2 = _versioningService.ValidateVersion("invalid-version");
+        Console.WriteLine($"'2.5.1' is valid: {isValid1}");
+        Console.WriteLine($"'invalid-version' is valid: {isValid2}");
 
-        if (semanticVersion != null)
-        {
-            Console.WriteLine($"Parsed version: {semanticVersion}");
-            Console.WriteLine($"Major: {semanticVersion.Major}");
-            Console.WriteLine($"Minor: {semanticVersion.Minor}");
-            Console.WriteLine($"Patch: {semanticVersion.Patch}");
-            Console.WriteLine($"Prerelease: {semanticVersion.Prerelease}");
-            Console.WriteLine($"Metadata: {semanticVersion.Metadata}");
-        }
+        // Parse semantic versions
+        var semanticVersion = _versioningService.ParseVersion("2.5.1-beta.1+20240716");
+        Console.WriteLine($"\nParsed version: {semanticVersion}");
+        Console.WriteLine($"Major: {semanticVersion.Major}");
+        Console.WriteLine($"Minor: {semanticVersion.Minor}");
+        Console.WriteLine($"Patch: {semanticVersion.Patch}");
+        Console.WriteLine($"Prerelease: {semanticVersion.Prerelease}");
+        Console.WriteLine($"Metadata: {semanticVersion.Metadata}");
 
-        // Create a SemanticVersion directly
-        var customVersion = new SemanticVersion
-        {
-            Major = 3,
-            Minor = 0,
-            Patch = 0,
-            Prerelease = "rc.1",
-            Metadata = "build.12345"
-        };
+        // Compare versions
+        int comparison1 = _versioningService.CompareVersions("2.0.0", "1.9.9");
+        int comparison2 = _versioningService.CompareVersions("1.5.0", "1.5.0");
+        int comparison3 = _versioningService.CompareVersions("1.2.3", "1.2.4");
+        Console.WriteLine($"\nVersion comparisons:");
+        Console.WriteLine($"2.0.0 vs 1.9.9: {comparison1} (2.0.0 > 1.9.9)");
+        Console.WriteLine($"1.5.0 vs 1.5.0: {comparison2} (equal)");
+        Console.WriteLine($"1.2.3 vs 1.2.4: {comparison3} (1.2.3 < 1.2.4)");
 
-        Console.WriteLine($"Custom version: {customVersion}");
+        // Check version constraints
+        bool satisfiesMinor = _versioningService.IsSatisfiedBy(">=1.5.0", "1.6.0");
+        bool satisfiesExact = _versioningService.IsSatisfiedBy("==2.0.0", "2.0.0");
+        bool satisfiesMajor = _versioningService.IsSatisfiedBy("2", "2.5.1");
+        Console.WriteLine($"\nConstraint checks:");
+        Console.WriteLine($"1.6.0 >= 1.5.0: {satisfiesMinor}");
+        Console.WriteLine($"2.0.0 == 2.0.0: {satisfiesExact}");
+        Console.WriteLine($"2.5.1 starts with major 2: {satisfiesMajor}");
 
-        // Validate a version string
-        bool isValid = _versioningService.ValidateVersion("1.2.3");
-        Console.WriteLine($"Is '1.2.3' valid: {isValid}");
-
-        // Compare two versions
-        int comparison = _versioningService.CompareVersions("2.0.0", "1.9.9");
-        Console.WriteLine($"2.0.0 compared to 1.9.9: {comparison} (2.0.0 > 1.9.9)");
+        // Increment versions
+        string majorVersion = _versioningService.IncrementVersion("1.2.3", VersionPart.Major);
+        string minorVersion = _versioningService.IncrementVersion("1.2.3", VersionPart.Minor);
+        string patchVersion = _versioningService.IncrementVersion("1.2.3", VersionPart.Patch);
+        Console.WriteLine($"\nIncremented versions:");
+        Console.WriteLine($"Major increment: 1.2.3 -> {majorVersion}");
+        Console.WriteLine($"Minor increment: 1.2.3 -> {minorVersion}");
+        Console.WriteLine($"Patch increment: 1.2.3 -> {patchVersion}");
 
         // Check version compatibility
-        bool isCompatible = _versioningService.AreCompatible("1.5.0", "1.5.2");
-        Console.WriteLine($"1.5.0 and 1.5.2 compatible: {isCompatible}");
+        bool compatible1 = _versioningService.AreCompatible("1.5.0", "1.5.2");
+        bool compatible2 = _versioningService.AreCompatible("2.0.0", "1.9.9");
+        Console.WriteLine($"\nCompatibility checks:");
+        Console.WriteLine($"1.5.0 and 1.5.2 compatible: {compatible1}");
+        Console.WriteLine($"2.0.0 and 1.9.9 compatible: {compatible2}");
 
-        // Increment a version
-        string incrementedVersion = _versioningService.IncrementVersion("1.2.3", VersionPart.Major);
-        Console.WriteLine($"Incremented major version: {incrementedVersion}");
+        // Get version history (returns empty collection in this implementation)
+        var history = await _versioningService.GetVersionHistoryAsync(Guid.NewGuid());
+        Console.WriteLine($"\nVersion history count: {history.Count()}");
+
+        // Get latest version (returns null in this implementation)
+        var latest = await _versioningService.GetLatestVersionAsync(Guid.NewGuid());
+        Console.WriteLine($"Latest version: {(latest?.ToString() ?? "null")}");
     }
 }
 
@@ -618,9 +656,9 @@ var services = new ServiceCollection();
 services.AddPluginEngine();
 
 var serviceProvider = services.BuildServiceProvider();
-var versioningService = serviceProvider.GetRequiredService<IVersioningService>();
+var versioningService = serviceProvider.GetRequiredService<VersioningService>();
 
 var demo = new VersioningDemo(versioningService);
-demo.Run();
+await demo.RunAsync();
 ```
 
