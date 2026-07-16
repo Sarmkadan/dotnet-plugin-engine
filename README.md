@@ -50,3 +50,79 @@ if (homePageResult.Success)
     Console.WriteLine($"Categories: {homePage.Categories.Count}");
 }
 ```
+
+## IPluginMarketplaceService
+
+The `IPluginMarketplaceService` is the core contract for interacting with the plugin marketplace. It provides methods for searching plugins, retrieving plugin details, checking version compatibility, and installing plugins from the marketplace.
+
+Here's a realistic usage example:
+
+```csharp
+using PluginEngine.Marketplace;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+
+// Setup dependency injection
+var services = new ServiceCollection();
+services.AddMemoryCache();
+services.AddLogging(configure => configure.AddConsole());
+services.AddPluginEngineMarketplace();
+
+var serviceProvider = services.BuildServiceProvider();
+var marketplaceService = serviceProvider.GetRequiredService<IPluginMarketplaceService>();
+var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
+
+// Example 1: Search for plugins matching a query
+var searchResult = await marketplaceService.SearchAsync(
+    new MarketplaceSearchFilter { Query = "logging", PageSize = 20 }
+);
+
+if (searchResult.Success)
+{
+    Console.WriteLine($"Found {searchResult.Data?.Count} plugins matching 'logging'");
+    foreach (var entry in searchResult.Data ?? [])
+    {
+        Console.WriteLine($"- {entry.Name} (v{entry.LatestVersion}) by {entry.Author}");
+    }
+}
+
+// Example 2: Get detailed information about a specific plugin
+guid samplePluginId = Guid.Parse("123e4567-e89b-12d3-a456-426614174000");
+var entryResult = await marketplaceService.GetEntryAsync(samplePluginId);
+
+if (entryResult.Success && entryResult.Data != null)
+{
+    var pluginEntry = entryResult.Data;
+    Console.WriteLine($"Plugin: {pluginEntry.Name}");
+    Console.WriteLine($"Description: {pluginEntry.Description}");
+    Console.WriteLine($"Available versions: {string.Join(", ", pluginEntry.AvailableVersions?.Select(v => v.Version) ?? [])}");
+}
+
+// Example 3: Check compatibility between a plugin version and engine version
+var compatibilityResult = await marketplaceService.CheckCompatibilityAsync(
+    samplePluginId,
+    "1.2.3",
+    "9.0"
+);
+
+if (compatibilityResult.Success && compatibilityResult.Data != null)
+{
+    Console.WriteLine($"Compatibility: {compatibilityResult.Data}");
+}
+
+// Example 4: Install a plugin to a target directory
+var installResult = await marketplaceService.InstallAsync(
+    samplePluginId,
+    "1.2.3",
+    @"./plugins/my-plugin"
+);
+
+if (installResult.Success)
+{
+    Console.WriteLine($"Plugin installed successfully: {installResult.Message}");
+}
+else
+{
+    logger.LogError("Installation failed: {Message}", installResult.Message);
+}
+```
