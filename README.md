@@ -399,6 +399,63 @@ Console.WriteLine($"Has circular dependencies: {hasCircular}");
 }
 ```
 
+## PluginExecutionContextTests
+
+The `PluginExecutionContextTests` class contains unit tests for the `PluginExecutionContext` class, verifying its initialization, state transitions, data storage, and summary generation capabilities. It tests scenarios such as creating new contexts, completing operations successfully or with failures, cancelling operations, and storing arbitrary execution data.
+
+Here's a realistic usage example leveraging its public members:
+
+```csharp
+using PluginEngine.Domain.Entities;
+using PluginEngine.Execution;
+using System;
+
+public class PluginExecutionContextDemo
+{
+    public void DemonstratePluginExecutionContext()
+    {
+        // Create a plugin instance
+        var plugin = new Plugin
+        {
+            Id = Guid.NewGuid(),
+            Name = "SamplePlugin",
+            Version = "1.0.0",
+            AssemblyPath = "/plugins/SamplePlugin.dll"
+        };
+
+        // Create a new execution context for a plugin operation
+        var context = new PluginExecutionContext
+        {
+            Plugin = plugin,
+            OperationType = "Execute"
+        };
+
+        Console.WriteLine($"Execution ID: {context.ExecutionId}");
+        Console.WriteLine($"State: {context.State}");
+        Console.WriteLine($"Started at: {context.StartedAtUtc}");
+        Console.WriteLine($"Completed at: {context.CompletedAtUtc}");
+
+        // Store arbitrary data in the context
+        context.Data["input"] = new { Param1 = "value1", Param2 = 42 };
+        context.Data["timestamp"] = DateTime.UtcNow;
+
+        // Complete the operation successfully
+        context.CompleteSuccess(new { Result = "Processed successfully" });
+
+        // Get execution summary
+        var summary = context.GetSummary();
+        Console.WriteLine($"Operation successful: {summary.IsSuccessful}");
+        Console.WriteLine($"Plugin name: {summary.PluginName}");
+        Console.WriteLine($"Duration: {context.Duration.TotalMilliseconds}ms");
+        Console.WriteLine($"Summary: {summary}");
+
+        // Access metrics
+        context.Metrics.CustomMetrics["itemsProcessed"] = 100;
+        Console.WriteLine($"Items processed: {context.Metrics.CustomMetrics["itemsProcessed"]}");
+    }
+}
+```
+
 ## IPluginFormatter
 
 The `IPluginFormatter` interface defines the contract for formatting plugin data in various output formats. It provides methods for formatting individual plugins, collections of plugins, detailed reports, and health information. This interface enables consistent output formatting across different serialization formats like JSON, CSV, and XML.
