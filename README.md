@@ -76,3 +76,54 @@ Console.WriteLine($"Dependency record valid? {dependency.IsValid()}");
 // Show creation timestamp
 Console.WriteLine($"Created at: {dependency.CreatedAt:u}");
 ```
+
+## PluginMetadata
+
+The `PluginMetadata` class represents the core metadata for a plugin, including identification, versioning, assembly details, and custom properties. It provides methods to manage custom metadata through key-value pairs and is used throughout the plugin engine for discovery, validation, and dependency resolution.
+
+### Usage Example
+
+```csharp
+using PluginEngine.Domain.Entities;
+using System;
+
+// Create plugin metadata for a sample plugin
+var metadata = new PluginMetadata
+{
+    Id = Guid.NewGuid(),
+    PluginId = Guid.Parse("a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d"),
+    PluginName = "SamplePlugin",
+    PluginVersion = "1.0.0",
+    AssemblyName = "SamplePlugin.Core",
+    AssemblyVersion = "1.0.0.0",
+    TargetFramework = ".NET 8.0",
+    Author = "Acme Corp",
+    Company = "Acme Corporation",
+    Description = "A sample plugin demonstrating plugin metadata usage",
+    License = "MIT",
+    RepositoryUrl = "https://github.com/acme/sample-plugin",
+    MinimumClrVersion = "8.0.0",
+    EngineVersionConstraint = ">=1.0.0 <2.0.0",
+    IsSigned = true,
+    PublicKeyToken = "a1b2c3d4e5f67890",
+    CreatedAt = DateTime.UtcNow
+};
+
+// Set and retrieve custom properties
+metadata.SetCustomProperty("customSetting", "value123");
+metadata.SetCustomProperty("enabledFeatures", "featureA,featureB");
+
+var customSetting = metadata.GetCustomProperty("customSetting");
+Console.WriteLine($"Custom setting: {customSetting}");
+
+// Remove a custom property
+var wasRemoved = metadata.RemoveCustomProperty("enabledFeatures");
+Console.WriteLine($"Feature settings removed: {wasRemoved}");
+
+// Display core metadata
+Console.WriteLine($"Plugin: {metadata.PluginName} v{metadata.PluginVersion}");
+Console.WriteLine($"Assembly: {metadata.AssemblyName} v{metadata.AssemblyVersion}");
+Console.WriteLine($"Author: {metadata.Author}");
+Console.WriteLine($"License: {metadata.License}");
+Console.WriteLine($"Created: {metadata.CreatedAt:u}");
+```
