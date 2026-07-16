@@ -1201,6 +1201,153 @@ var demo = new PluginLoaderDemo(pluginLoader, serviceProvider.GetRequiredService
 await demo.RunAsync();
 ```
 
+## PluginRepository
+
+The `PluginRepository` class provides data access operations for plugin entities using in-memory storage. It implements the `IPluginRepository` interface and serves as the primary data access layer for plugin metadata, dependencies, and capabilities. The repository handles CRUD operations for plugins, manages plugin dependencies through bidirectional relationships, and provides search functionality for plugin discovery.
+
+Here's a realistic usage example that demonstrates the complete plugin repository workflow:
+
+```csharp
+using PluginEngine.Data.Repositories;
+using PluginEngine.Domain.Entities;
+using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+
+public class PluginRepositoryDemo
+{
+    private readonly PluginRepository _repository;
+
+    public PluginRepositoryDemo(PluginRepository repository)
+    {
+        _repository = repository;
+    }
+
+    public async Task RunAsync()
+    {
+        // Create a new plugin
+        var newPlugin = new Plugin
+        {
+            Name = "Logging Plugin",
+            Description = "Provides logging capabilities for the plugin engine",
+            Author = "Plugin Engine Team",
+            Version = "1.0.0",
+            Status = PluginStatus.Active,
+            CreatedAt = DateTime.UtcNow,
+            ModifiedAt = DateTime.UtcNow
+        };
+
+        // Add the plugin to the repository
+        var addedPlugin = await _repository.AddAsync(newPlugin);
+        Console.WriteLine($"Added plugin: {addedPlugin.Name} (ID: {addedPlugin.Id})");
+
+        // Add dependencies to the plugin
+        var dependency1 = new PluginDependency
+        {
+            Name = "Microsoft.Extensions.Logging",
+            Version = "8.0.0",
+            Description = "Logging abstractions"
+        };
+
+        var dependency2 = new PluginDependency
+        {
+            Name = "Serilog",
+            Version = "3.0.0",
+            Description = "Structured logging"
+        };
+
+        await _repository.AddDependencyAsync(addedPlugin.Id, dependency1);
+        await _repository.AddDependencyAsync(addedPlugin.Id, dependency2);
+        Console.WriteLine("Added dependencies to plugin");
+
+        // Add capabilities to the plugin
+        var capability1 = new PluginCapability
+        {
+            Name = "LogMessage",
+            Description = "Logs a message with specified level"
+        };
+
+        var capability2 = new PluginCapability
+        {
+            Name = "LogError",
+            Description = "Logs an error message"
+        };
+
+        await _repository.AddCapabilityAsync(addedPlugin.Id, capability1);
+        await _repository.AddCapabilityAsync(addedPlugin.Id, capability2);
+        Console.WriteLine("Added capabilities to plugin");
+
+        // Get the plugin by ID
+        var retrievedPlugin = await _repository.GetByIdAsync(addedPlugin.Id);
+        Console.WriteLine($"Retrieved plugin: {retrievedPlugin?.Name}");
+
+        // Get all plugins
+        var allPlugins = await _repository.GetAllAsync();
+        Console.WriteLine($"Total plugins in repository: {allPlugins.Count()}");
+
+        // Search for plugins
+        var loggingPlugins = await _repository.SearchAsync("Logging");
+        Console.WriteLine($"Found {loggingPlugins.Count()} plugins matching 'Logging'");
+
+        // Get plugins by status
+        var activePlugins = await _repository.GetByStatusAsync(PluginStatus.Active);
+        Console.WriteLine($"Active plugins: {activePlugins.Count()}");
+
+        // Get dependencies for the plugin
+        var dependencies = await _repository.GetDependenciesAsync(addedPlugin.Id);
+        Console.WriteLine($"Plugin has {dependencies.Count()} dependencies:");
+        foreach (var dep in dependencies)
+        {
+            Console.WriteLine($" - {dep.Name} v{dep.Version}");
+        }
+
+        // Get capabilities for the plugin
+        var capabilities = await _repository.GetCapabilitiesAsync(addedPlugin.Id);
+        Console.WriteLine($"Plugin has {capabilities.Count()} capabilities:");
+        foreach (var cap in capabilities)
+        {
+            Console.WriteLine($" - {cap.Name}: {cap.Description}");
+        }
+
+        // Update the plugin
+        retrievedPlugin!.Description = "Enhanced logging capabilities with structured logging support";
+        var updated = await _repository.UpdateAsync(retrievedPlugin);
+        Console.WriteLine($"Plugin updated: {updated}");
+
+        // Check if plugin exists
+        var exists = await _repository.ExistsAsync(addedPlugin.Id);
+        Console.WriteLine($"Plugin exists: {exists}");
+
+        // Get plugin count
+        var count = await _repository.CountAsync();
+        Console.WriteLine($"Total plugins in repository: {count}");
+
+        // Remove a dependency
+        var dependencyToRemove = dependencies.FirstOrDefault();
+        if (dependencyToRemove != null)
+        {
+            var removed = await _repository.RemoveDependencyAsync(addedPlugin.Id, dependencyToRemove.Id);
+            Console.WriteLine($"Dependency removed: {removed}");
+        }
+
+        // Delete the plugin
+        var deleted = await _repository.DeleteAsync(addedPlugin.Id);
+        Console.WriteLine($"Plugin deleted: {deleted}");
+    }
+}
+
+// Usage in DI setup
+var services = new ServiceCollection();
+services.AddPluginEngine();
+
+var serviceProvider = services.BuildServiceProvider();
+var repository = serviceProvider.GetRequiredService<PluginRepository>();
+
+var demo = new PluginRepositoryDemo(repository);
+await demo.RunAsync();
+```
+
 ## IPluginDependencyResolver
 
 The `IPluginDependencyResolver` interface provides advanced dependency resolution capabilities for plugin systems. It computes the topologically sorted installation order for plugins, detects version conflicts between plugins, and generates comprehensive resolution plans that include all transitive dependencies, conflict detection, and recommended actions. This resolver operates at a higher level than `IDependencyResolutionService`, producing actionable plans for plugin installation workflows.
