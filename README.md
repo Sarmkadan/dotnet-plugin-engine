@@ -611,6 +611,119 @@ Here's a realistic usage example leveraging its public members:
 ```csharp
 using FluentAssertions;
 
+## DependencyResolutionServiceTests
+
+The `DependencyResolutionServiceTests` class contains unit tests for the `DependencyResolutionService` class, which provides functionality for resolving plugin dependencies, validating dependency requirements, detecting circular dependencies, and managing dependency caching. It tests scenarios such as resolving single and multiple dependencies, validating required and optional dependencies, checking for circular dependencies, and clearing dependency cache.
+
+Here's a realistic usage example leveraging its public members:
+
+```csharp
+using Microsoft.Extensions.Logging;
+using Moq;
+using PluginEngine.Domain.Entities;
+using PluginEngine.Services.Abstractions;
+using PluginEngine.Services.Implementations;
+using Xunit;
+
+public class DependencyResolutionServiceTestsDemo : IDisposable
+{
+    private readonly Mock<IPluginLoaderService> _mockLoaderService = new();
+    private readonly Mock<ILogger<DependencyResolutionService>> _mockLogger = new();
+    private readonly DependencyResolutionService _resolutionService;
+    private readonly string _tempDir;
+
+    public DependencyResolutionServiceTestsDemo()
+    {
+        _tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+        Directory.CreateDirectory(_tempDir);
+        _resolutionService = new DependencyResolutionService(_mockLoaderService.Object);
+    }
+
+    public void Dispose()
+    {
+        if (Directory.Exists(_tempDir))
+        {
+            Directory.Delete(_tempDir, true);
+        }
+    }
+
+    private static Plugin CreatePlugin(Guid id, string name = "TestPlugin", string version = "1.0.0")
+    {
+        return new Plugin
+        {
+            Id = id,
+            Name = name,
+            Version = version,
+            AssemblyPath = $"/plugins/{name}.dll"
+        };
+    }
+
+    public async Task DemonstrateDependencyResolutionServiceTests()
+    {
+        // Create main plugin with dependencies
+        var mainPluginId = Guid.NewGuid();
+        var corePluginId = Guid.NewGuid();
+        var loggingPluginId = Guid.NewGuid();
+
+        var mainPlugin = CreatePlugin(mainPluginId, "MainApplication");
+        mainPlugin.AddDependency(new PluginDependency
+        {
+            PluginId = mainPluginId,
+            DependencyPluginId = corePluginId,
+            MinimumVersion = "2.0.0",
+            IsOptional = false
+        });
+        mainPlugin.AddDependency(new PluginDependency
+        {
+            PluginId = mainPluginId,
+            DependencyPluginId = loggingPluginId,
+            MinimumVersion = "1.5.0",
+            IsOptional = true
+        });
+
+        // Create dependency plugins
+        var corePlugin = CreatePlugin(corePluginId, "CoreServices", "2.1.0");
+        var loggingPlugin = CreatePlugin(loggingPluginId, "LoggingPlugin", "1.5.0");
+
+        // Setup mock loader service
+        _mockLoaderService
+            .Setup(x => x.GetAllLoadedPluginsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new[] { corePlugin, loggingPlugin });
+
+        // Test dependency resolution
+        var resolvedDependencies = await _resolutionService.ResolveDependenciesAsync(mainPlugin);
+        Console.WriteLine($"Resolved {resolvedDependencies.Count} dependencies");
+        
+        // Test single dependency resolution
+        var singleDependency = mainPlugin.Dependencies.First();
+        var resolvedSingle = await _resolutionService.ResolveSingleDependencyAsync(singleDependency);
+        Console.WriteLine($"Single dependency resolved: {resolvedSingle?.Name}");
+
+        // Test dependency validation
+        var isValid = await _resolutionService.ValidateDependenciesAsync(mainPlugin);
+        Console.WriteLine($"Dependencies valid: {isValid}");
+
+        // Test getting dependents
+        var dependents = await _resolutionService.GetDependentsAsync(corePluginId);
+        Console.WriteLine($"Plugins depending on CoreServices: {dependents.Count}");
+
+        // Test circular dependency detection
+        var hasCircular = await _resolutionService.HasCircularDependenciesAsync(mainPlugin);
+        Console.WriteLine($"Has circular dependencies: {hasCircular}");
+
+        // Test cache behavior
+        var firstCall = await _resolutionService.ResolveDependenciesAsync(mainPlugin);
+        var secondCall = await _resolutionService.ResolveDependenciesAsync(mainPlugin);
+        Console.WriteLine($"Cache returns same instance: {ReferenceEquals(firstCall, secondCall)}");
+
+        // Test cache clearing
+        await _resolutionService.ClearDependencyCacheAsync();
+        var afterClear = await _resolutionService.ResolveDependenciesAsync(mainPlugin);
+        Console.WriteLine($"Cache cleared: {!ReferenceEquals(firstCall, afterClear)}");
+    }
+}
+```
+
 ## FileSystemHelperTests
 
 The `FileSystemHelperTests` class contains unit tests for the `FileSystemHelper` class, which provides utility methods for file system operations commonly used in plugin processing. It tests directory creation, file discovery, file operations, directory size calculations, and recursive directory deletion. These tests validate that file system operations handle various edge cases including invalid paths, non-existent files, and permission scenarios.
