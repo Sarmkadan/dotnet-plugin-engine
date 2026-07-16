@@ -1117,6 +1117,105 @@ public class DependencyResolutionDemo
 
 ```
 
+## LoggingConfiguration
+
+The `LoggingConfiguration` class provides centralized logging configuration for the plugin engine. It controls structured logging, console formatting, file-based logging, performance monitoring, and detailed metrics collection. This configuration enables comprehensive observability for plugin operations and system health monitoring.
+
+Here's a realistic usage example that demonstrates the complete logging configuration workflow:
+
+```csharp
+using PluginEngine.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Threading.Tasks;
+
+public class LoggingConfigurationDemo
+{
+    private readonly LoggingConfiguration _loggingConfig;
+    private readonly ILogger<LoggingConfigurationDemo> _logger;
+
+    public LoggingConfigurationDemo(LoggingConfiguration loggingConfig, ILogger<LoggingConfigurationDemo> logger)
+    {
+        _loggingConfig = loggingConfig;
+        _logger = logger;
+    }
+
+    public async Task RunAsync()
+    {
+        // Configure logging in DI
+        var services = new ServiceCollection();
+        services.AddLogging(configure => configure.AddConsole());
+        services.AddPluginEngineLogging(config =>
+        {
+            // Enable structured logging for better log analysis
+            config.EnableStructuredLogging = true;
+
+            // Set minimum log level (Information, Warning, Error, etc.)
+            config.MinimumLogLevel = LogLevel.Information;
+
+            // Enable detailed metrics collection
+            config.EnableDetailedMetrics = true;
+
+            // Configure file-based logging
+            config.LogFilePath = @"./logs/plugin-engine.log";
+            config.MaxLogFileSizeMb = 50; // 50MB max file size
+            config.MaxLogFiles = 10; // Keep up to 10 log files
+
+            // Enable performance profiling for slow operations
+            config.EnablePerformanceProfiling = true;
+            config.SlowOperationThresholdMs = 1000; // Log operations slower than 1s
+
+            // Enable dependency resolution logging
+            config.LogDependencyResolution = true;
+
+            // Enable hot reload logging
+            config.LogHotReload = true;
+
+            // Customize console output format
+            config.ConsoleFormat = "[{Timestamp:HH:mm:ss} {Level}] {Message}{NewLine}{Exception}";
+        });
+
+        var serviceProvider = services.BuildServiceProvider();
+        var config = serviceProvider.GetRequiredService<LoggingConfiguration>();
+
+        _logger.LogInformation("Logging Configuration:");
+        _logger.LogInformation($"Structured Logging Enabled: {config.EnableStructuredLogging}");
+        _logger.LogInformation($"Minimum Log Level: {config.MinimumLogLevel}");
+        _logger.LogInformation($"Detailed Metrics Enabled: {config.EnableDetailedMetrics}");
+        _logger.LogInformation($"Log File Path: {config.LogFilePath}");
+        _logger.LogInformation($"Max Log File Size: {config.MaxLogFileSizeMb}MB");
+        _logger.LogInformation($"Max Log Files: {config.MaxLogFiles}");
+        _logger.LogInformation($"Performance Profiling Enabled: {config.EnablePerformanceProfiling}");
+        _logger.LogInformation($"Slow Operation Threshold: {config.SlowOperationThresholdMs}ms");
+        _logger.LogInformation($"Log Dependency Resolution: {config.LogDependencyResolution}");
+        _logger.LogInformation($"Log Hot Reload: {config.LogHotReload}");
+        _logger.LogInformation($"Console Format: {config.ConsoleFormat}");
+
+        // Use convenience methods for common configurations
+        var verboseConfig = LoggingConfiguration.WithVerboseLogging();
+        var productionConfig = LoggingConfiguration.WithProductionLogging();
+        var fileConfig = LoggingConfiguration.WithFileLogging(@"./logs/plugin-engine.log");
+
+        _logger.LogInformation($"\nConvenience configurations:");
+        _logger.LogInformation($"Verbose logging - MinimumLogLevel: {verboseConfig.MinimumLogLevel}");
+        _logger.LogInformation($"Production logging - EnableDetailedMetrics: {productionConfig.EnableDetailedMetrics}");
+        _logger.LogInformation($"File logging - LogFilePath: {fileConfig.LogFilePath}");
+    }
+}
+
+// Usage
+var services = new ServiceCollection();
+services.AddLogging(configure => configure.AddConsole());
+services.AddPluginEngineLogging(config =>
+{
+    config.WithVerboseLogging();
+});
+
+var serviceProvider = services.BuildServiceProvider();
+var loggingConfig = serviceProvider.GetRequiredService<LoggingConfiguration>();
+```
+
 ## WebhookConfiguration
 
 The `WebhookConfiguration` class provides configuration for webhook support in the plugin engine. It manages incoming webhooks from external systems and registries, enabling integration with CI/CD pipelines, registries, and other external services that need to notify the plugin engine about events like plugin creation, updates, or security patches.
