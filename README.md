@@ -558,6 +558,89 @@ The `PluginDependencyResolverTests` class contains unit tests for the `PluginDep
 
 Here's a realistic usage example leveraging its public members:
 
+[... existing content ...]
+
+## MemoryPluginCacheTests
+
+The `MemoryPluginCacheTests` class contains unit tests for the `MemoryPluginCache` class, which provides an in-memory caching mechanism for plugin operations. It tests various cache operations including getting and setting values, expiration policies, cache statistics, and cleanup functionality. The tests validate that the cache properly handles different data types, maintains correct statistics, and provides appropriate error handling.
+
+Here's a realistic usage example leveraging its public members:
+
+```csharp
+using PluginEngine.Caching;
+using System;
+using System.Threading.Tasks;
+
+public class MemoryPluginCacheDemo
+{
+    public async Task DemonstrateMemoryPluginCache()
+    {
+        // Create a cache instance with default settings
+        var cache = new MemoryPluginCache();
+
+        // Test basic set and get operations
+        await cache.SetAsync("user-session-123", new { UserId = 42, Username = "john_doe", Role = "admin" });
+        
+        var userData = await cache.GetAsync<object>("user-session-123");
+        Console.WriteLine($"Retrieved user data: UserId={userData?.UserId}, Username={userData?.Username}");
+
+        // Test cache statistics
+        var stats = await cache.GetStatisticsAsync();
+        Console.WriteLine($"Cache stats - Hits: {stats.Hits}, Misses: {stats.Misses}, HitRate: {stats.HitRate:P}");
+
+        // Test removal
+        await cache.RemoveAsync("user-session-123");
+        var removedValue = await cache.GetAsync<object>("user-session-123");
+        Console.WriteLine($"Value after removal: {(removedValue == null ? "null (correct)" : "not null (error)")}");
+
+        // Test with expiration
+        await cache.SetAsync("temp-data", "temporary value", TimeSpan.FromSeconds(5));
+        var tempValue = await cache.GetAsync<string>("temp-data");
+        Console.WriteLine($"Before expiration: {tempValue}");
+        
+        await Task.Delay(TimeSpan.FromSeconds(6));
+        var expiredValue = await cache.GetAsync<string>("temp-data");
+        Console.WriteLine($"After expiration: {(expiredValue == null ? "null (correct)" : "not null (error)")}");
+
+        // Test clear operation
+        await cache.SetAsync("key1", "value1");
+        await cache.SetAsync("key2", "value2");
+        await cache.ClearAsync();
+        
+        var allCleared = await Task.WhenAll(
+            cache.GetAsync<object>("key1"),
+            cache.GetAsync<object>("key2")
+        );
+        Console.WriteLine($"All values cleared: {allCleared.All(v => v == null)}");
+
+        // Test integer values
+        await cache.SetAsync("counter", 42);
+        var counterValue = await cache.GetAsync<int>("counter");
+        Console.WriteLine($"Counter value: {counterValue}");
+
+        // Test complex object with multiple properties
+        await cache.SetAsync("plugin-config", new 
+        {
+            PluginName = "DataProcessor",
+            Version = "2.1.0",
+            Settings = new { Timeout = 30, Retries = 3 },
+            Enabled = true
+        });
+        
+        var config = await cache.GetAsync<object>("plugin-config");
+        Console.WriteLine($"Plugin config: {config?.PluginName} v{config?.Version}");
+
+        // Test statistics after various operations
+        await cache.GetAsync<object>("nonexistent-key"); // Cache miss
+        await cache.SetAsync("existing-key", "value");
+        await cache.GetAsync<object>("existing-key"); // Cache hit
+        
+        var finalStats = await cache.GetStatisticsAsync();
+        Console.WriteLine($"Final stats - Hits: {finalStats.Hits}, Misses: {finalStats.Misses}, HitRate: {finalStats.HitRate:P}");
+    }
+}
+```
+
 ```csharp
 using PluginEngine.Domain.Entities;
 using PluginEngine.Services.Implementations;
