@@ -190,6 +190,141 @@ foreach (var plugin in plugins)
 }
 ```
 
+## DependencyResolutionServiceValidation
+
+The `DependencyResolutionServiceValidation` class provides validation helpers for `DependencyResolutionService` instances, along with extension methods for validating plugin-related entities (`Plugin`, `PluginDependency`, `PluginMetadata`, `DependencyNode`, `DependencyEdge`, and `DependencyGraph`). It offers utilities for checking validity, returning detailed error messages, and ensuring constraints are met, with proper null-safety and semantic version validation.
+
+Here's a realistic usage example leveraging its public members:
+
+```csharp
+using PluginEngine.Domain.Entities;
+using PluginEngine.Services.Implementations;
+using System;
+using System.Linq;
+
+// Create a valid DependencyResolutionService instance
+var dependencyResolutionService = new DependencyResolutionService(
+    pluginRepository: new MemoryPluginRepository(),
+    dependencyGraphBuilder: new DependencyGraphBuilder()
+);
+
+// Validate the service instance - returns empty list if valid
+var serviceErrors = dependencyResolutionService.Validate();
+if (serviceErrors.Any())
+{
+    Console.WriteLine("Service validation failed:");
+    foreach (var error in serviceErrors)
+    {
+        Console.WriteLine($"- {error}");
+    }
+}
+else
+{
+    Console.WriteLine("DependencyResolutionService is valid!");
+}
+
+// Check if service is valid using IsValid extension
+if (dependencyResolutionService.IsValid())
+{
+    Console.WriteLine("Service passed validation checks");
+}
+
+// Use EnsureValid to throw if invalid
+try
+{
+    dependencyResolutionService.EnsureValid();
+    Console.WriteLine("Service validation passed");
+}
+catch (ArgumentException ex)
+{
+    Console.WriteLine($"Validation failed: {ex.Message}");
+}
+
+// Validate a plugin instance
+var plugin = new Plugin
+{
+    Id = Guid.NewGuid(),
+    Name = "AnalyticsCore",
+    Version = "2.1.0",
+    Author = "Acme Corp",
+    AssemblyPath = "/plugins/AnalyticsCore.dll",
+    CreatedAt = DateTime.UtcNow.AddDays(-30),
+    ModifiedAt = DateTime.UtcNow,
+    Dependencies = new List<PluginDependency>
+    {
+        new PluginDependency("Logging", "1.0.0")
+        {
+            PluginId = Guid.NewGuid(),
+            DependencyPluginId = Guid.NewGuid()
+        }
+    },
+    Metadata = new PluginMetadata
+    {
+        PluginId = Guid.NewGuid(),
+        PluginName = "AnalyticsCore",
+        PluginVersion = "2.1.0",
+        AssemblyName = "AnalyticsCore",
+        TargetFramework = ".NET 8.0",
+        AssemblyVersion = "2.1.0.0",
+        Author = "Acme Corp",
+        CreatedAt = DateTime.UtcNow.AddDays(-30)
+    }
+};
+
+// Validate plugin - returns list of validation errors
+var pluginErrors = plugin.Validate();
+if (pluginErrors.Any())
+{
+    Console.WriteLine($"Plugin has {pluginErrors.Count} validation errors:");
+    foreach (var error in pluginErrors)
+    {
+        Console.WriteLine($"- {error}");
+    }
+}
+else
+{
+    Console.WriteLine("Plugin is valid!");
+}
+
+// Validate a plugin dependency
+var dependency = plugin.Dependencies.First();
+var dependencyErrors = dependency.Validate();
+if (dependencyErrors.Any())
+{
+    Console.WriteLine($"Dependency has {dependencyErrors.Count} validation errors");
+}
+
+// Validate plugin metadata
+var metadataErrors = plugin.Metadata.Validate();
+if (metadataErrors.Any())
+{
+    Console.WriteLine($"Metadata has {metadataErrors.Count} validation errors");
+}
+
+// Validate a dependency graph
+var graph = new DependencyGraph
+{
+    RootPluginId = plugin.Id,
+    Nodes = new List<DependencyNode>
+    {
+        new DependencyNode
+        {
+            PluginId = plugin.Id,
+            PluginName = plugin.Name,
+            Version = plugin.Version,
+            Level = 0
+        }
+    },
+    Edges = new List<DependencyEdge>()
+};
+
+var graphErrors = graph.Validate();
+if (graphErrors.Any())
+{
+    Console.WriteLine($"Graph has {graphErrors.Count} validation errors");
+}
+```
+
 ## PluginEventPublisherTests
 
 The `PluginEventPublisherTests` class contains unit tests for the `PluginEventPublisher` class, which provides functionality for publishing plugin events to subscribers. It tests various scenarios including publishing with no subscribers, publishing with one or multiple subscribers, unsubscribing handlers, and publishing different event types. Here's a realistic usage example leveraging its public members:
