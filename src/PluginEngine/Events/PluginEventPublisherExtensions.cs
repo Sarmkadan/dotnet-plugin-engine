@@ -95,6 +95,10 @@ public static class PluginEventPublisherExtensions
     /// <typeparam name="T">The type of plugin event to unsubscribe from.</typeparam>
     /// <param name="publisher">The event publisher instance.</param>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="publisher"/> is null.</exception>
+    /// <remarks>
+    /// This method uses reflection to access the internal subscribers dictionary.
+    /// If reflection fails for any reason, the operation will silently complete without error.
+    /// </remarks>
     public static void UnsubscribeAll<T>(this PluginEventPublisher publisher) where T : IPluginEvent
     {
         ArgumentNullException.ThrowIfNull(publisher);
@@ -116,8 +120,7 @@ public static class PluginEventPublisherExtensions
     }
 
     /// <summary>
-    /// Gets a formatted string representation of the current publisher statistics.
-    /// Useful for logging and diagnostics.
+    /// Gets the current statistics from the publisher without locking.
     /// </summary>
     /// <param name="publisher">The event publisher instance.</param>
     /// <param name="formatProvider">The format provider to use (defaults to invariant culture).</param>
@@ -185,6 +188,10 @@ public static class PluginEventPublisherExtensions
     /// <param name="publisher">The event publisher instance.</param>
     /// <returns>An enumerable of monitored event types.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="publisher"/> is null.</exception>
+    /// <remarks>
+    /// This method uses reflection to access the internal subscribers dictionary.
+    /// If reflection fails for any reason, an empty enumerable is returned.
+    /// </remarks>
     public static IEnumerable<Type> GetMonitoredEventTypes(this PluginEventPublisher publisher)
     {
         ArgumentNullException.ThrowIfNull(publisher);
@@ -210,6 +217,10 @@ public static class PluginEventPublisherExtensions
     /// <param name="publisher">The event publisher instance.</param>
     /// <returns>The number of registered subscribers, or 0 if no subscribers exist.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="publisher"/> is null.</exception>
+    /// <remarks>
+    /// This method uses reflection to access the internal subscribers dictionary.
+    /// If reflection fails for any reason, 0 is returned.
+    /// </remarks>
     public static int GetSubscriberCount<T>(this PluginEventPublisher publisher) where T : IPluginEvent
     {
         ArgumentNullException.ThrowIfNull(publisher);
