@@ -55,6 +55,53 @@ Console.WriteLine($"Monitored event types: {string.Join(", ", monitoredTypes.Sel
 publisher.UnsubscribeAll<PluginLoadedEvent>();
 ```
 
+## PluginExtensions
+
+The `PluginExtensions` class provides a comprehensive set of extension methods for the `Plugin` class that simplify common plugin management operations. It offers utilities for checking plugin state, formatting metadata, managing timestamps, and analyzing plugin dependencies and capabilities, all with proper null-safety and culture-invariant formatting.
+
+Here's a realistic usage example leveraging its public members:
+
+```csharp
+using PluginEngine.Domain.Entities;
+using System;
+
+// Create a sample plugin
+var plugin = new Plugin
+{
+    Name = "AnalyticsDashboard",
+    Version = "2.1.0",
+    Author = "Acme Corp",
+    Description = "Provides advanced analytics and reporting capabilities",
+    Status = PluginStatus.Active,
+    CreatedAt = DateTime.UtcNow.AddDays(-30),
+    ModifiedAt = DateTime.UtcNow.AddDays(-5),
+    Dependencies = new List<PluginDependency> { new PluginDependency("Logging", "1.0.0") },
+    Capabilities = new List<string> { "Reporting", "Dashboard", "Export" }
+};
+
+// Check plugin state
+Console.WriteLine($"Is active: {plugin.IsActive()}");
+Console.WriteLine($"Is failed: {plugin.IsFailed()}");
+Console.WriteLine($"Is transitioning: {plugin.IsTransitioning()}");
+
+// Get formatted metadata
+Console.WriteLine($"Display name: {plugin.GetDisplayName()}");
+Console.WriteLine($"Created: {plugin.GetFormattedCreationDate()}");
+Console.WriteLine($"Modified: {plugin.GetFormattedModificationDate()}");
+Console.WriteLine($"Age in days: {plugin.GetAgeInDays()}");
+
+// Check dependencies and capabilities
+Console.WriteLine($"Has dependencies: {plugin.HasDependencies()}");
+Console.WriteLine($"Has capabilities: {plugin.HasCapabilities()}");
+
+// Get metadata summary
+Console.WriteLine($"Metadata: {plugin.GetMetadataSummary()}");
+
+// Update modification timestamp
+plugin.Touch();
+Console.WriteLine($"New modified date: {plugin.GetFormattedModificationDate()}");
+```
+
 ## RemotePluginRegistryValidation
 
 The `RemotePluginRegistryValidation` class provides validation helpers for `PluginInfo`, `PluginVersionInfo`, `PluginPublishMetadata`, and `RemotePluginRegistry` instances. It offers extension methods that validate plugin metadata against semantic versioning rules, URL formats, and required fields, returning detailed error messages for invalid data or throwing exceptions when strict validation is required.
