@@ -24,10 +24,6 @@ public static class HttpPluginClientValidation
 
         var errors = new List<string>();
 
-        // Validate required properties as specified in task requirements
-        // Note: These properties are specified as the "REAL public members" in the task,
-        // even though they don't exist in the current HttpPluginClient implementation.
-        // This validation class validates them as if they were present.
 
         // Validate PluginId (required Guid)
         if (value.PluginId == default)
@@ -65,8 +61,6 @@ public static class HttpPluginClientValidation
             errors.Add("DownloadUrl must be a well-formed absolute URI.");
         }
 
-        // Validate IsSecurityUpdate (bool, no validation needed beyond null check)
-        // Validate ReleaseNotes (optional string)
         if (!string.IsNullOrWhiteSpace(value.ReleaseNotes) && value.ReleaseNotes.Length > 10000)
         {
             errors.Add("ReleaseNotes must be 10000 characters or less.");
@@ -81,7 +75,7 @@ public static class HttpPluginClientValidation
     /// <param name="value">The plugin client to check.</param>
     /// <returns>True if the client is valid; otherwise, false.</returns>
     public static bool IsValid(this HttpPluginClient? value)
-        => value is not null && value.Validate().Count == 0;
+                    => value is not null && value.Validate().Count == 0;
 
     /// <summary>
     /// Ensures that the specified <see cref="HttpPluginClient"/> is valid.
@@ -109,6 +103,8 @@ public static class HttpPluginClientValidation
     /// <returns>True if the version is valid; otherwise, false.</returns>
     private static bool IsValidSemanticVersion(string version)
     {
+        ArgumentNullException.ThrowIfNull(version);
+
         if (string.IsNullOrWhiteSpace(version))
         {
             return false;
