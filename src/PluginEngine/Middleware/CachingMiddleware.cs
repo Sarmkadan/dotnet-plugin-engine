@@ -120,6 +120,16 @@ public sealed class CachingMiddleware : IPluginMiddleware
             _cache.Remove(key);
     }
 
+    /// <summary>
+    /// Gets the configured cache duration for validation purposes.
+    /// </summary>
+    internal TimeSpan GetCacheDuration() => _cacheDuration;
+
+    /// <summary>
+    /// Gets the configured cachable operations for validation purposes.
+    /// </summary>
+    internal IReadOnlyCollection<string> GetCachableOperations() => _cachableOperations;
+
     private sealed class CacheEntry
     {
         public required string OperationType { get; set; }
