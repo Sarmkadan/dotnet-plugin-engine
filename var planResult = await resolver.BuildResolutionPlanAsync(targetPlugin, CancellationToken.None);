@@ -1,0 +1,27 @@
+
+## Notes
+
+* **Thread‑safety** – All validation methods are pure functions; they do not modify the
+  objects they inspect. Consequently, they are safe to call concurrently on the same
+  instance, provided the underlying objects are not being mutated elsewhere at the same
+  time.
+
+* **Error aggregation** – Each `Validate` overload returns *all* detected errors rather
+  than failing fast. This design enables callers to present a complete list of issues
+  to the user in a single step.
+
+* **Extension method semantics** – Because the members are implemented as extension
+  methods, they can be invoked using instance method syntax (`service.Validate()`) even
+  though the underlying type does not contain the members.
+
+* **Performance** – Validation walks the entire object graph (e.g., the full
+  `DependencyGraph`). For large graphs, consider invoking validation only at
+  configuration boundaries rather than on every operation to avoid unnecessary overhead.
+
+* **Null handling** – Passing `null` to any of the overloads results in an
+  `ArgumentNullException`. This behavior is consistent across all members.
+
+* **Version constraints** – The `Validate` overload for `PluginDependency` checks that
+  version constraints conform to the semantic‑versioning rules implemented by
+  `VersioningService`. Invalid constraints are reported as errors rather than causing
+  exceptions during validation.
