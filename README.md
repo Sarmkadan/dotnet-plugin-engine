@@ -287,6 +287,120 @@ public class StringExtensionsDemo
 }
 ```
 
+## PluginOperationResultTests
+
+The `PluginOperationResultTests` class contains unit tests for the `PluginOperationResult`, `PluginOperationResult<T>`, and `PluginBatchOperationResult` classes that form the foundation of the plugin operation result system. It tests various scenarios including success/failure creation, error code handling, exception conversion, generic result types, and batch operation tracking. The tests validate that operation results properly handle their required fields, maintain data integrity, and provide appropriate error messages when operations fail.
+
+Here's a realistic usage example leveraging its public members:
+
+```csharp
+using PluginEngine.Results;
+using PluginEngine.Exceptions;
+using System;
+
+public class PluginOperationResultDemo
+{
+    public void DemonstratePluginOperationResults()
+    {
+        // Create a successful operation result with a message and duration
+        var successResult = PluginOperationResult.CreateSuccess("Plugin activated successfully.", durationMs: 125);
+        Console.WriteLine($"Success: {successResult.Success}");
+        Console.WriteLine($"Message: {successResult.Message}");
+        Console.WriteLine($"Duration: {successResult.DurationMs}ms");
+        Console.WriteLine($"Error Code: {successResult.ErrorCode}");
+
+        // Create a failed operation result with a custom error code and details
+        var failureResult = PluginOperationResult.CreateFailure(
+            "Failed to load plugin assembly.",
+            errorCode: 404,
+            details: "Assembly file not found at specified path."
+        );
+        Console.WriteLine($"Success: {failureResult.Success}");
+        Console.WriteLine($"Error Code: {failureResult.ErrorCode}");
+        Console.WriteLine($"Error Details: {failureResult.ErrorDetails}");
+
+        // Convert a PluginLoadException to an operation result
+        try
+        {
+            // Simulate plugin loading that fails
+            throw new PluginLoadException(
+                "Failed to load assembly during initialization.",
+                "AuthenticationPlugin",
+                "/plugins/auth/AuthPlugin.dll",
+                PluginLoadStage.AssemblyResolution
+            );
+        }
+        catch (PluginLoadException ex)
+        {
+            var exceptionResult = PluginOperationResult.FromException(ex);
+            Console.WriteLine($"Exception converted - Success: {exceptionResult.Success}");
+            Console.WriteLine($"Exception converted - Error Code: {exceptionResult.ErrorCode}");
+            Console.WriteLine($"Exception converted - Message: {exceptionResult.Message}");
+        }
+
+        // Create a generic operation result with typed data
+        var data = new { PluginName = "DataProcessor", Version = "3.2.1" };
+        var genericSuccessResult = PluginOperationResult<object>.CreateSuccess(
+            data,
+            "Data processing plugin initialized."
+        );
+        Console.WriteLine($"Generic Success: {genericSuccessResult.Success}");
+        Console.WriteLine($"Generic Data: {genericSuccessResult.Data?.PluginName}");
+        Console.WriteLine($"Generic Message: {genericSuccessResult.Message}");
+
+        // Create a generic failure result
+        var genericFailureResult = PluginOperationResult<string>.CreateFailure(
+            "Data validation failed.",
+            errorCode: 422
+        );
+        Console.WriteLine($"Generic Failure Success: {genericFailureResult.Success}");
+        Console.WriteLine($"Generic Failure Data: {genericFailureResult.Data}");
+        Console.WriteLine($"Generic Failure Error Code: {genericFailureResult.ErrorCode}");
+
+        // Use batch operation result to track multiple plugin operations
+        var batchResult = new PluginBatchOperationResult();
+        var pluginId1 = Guid.NewGuid();
+        var pluginId2 = Guid.NewGuid();
+        var pluginId3 = Guid.NewGuid();
+
+        // Add successful operations
+        batchResult.AddResult(
+            pluginId1,
+            "LoggingPlugin",
+            PluginOperationResult.CreateSuccess("Logging plugin loaded.", 80)
+        );
+
+        // Add failed operations
+        batchResult.AddResult(
+            pluginId2,
+            "DatabasePlugin",
+            PluginOperationResult.CreateFailure("Database connection failed.", 500, "Connection timeout")
+        );
+
+        batchResult.AddResult(
+            pluginId3,
+            "CachePlugin",
+            PluginOperationResult.CreateFailure("Cache initialization failed.", 503, "Service unavailable")
+        );
+
+        Console.WriteLine($"Batch Success Count: {batchResult.SuccessCount}");
+        Console.WriteLine($"Batch Failure Count: {batchResult.FailureCount}");
+        Console.WriteLine($"Batch Total Results: {batchResult.Results.Count}");
+        Console.WriteLine($"Batch Is Successful: {batchResult.IsSuccessful}");
+        Console.WriteLine($"Batch Summary: {batchResult.GetSummary()}");
+
+        // Check if all operations succeeded
+        if (batchResult.IsSuccessful)
+        {
+            Console.WriteLine("All plugins loaded successfully!");
+        }
+        else
+        {
+            Console.WriteLine($"Some plugins failed to load. Success: {batchResult.SuccessCount}/{batchResult.Results.Count}");
+        }
+    }
+}
+```
 ## PluginValidatorTests
 
 The `PluginValidatorTests` class contains unit tests for the `PluginValidator` class, which is responsible for validating plugin entities. It tests various validation scenarios, including plugin name validation, version validation, metadata validation, and dependency validation. Here's a realistic usage example leveraging its public members:
