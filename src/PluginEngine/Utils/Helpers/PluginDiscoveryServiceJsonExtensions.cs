@@ -2,7 +2,7 @@
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
-// =====================================================================
+// ===================================================================
 
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -30,37 +30,25 @@ public static class PluginDiscoveryServiceJsonExtensions
     /// <returns>A JSON string representation of the instance.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="value"/> is null.</exception>
     public static string ToJson(this PluginDiscoveryService value, bool indented = false)
-    {
-        ArgumentNullException.ThrowIfNull(value);
-
-        var options = indented
-            ? new JsonSerializerOptions(_jsonOptions)
-            {
-                WriteIndented = true
-            }
-            : _jsonOptions;
-
-        return JsonSerializer.Serialize(value, options);
-    }
+        => JsonSerializer.Serialize(value, indented
+            ? new JsonSerializerOptions(_jsonOptions) { WriteIndented = true }
+            : _jsonOptions);
 
     /// <summary>
     /// Deserializes a JSON string to a <see cref="PluginDiscoveryService"/> instance.
     /// </summary>
     /// <param name="json">The JSON string to deserialize.</param>
-    /// <returns>The deserialized instance, or null if the JSON is invalid.</returns>
-    /// <exception cref="ArgumentException">Thrown when <paramref name="json"/> is null or empty.</exception>
-    public static PluginDiscoveryService? FromJson(string json)
+    /// <returns>The deserialized instance.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="json"/> is null.</exception>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="json"/> is empty.</exception>
+    /// <exception cref="JsonException">Thrown when the JSON is invalid or cannot be deserialized.</exception>
+    public static PluginDiscoveryService FromJson(string json)
     {
-        ArgumentException.ThrowIfNullOrEmpty(json);
-
-        try
-        {
-            return JsonSerializer.Deserialize<PluginDiscoveryService>(json, _jsonOptions);
-        }
-        catch (JsonException)
-        {
-            return null;
-        }
+        ArgumentNullException.ThrowIfNull(json);
+        return json.Length == 0
+            ? throw new ArgumentException("Value cannot be empty.", nameof(json))
+            : JsonSerializer.Deserialize<PluginDiscoveryService>(json, _jsonOptions)
+                ?? throw new JsonException("Deserialization returned null, indicating invalid JSON or missing required properties.");
     }
 
     /// <summary>
@@ -69,20 +57,15 @@ public static class PluginDiscoveryServiceJsonExtensions
     /// <param name="json">The JSON string to deserialize.</param>
     /// <param name="value">Receives the deserialized instance if successful.</param>
     /// <returns>True if deserialization succeeded; otherwise, false.</returns>
-    /// <exception cref="ArgumentException">Thrown when <paramref name="json"/> is null or empty.</exception>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="json"/> is null.</exception>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="json"/> is empty.</exception>
+    /// <exception cref="JsonException">Thrown when the JSON is invalid or cannot be deserialized.</exception>
     public static bool TryFromJson(string json, out PluginDiscoveryService? value)
     {
-        ArgumentException.ThrowIfNullOrEmpty(json);
-
-        try
-        {
-            value = JsonSerializer.Deserialize<PluginDiscoveryService>(json, _jsonOptions);
-            return true;
-        }
-        catch (JsonException)
-        {
-            value = null;
-            return false;
-        }
+        ArgumentNullException.ThrowIfNull(json);
+        value = json.Length == 0
+            ? throw new ArgumentException("Value cannot be empty.", nameof(json))
+            : JsonSerializer.Deserialize<PluginDiscoveryService>(json, _jsonOptions);
+        return value is not null;
     }
 }
