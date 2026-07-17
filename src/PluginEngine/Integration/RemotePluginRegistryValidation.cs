@@ -18,6 +18,7 @@ public static class RemotePluginRegistryValidation
     /// </summary>
     /// <param name="value">The plugin info to validate.</param>
     /// <returns>A list of human-readable validation problems; empty if valid.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="value"/> is <see langword="null"/>.</exception>
     public static IReadOnlyList<string> Validate(this PluginInfo? value)
     {
         if (value is null)
@@ -59,6 +60,7 @@ public static class RemotePluginRegistryValidation
     /// </summary>
     /// <param name="value">The plugin version info to validate.</param>
     /// <returns>A list of human-readable validation problems; empty if valid.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="value"/> is <see langword="null"/>.</exception>
     public static IReadOnlyList<string> Validate(this PluginVersionInfo? value)
     {
         if (value is null)
@@ -103,6 +105,7 @@ public static class RemotePluginRegistryValidation
     /// </summary>
     /// <param name="value">The plugin publish metadata to validate.</param>
     /// <returns>A list of human-readable validation problems; empty if valid.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="value"/> is <see langword="null"/>.</exception>
     public static IReadOnlyList<string> Validate(this PluginPublishMetadata? value)
     {
         if (value is null)
@@ -149,13 +152,10 @@ public static class RemotePluginRegistryValidation
     /// </summary>
     /// <param name="value">The remote plugin registry to validate.</param>
     /// <returns>A list of human-readable validation problems; empty if valid.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="value"/> is <see langword="null"/>.</exception>
     public static IReadOnlyList<string> Validate(this RemotePluginRegistry? value)
     {
-        if (value is null)
-        {
-            return ["RemotePluginRegistry cannot be null"];
-        }
-
+        ArgumentNullException.ThrowIfNull(value);
         return [];
     }
 
@@ -164,46 +164,35 @@ public static class RemotePluginRegistryValidation
     /// </summary>
     /// <param name="value">The plugin info to check.</param>
     /// <returns><see langword="true"/> if valid; otherwise, <see langword="false"/>.</returns>
-    public static bool IsValid(this PluginInfo? value)
-    {
-        return Validate(value).Count == 0;
-    }
+    public static bool IsValid(this PluginInfo? value) => Validate(value).Count == 0;
 
     /// <summary>
     /// Determines whether the specified <see cref="PluginVersionInfo"/> is valid.
     /// </summary>
     /// <param name="value">The plugin version info to check.</param>
     /// <returns><see langword="true"/> if valid; otherwise, <see langword="false"/>.</returns>
-    public static bool IsValid(this PluginVersionInfo? value)
-    {
-        return Validate(value).Count == 0;
-    }
+    public static bool IsValid(this PluginVersionInfo? value) => Validate(value).Count == 0;
 
     /// <summary>
     /// Determines whether the specified <see cref="PluginPublishMetadata"/> is valid.
     /// </summary>
     /// <param name="value">The plugin publish metadata to check.</param>
     /// <returns><see langword="true"/> if valid; otherwise, <see langword="false"/>.</returns>
-    public static bool IsValid(this PluginPublishMetadata? value)
-    {
-        return Validate(value).Count == 0;
-    }
+    public static bool IsValid(this PluginPublishMetadata? value) => Validate(value).Count == 0;
 
     /// <summary>
     /// Determines whether the specified <see cref="RemotePluginRegistry"/> is valid.
     /// </summary>
     /// <param name="value">The remote plugin registry to check.</param>
     /// <returns><see langword="true"/> if valid; otherwise, <see langword="false"/>.</returns>
-    public static bool IsValid(this RemotePluginRegistry? value)
-    {
-        return Validate(value).Count == 0;
-    }
+    public static bool IsValid(this RemotePluginRegistry? value) => value is not null;
 
     /// <summary>
     /// Ensures that the specified <see cref="PluginInfo"/> is valid, throwing an <see cref="ArgumentException"/> if not.
     /// </summary>
     /// <param name="value">The plugin info to validate.</param>
     /// <exception cref="ArgumentException">Thrown when the value is invalid.</exception>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="value"/> is <see langword="null"/>.</exception>
     public static void EnsureValid(this PluginInfo? value)
     {
         var problems = Validate(value);
@@ -220,6 +209,7 @@ public static class RemotePluginRegistryValidation
     /// </summary>
     /// <param name="value">The plugin version info to validate.</param>
     /// <exception cref="ArgumentException">Thrown when the value is invalid.</exception>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="value"/> is <see langword="null"/>.</exception>
     public static void EnsureValid(this PluginVersionInfo? value)
     {
         var problems = Validate(value);
@@ -236,6 +226,7 @@ public static class RemotePluginRegistryValidation
     /// </summary>
     /// <param name="value">The plugin publish metadata to validate.</param>
     /// <exception cref="ArgumentException">Thrown when the value is invalid.</exception>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="value"/> is <see langword="null"/>.</exception>
     public static void EnsureValid(this PluginPublishMetadata? value)
     {
         var problems = Validate(value);
@@ -248,19 +239,13 @@ public static class RemotePluginRegistryValidation
     }
 
     /// <summary>
-    /// Ensures that the specified <see cref="RemotePluginRegistry"/> is valid, throwing an <see cref="ArgumentException"/> if not.
+    /// Ensures that the specified <see cref="RemotePluginRegistry"/> is valid, throwing an <see cref="ArgumentNullException"/> if null.
     /// </summary>
     /// <param name="value">The remote plugin registry to validate.</param>
-    /// <exception cref="ArgumentException">Thrown when the value is invalid.</exception>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="value"/> is <see langword="null"/>.</exception>
     public static void EnsureValid(this RemotePluginRegistry? value)
     {
-        var problems = Validate(value);
-        if (problems.Count > 0)
-        {
-            throw new ArgumentException(
-                $"RemotePluginRegistry is invalid: {string.Join("; ", problems)}",
-                nameof(value));
-        }
+        ArgumentNullException.ThrowIfNull(value);
     }
 
     private static bool IsValidSemanticVersion(string version)
