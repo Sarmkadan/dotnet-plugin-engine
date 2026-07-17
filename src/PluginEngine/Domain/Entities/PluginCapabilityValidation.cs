@@ -6,7 +6,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 
 namespace PluginEngine.Domain.Entities;
@@ -51,7 +50,7 @@ public static class PluginCapabilityValidation
         {
             problems.Add("Version cannot be null or whitespace.");
         }
-        else if (!System.Version.TryParse(value.Version, out _))
+        else if (!Version.TryParse(value.Version, out _))
         {
             problems.Add("Version must be a valid version string (e.g., 1.0.0).");
         }
@@ -88,16 +87,24 @@ public static class PluginCapabilityValidation
             }
         }
 
-        // Validate CreatedAt (should not be default DateTime)
+        // Validate CreatedAt (should be a reasonable date, not MinValue)
         if (value.CreatedAt == default)
         {
             problems.Add("CreatedAt cannot be default DateTime.");
         }
+        else if (value.CreatedAt < new DateTime(2000, 1, 1))
+        {
+            problems.Add("CreatedAt must be a reasonable date.");
+        }
 
-        // Validate ModifiedAt (should not be default DateTime and should be >= CreatedAt)
+        // Validate ModifiedAt (should be a reasonable date, not MinValue and should be >= CreatedAt)
         if (value.ModifiedAt == default)
         {
             problems.Add("ModifiedAt cannot be default DateTime.");
+        }
+        else if (value.ModifiedAt < new DateTime(2000, 1, 1))
+        {
+            problems.Add("ModifiedAt must be a reasonable date.");
         }
         else if (value.ModifiedAt < value.CreatedAt)
         {
@@ -113,10 +120,7 @@ public static class PluginCapabilityValidation
     /// <param name="value">The capability to check.</param>
     /// <returns>True if valid; otherwise, false.</returns>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="value"/> is null.</exception>
-    public static bool IsValid(this PluginCapability value)
-    {
-        return Validate(value).Count == 0;
-    }
+    public static bool IsValid(this PluginCapability value) => Validate(value).Count == 0;
 
     /// <summary>
     /// Ensures that a <see cref="PluginCapability"/> instance is valid, throwing an <see cref="ArgumentException"/>
