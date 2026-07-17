@@ -42,7 +42,7 @@ public static class FileSystemHelperTestsJsonExtensions
     /// Deserializes a JSON string to a <see cref="FileSystemHelperTests"/> instance.
     /// </summary>
     /// <param name="json">The JSON string to deserialize.</param>
-    /// <returns>A deserialized <see cref="FileSystemHelperTests"/> instance, or null if the JSON is null or empty.</returns>
+    /// <returns>A deserialized <see cref="FileSystemHelperTests"/> instance if successful; otherwise null.</returns>
     /// <exception cref="JsonException">Thrown when the JSON is malformed or cannot be deserialized.</exception>
     public static FileSystemHelperTests? FromJson(string json)
     {
@@ -58,7 +58,7 @@ public static class FileSystemHelperTestsJsonExtensions
     /// Attempts to deserialize a JSON string to a <see cref="FileSystemHelperTests"/> instance.
     /// </summary>
     /// <param name="json">The JSON string to deserialize.</param>
-    /// <param name="value">Receives the deserialized instance if successful, otherwise null.</param>
+    /// <param name="value">Receives the deserialized instance if successful; otherwise null.</param>
     /// <returns>True if deserialization succeeded; otherwise false.</returns>
     public static bool TryFromJson(string json, out FileSystemHelperTests? value)
     {
