@@ -477,3 +477,78 @@ public class DependencyGraphAnalyzerDemo
 ```
 
 This demo showcases how each test method can be called programmatically, allowing developers to reuse the verification logic outside of a traditional test runner when needed.
+
+## PluginLifecycleTests
+
+The `PluginLifecycleTests` class contains unit tests for the `IPluginLifecycle` interface and its hook invocation patterns during plugin load and unload operations. It verifies that lifecycle hooks are called in the correct order, validates interface contract requirements, and ensures cancellation tokens are properly forwarded to hook implementations. The tests demonstrate how plugins can optionally implement lifecycle hooks to participate in initialization and cleanup sequences.
+
+Here's a realistic usage example leveraging its public members:
+
+```csharp
+using PluginEngine.Execution;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+public class PluginLifecycleDemo
+{
+    public async Task DemonstratePluginLifecycle()
+    {
+        // Create a plugin that implements IPluginLifecycle
+        var myPlugin = new MyPluginWithLifecycle();
+
+        // Simulate plugin loading sequence
+        Console.WriteLine("Loading plugin...");
+        await myPlugin.OnBeforeLoadAsync();
+        await myPlugin.OnAfterLoadAsync();
+        Console.WriteLine("Plugin loaded successfully.");
+
+        // Simulate plugin unloading sequence
+        Console.WriteLine("Unloading plugin...");
+        await myPlugin.OnBeforeUnloadAsync();
+        await myPlugin.OnAfterUnloadAsync();
+        Console.WriteLine("Plugin unloaded successfully.");
+
+        // Verify hook invocation order
+        var recordingLifecycle = new PluginEngine.Tests.PluginLifecycleTests.RecordingLifecycle();
+        await recordingLifecycle.OnBeforeLoadAsync();
+        await recordingLifecycle.OnAfterLoadAsync();
+        await recordingLifecycle.OnBeforeUnloadAsync();
+        await recordingLifecycle.OnAfterUnloadAsync();
+
+        Console.WriteLine("Hook invocation order:");
+        foreach (var hook in recordingLifecycle.CallLog)
+        {
+            Console.WriteLine($"  - {hook}");
+        }
+    }
+}
+
+// Example plugin implementing IPluginLifecycle
+public class MyPluginWithLifecycle : IPluginLifecycle
+{
+    public Task OnBeforeLoadAsync(CancellationToken cancellationToken = default)
+    {
+        Console.WriteLine("OnBeforeLoadAsync called - preparing plugin for load...");
+        return Task.CompletedTask;
+    }
+
+    public Task OnAfterLoadAsync(CancellationToken cancellationToken = default)
+    {
+        Console.WriteLine("OnAfterLoadAsync called - plugin loaded successfully!");
+        return Task.CompletedTask;
+    }
+
+    public Task OnBeforeUnloadAsync(CancellationToken cancellationToken = default)
+    {
+        Console.WriteLine("OnBeforeUnloadAsync called - preparing plugin for unload...");
+        return Task.CompletedTask;
+    }
+
+    public Task OnAfterUnloadAsync(CancellationToken cancellationToken = default)
+    {
+        Console.WriteLine("OnAfterUnloadAsync called - plugin unloaded successfully!");
+        return Task.CompletedTask;
+    }
+}
+```
