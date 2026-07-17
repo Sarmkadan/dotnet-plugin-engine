@@ -62,7 +62,6 @@ public static class PluginExtensions
     public static string GetFormattedCreationDate(this Plugin plugin)
     {
         ArgumentNullException.ThrowIfNull(plugin);
-
         return plugin.CreatedAt.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
     }
 
@@ -75,7 +74,6 @@ public static class PluginExtensions
     public static string GetFormattedModificationDate(this Plugin plugin)
     {
         ArgumentNullException.ThrowIfNull(plugin);
-
         return plugin.ModifiedAt.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
     }
 
