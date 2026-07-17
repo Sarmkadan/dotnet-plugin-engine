@@ -47,8 +47,10 @@ public static class WebhookConfigurationJsonExtensions
     /// Deserializes a JSON string to a <see cref="WebhookConfiguration"/> instance.
     /// </summary>
     /// <param name="json">The JSON string to deserialize.</param>
-    /// <returns>The deserialized webhook configuration, or null if the JSON is invalid.</returns>
+    /// <returns>The deserialized webhook configuration, or null if the JSON is invalid.
+    /// The <see cref="JsonException"/> is swallowed and null is returned on deserialization failure.</returns>
     /// <exception cref="ArgumentException">Thrown when <paramref name="json"/> is null or empty.</exception>
+    /// <exception cref="JsonException">Thrown when the JSON is malformed and cannot be deserialized.</exception>
     public static WebhookConfiguration? FromJson(string json)
     {
         ArgumentException.ThrowIfNullOrEmpty(json);
@@ -70,6 +72,7 @@ public static class WebhookConfigurationJsonExtensions
     /// <param name="value">Receives the deserialized webhook configuration if successful.</param>
     /// <returns>True if deserialization succeeded; otherwise, false.</returns>
     /// <exception cref="ArgumentException">Thrown when <paramref name="json"/> is null or empty.</exception>
+    /// <exception cref="JsonException">Thrown when the JSON is malformed and cannot be deserialized.</exception>
     public static bool TryFromJson(string json, out WebhookConfiguration? value)
     {
         ArgumentException.ThrowIfNullOrEmpty(json);
