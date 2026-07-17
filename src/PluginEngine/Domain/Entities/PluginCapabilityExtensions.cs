@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 
 namespace PluginEngine.Domain.Entities
 {
     /// <summary>
-    /// Provides extension methods for the PluginCapability class.
+    /// Provides extension methods for the <see cref="PluginCapability"/> class.
     /// </summary>
     public static class PluginCapabilityExtensions
     {
@@ -14,7 +13,7 @@ namespace PluginEngine.Domain.Entities
         /// </summary>
         /// <param name="capability">The plugin capability.</param>
         /// <returns>A formatted string combining display name and version.</returns>
-        /// <exception cref="ArgumentNullException">Thrown when capability is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="capability"/> is null.</exception>
         public static string GetDisplayNameWithVersion(this PluginCapability capability)
         {
             ArgumentNullException.ThrowIfNull(capability);
@@ -27,7 +26,8 @@ namespace PluginEngine.Domain.Entities
         /// <param name="capability">The plugin capability.</param>
         /// <param name="requiredTags">The tags that must be present.</param>
         /// <returns>true if all required tags are present; otherwise, false.</returns>
-        /// <exception cref="ArgumentNullException">Thrown when capability or requiredTags is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="capability"/> or <paramref name="requiredTags"/> is null.</exception>
+        /// <exception cref="ArgumentException">Thrown when any tag in <paramref name="requiredTags"/> is null or empty.</exception>
         public static bool HasAllTags(this PluginCapability capability, IEnumerable<string> requiredTags)
         {
             ArgumentNullException.ThrowIfNull(capability);
@@ -39,12 +39,13 @@ namespace PluginEngine.Domain.Entities
                 {
                     throw new ArgumentException("Tag cannot be null or empty.", nameof(requiredTags));
                 }
-                
+
                 if (!capability.HasTag(tag))
                 {
                     return false;
                 }
             }
+
             return true;
         }
 
@@ -54,12 +55,11 @@ namespace PluginEngine.Domain.Entities
         /// <param name="capability">The plugin capability.</param>
         /// <param name="other">The capability to compare with.</param>
         /// <returns>true if interface types match; otherwise, false.</returns>
-        /// <exception cref="ArgumentNullException">Thrown when capability or other is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="capability"/> or <paramref name="other"/> is null.</exception>
         public static bool IsInterfaceCompatible(this PluginCapability capability, PluginCapability other)
         {
             ArgumentNullException.ThrowIfNull(capability);
             ArgumentNullException.ThrowIfNull(other);
-            
             return capability.InterfaceTypeName == other.InterfaceTypeName;
         }
     }
