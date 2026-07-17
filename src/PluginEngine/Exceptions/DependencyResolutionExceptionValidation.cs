@@ -43,7 +43,7 @@ public static class DependencyResolutionExceptionValidation
         }
 
         // Validate Reason
-        if (value.Reason is not (>= DependencyResolutionReason.Unknown and <= DependencyResolutionReason.OptionalDependencyFailed))
+        if (!Enum.IsDefined(value.Reason))
         {
             problems.Add("Reason has an invalid enum value.");
         }
@@ -102,10 +102,7 @@ public static class DependencyResolutionExceptionValidation
     /// <param name="value">The exception to validate.</param>
     /// <returns><see langword="true"/> if the instance is valid; otherwise, <see langword="false"/>.</returns>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="value"/> is null.</exception>
-    public static bool IsValid(this DependencyResolutionException value)
-    {
-        return value.Validate().Count == 0;
-    }
+    public static bool IsValid(this DependencyResolutionException value) => value.Validate().Count == 0;
 
     /// <summary>
     /// Ensures that the specified <see cref="DependencyResolutionException"/> instance is valid.
@@ -118,13 +115,11 @@ public static class DependencyResolutionExceptionValidation
         ArgumentNullException.ThrowIfNull(value);
 
         var problems = value.Validate();
-        if (problems.Count == 0)
+        if (problems.Count > 0)
         {
-            return;
+            throw new ArgumentException(
+                $"DependencyResolutionException is invalid. Problems:\n{string.Join("\n", problems)}",
+                nameof(value));
         }
-
-        throw new ArgumentException(
-            $"DependencyResolutionException is invalid. Problems:\n{string.Join("\n", problems)}",
-            nameof(value));
     }
 }
