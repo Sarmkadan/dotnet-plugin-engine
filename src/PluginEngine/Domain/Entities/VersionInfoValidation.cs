@@ -7,7 +7,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 
 namespace PluginEngine.Domain.Entities;
 
@@ -39,7 +38,7 @@ public static class VersionInfoValidation
         // Validate Version
         if (string.IsNullOrWhiteSpace(value.Version))
             errors.Add("Version must not be null or whitespace.");
-        else if (!System.Version.TryParse(value.Version, out _))
+        else if (!Version.TryParse(value.Version, out _))
             errors.Add("Version must be a valid semantic version string (e.g., 1.0.0).");
 
         // Validate ReleaseDate
@@ -51,25 +50,20 @@ public static class VersionInfoValidation
             errors.Add("ReleaseDate must be a valid date after year 2000.");
 
         // Validate ReleaseNotes (can be empty, but not null)
-        if (value.ReleaseNotes is null)
-            errors.Add("ReleaseNotes must not be null.");
+        ArgumentNullException.ThrowIfNull(value.ReleaseNotes);
 
         // Validate IsPrerelease and PrereleaseIdentifier
         if (value.IsPrerelease && string.IsNullOrWhiteSpace(value.PrereleaseIdentifier))
             errors.Add("PrereleaseIdentifier must not be null or whitespace when IsPrerelease is true.");
 
         // Validate BuildMetadata (can be empty)
-        if (value.BuildMetadata is null)
-            errors.Add("BuildMetadata must not be null.");
+        ArgumentNullException.ThrowIfNull(value.BuildMetadata);
 
         // Validate Compatibility (can be empty)
-        if (value.Compatibility is null)
-            errors.Add("Compatibility must not be null.");
+        ArgumentNullException.ThrowIfNull(value.Compatibility);
 
-        // Validate IsActive (no validation needed, just a flag)
         // Validate DeprecationNotice (can be empty)
-        if (value.DeprecationNotice is null)
-            errors.Add("DeprecationNotice must not be null.");
+        ArgumentNullException.ThrowIfNull(value.DeprecationNotice);
 
         // Validate DownloadCount
         if (value.DownloadCount < 0)
