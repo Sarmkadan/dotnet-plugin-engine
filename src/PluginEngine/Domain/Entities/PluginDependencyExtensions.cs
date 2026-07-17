@@ -67,6 +67,9 @@ namespace PluginEngine.Domain.Entities
         /// <exception cref="ArgumentNullException">
         /// Thrown when either <paramref name="first"/> or <paramref name="second"/> is <c>null</c>.
         /// </exception>
+        /// <exception cref="FormatException">
+        /// Thrown when either dependency has an invalid version string that cannot be parsed.
+        /// </exception>
         public static bool OverlapsWith(this PluginDependency first, PluginDependency second)
         {
             ArgumentNullException.ThrowIfNull(first);
@@ -77,10 +80,19 @@ namespace PluginEngine.Domain.Entities
                 return false;
 
             // Resolve bounds; null or empty means unbounded.
-            Version? firstMin = string.IsNullOrWhiteSpace(first.MinimumVersion) ? null : Version.Parse(first.MinimumVersion);
-            Version? firstMax = string.IsNullOrWhiteSpace(first.MaximumVersion) ? null : Version.Parse(first.MaximumVersion);
-            Version? secondMin = string.IsNullOrWhiteSpace(second.MinimumVersion) ? null : Version.Parse(second.MinimumVersion);
-            Version? secondMax = string.IsNullOrWhiteSpace(second.MaximumVersion) ? null : Version.Parse(second.MaximumVersion);
+            if (!Version.TryParse(first.MinimumVersion, out var firstMin))
+                throw new FormatException($"Invalid minimum version format: '{first.MinimumVersion}'");
+
+            Version? firstMax = null;
+            if (!string.IsNullOrWhiteSpace(first.MaximumVersion) && !Version.TryParse(first.MaximumVersion, out firstMax))
+                throw new FormatException($"Invalid maximum version format: '{first.MaximumVersion}'");
+
+            if (!Version.TryParse(second.MinimumVersion, out var secondMin))
+                throw new FormatException($"Invalid minimum version format: '{second.MinimumVersion}'");
+
+            Version? secondMax = null;
+            if (!string.IsNullOrWhiteSpace(second.MaximumVersion) && !Version.TryParse(second.MaximumVersion, out secondMax))
+                throw new FormatException($"Invalid maximum version format: '{second.MaximumVersion}'");
 
             // The latest lower bound must be less than or equal to the earliest upper bound.
             var effectiveMin = Max(firstMin, secondMin);
@@ -102,22 +114,48 @@ namespace PluginEngine.Domain.Entities
         /// <exception cref="ArgumentNullException">
         /// Thrown when <paramref name="dependency"/> is <c>null</c>.
         /// </exception>
-        public static string ToSummary(this PluginDependency dependency) =>
-            $"{dependency.DependencyPluginId} " +
-            $"[{(string.IsNullOrWhiteSpace(dependency.MinimumVersion) ? "any" : dependency.MinimumVersion)} - " +
-            $"{(string.IsNullOrWhiteSpace(dependency.MaximumVersion) ? "any" : dependency.MaximumVersion)}] " +
-            $"{(dependency.IsOptional ? "Optional" : "Required")} - {dependency.Description}";
+        public static string ToSummary(this PluginDependency dependency)
+        {
+            ArgumentNullException.ThrowIfNull(dependency);
 
-        // Helper: returns the greater of two nullable Version values, treating null as unbounded (i.e., greater than any concrete version).
-        private static Version? Max(Version? a, Version? b) =>
-            a is null ? b :
-            b is null ? a :
-            a > b ? a : b;
+            return $"{dependency.DependencyPluginId} " +
+                   $"[{(string.IsNullOrWhiteSpace(dependency.MinimumVersion) ? "any" : dependency.MinimumVersion)} - " +
+                   $"{(string.IsNullOrWhiteSpace(dependency.MaximumVersion) ? "any" : dependency.MaximumVersion)}] " +
+                   $"{(dependency.IsOptional ? "Optional" : "Required")} - {dependency.Description}";
+        }
 
-        // Helper: returns the lesser of two nullable Version values, treating null as unbounded (i.e., less than any concrete version).
-        private static Version? Min(Version? a, Version? b) =>
-            a is null ? b :
-            b is null ? a :
-            a < b ? a : b;
+        /// <summary>
+        /// Returns the greater of two nullable Version values, treating null as unbounded
+        /// (i.e., greater than any concrete version).
+        /// </summary>
+        /// <param name="a">The first version to compare.</param>
+        /// <param name="b">The second version to compare.</param>
+        /// <returns>The greater version, or null if both are null.</returns>
+        private static Version? Max(Version? a, Version? b)
+        {
+            return a switch
+            {
+                null => b,
+                _ when b is null => a,
+                _ => a > b ? a : b
+            };
+        }
+
+        /// <summary>
+        /// Returns the lesser of two nullable Version values, treating null as unbounded
+        /// (i.e., less than any concrete version).
+        /// </summary>
+        /// <param name="a">The first version to compare.</param>
+        /// <param name="b">The second version to compare.</param>
+        /// <returns>The lesser version, or null if both are null.</returns>
+        private static Version? Min(Version? a, Version? b)
+        {
+            return a switch
+            {
+                null => b,
+                _ when b is null => a,
+                _ => a < b ? a : b
+            };
+        }
     }
 }
