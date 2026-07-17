@@ -1,4 +1,5 @@
 #nullable enable
+
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -27,10 +28,9 @@ public static class DependencyResolutionServiceValidation
 
         var errors = new List<string>();
 
-        // Validate internal state - though DependencyResolutionService is a service class,
-        // we validate its dependencies and configuration
-        // The service itself doesn't have public properties to validate beyond its constructor
-        // which already validates its dependencies
+        // DependencyResolutionService is a stateless service class with dependencies injected via constructor.
+        // The constructor already validates its dependencies, so there's no additional state to validate here.
+        // This method exists for consistency with the validation pattern used throughout the codebase.
 
         return errors.AsReadOnly();
     }
@@ -336,12 +336,15 @@ public static class DependencyResolutionServiceValidation
         {
             errors.Add("Version constraint cannot be null or whitespace.");
         }
-
-        // Validate version constraint format
-        if (!edge.VersionConstraint.StartsWith(">=", StringComparison.Ordinal) &&
-            !edge.VersionConstraint.Contains("&&", StringComparison.Ordinal))
+        else
         {
-            errors.Add("Version constraint should start with '>= ' or contain '&&' for range constraints.");
+            // Validate version constraint format more thoroughly
+            var constraint = edge.VersionConstraint.Trim();
+            if (!constraint.StartsWith(">=", StringComparison.Ordinal) &&
+                !constraint.Contains("&&", StringComparison.Ordinal))
+            {
+                errors.Add("Version constraint should start with '>= ' or contain '&&' for range constraints.");
+            }
         }
 
         return errors.AsReadOnly();
