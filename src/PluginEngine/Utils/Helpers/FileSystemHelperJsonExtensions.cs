@@ -4,6 +4,7 @@
 // CTO & Software Architect
 // =============================================================================
 
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -47,7 +48,7 @@ public static class FileSystemHelperJsonExtensions
     /// Deserializes a JSON string to a <see cref="FileSystemHelper"/> instance.
     /// </summary>
     /// <param name="json">The JSON string to deserialize.</param>
-    /// <returns>The deserialized instance, or null if the JSON is invalid.</returns>
+    /// <returns>The deserialized instance, or null if the JSON is invalid or cannot be deserialized.</returns>
     /// <exception cref="ArgumentException">Thrown when <paramref name="json"/> is null or empty.</exception>
     public static FileSystemHelper? FromJson(string json)
     {
