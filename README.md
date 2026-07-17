@@ -2,6 +2,59 @@
 
 [... existing content ...]
 
+## PluginEventPublisherExtensions
+
+The `PluginEventPublisherExtensions` class provides a set of extension methods for `PluginEventPublisher` that simplify event publishing, subscription management, and diagnostics. It offers both synchronous and asynchronous APIs for publishing events, batch operations for efficiency, and utilities for monitoring publisher state and managing subscriptions.
+
+Here's a realistic usage example leveraging its public members:
+
+```csharp
+using PluginEngine.Events;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+
+// Create a publisher instance
+var publisher = new PluginEventPublisher();
+
+// Publish a single event synchronously
+publisher.Publish(new PluginLoadedEvent("MyPlugin", "1.0.0"));
+
+// Get current statistics
+var stats = publisher.GetCurrentStatistics();
+Console.WriteLine(publisher.GetStatisticsString());
+
+// Subscribe to events
+publisher.Subscribe<PluginLoadedEvent>(loadedEvent => {
+    Console.WriteLine($"Plugin loaded: {loadedEvent.PluginName} v{loadedEvent.Version}");
+    return Task.CompletedTask;
+});
+
+// Check subscriber count
+var subscriberCount = publisher.GetSubscriberCount<PluginLoadedEvent>();
+Console.WriteLine($"Subscribers for PluginLoadedEvent: {subscriberCount}");
+
+// Subscribe once (auto-unsubscribe after first event)
+var oneTimeDisposable = publisher.SubscribeOnce<PluginUnloadedEvent>(unloadedEvent => {
+    Console.WriteLine($"Plugin unloaded: {unloadedEvent.PluginName}");
+    return Task.CompletedTask;
+});
+
+// Publish multiple events as a batch (more efficient than individual publishes)
+publisher.PublishBatchAsync(new[] {
+    new PluginLoadedEvent("PluginA", "1.0.0"),
+    new PluginLoadedEvent("PluginB", "2.0.0"),
+    new PluginLoadedEvent("PluginC", "1.5.0")
+}).Wait();
+
+// Get all monitored event types
+var monitoredTypes = publisher.GetMonitoredEventTypes();
+Console.WriteLine($"Monitored event types: {string.Join(", ", monitoredTypes.Select(t => t.Name))}");
+
+// Unsubscribe all handlers for a specific event type
+publisher.UnsubscribeAll<PluginLoadedEvent>();
+```
+
 ## PluginEventPublisherTests
 
 The `PluginEventPublisherTests` class contains unit tests for the `PluginEventPublisher` class, which provides functionality for publishing plugin events to subscribers. It tests various scenarios including publishing with no subscribers, publishing with one or multiple subscribers, unsubscribing handlers, and publishing different event types. Here's a realistic usage example leveraging its public members:
