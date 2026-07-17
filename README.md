@@ -55,6 +55,94 @@ Console.WriteLine($"Monitored event types: {string.Join(", ", monitoredTypes.Sel
 publisher.UnsubscribeAll<PluginLoadedEvent>();
 ```
 
+## RemotePluginRegistryValidation
+
+The `RemotePluginRegistryValidation` class provides validation helpers for `PluginInfo`, `PluginVersionInfo`, `PluginPublishMetadata`, and `RemotePluginRegistry` instances. It offers extension methods that validate plugin metadata against semantic versioning rules, URL formats, and required fields, returning detailed error messages for invalid data or throwing exceptions when strict validation is required.
+
+Here's a realistic usage example leveraging its public members:
+
+```csharp
+using PluginEngine.Integration;
+using System;
+using System.Linq;
+
+// Create valid plugin info
+var validPluginInfo = new PluginInfo {
+    Id = Guid.NewGuid(),
+    Name = "MyAwesomePlugin",
+    Version = "1.0.0",
+    DownloadUrl = "https://example.com/plugins/myplugin.zip"
+};
+
+// Validate plugin info - returns list of problems (empty if valid)
+var validationErrors = validPluginInfo.Validate();
+if (validationErrors.Any())
+{
+    Console.WriteLine("Plugin validation failed:");
+    foreach (var error in validationErrors)
+    {
+        Console.WriteLine($"- {error}");
+    }
+}
+else
+{
+    Console.WriteLine("Plugin info is valid!");
+}
+
+// Check if plugin info is valid using IsValid extension
+if (validPluginInfo.IsValid())
+{
+    Console.WriteLine("Plugin info passed validation checks");
+}
+
+// Validate plugin version info
+var versionInfo = new PluginVersionInfo {
+    Version = "2.1.0",
+    PublishedAtUtc = DateTime.UtcNow,
+    DownloadUrl = "https://example.com/plugins/myplugin-v2.1.0.zip"
+};
+
+if (!versionInfo.IsValid())
+{
+    Console.WriteLine("Version info is invalid");
+}
+
+// Validate plugin publish metadata
+var publishMetadata = new PluginPublishMetadata {
+    PluginName = "MyAwesomePlugin",
+    Version = "1.0.0",
+    Description = "A sample plugin for the plugin engine",
+    Author = "John Doe",
+    Tags = new[] { "sample", "demo", "plugin" }
+};
+
+// Use EnsureValid to throw if invalid
+try
+{
+    publishMetadata.EnsureValid();
+    Console.WriteLine("Publish metadata is valid");
+}
+catch (ArgumentException ex)
+{
+    Console.WriteLine($"Validation failed: {ex.Message}");
+}
+
+// Validate RemotePluginRegistry
+var registry = new RemotePluginRegistry();
+registry.EnsureValid(); // Throws if null
+
+// Batch validation example
+var plugins = new[] { validPluginInfo, null };
+foreach (var plugin in plugins)
+{
+    var errors = plugin.Validate();
+    if (errors.Count > 0)
+    {
+        Console.WriteLine($"Plugin {plugin?.Name ?? "null"} has {errors.Count} validation errors");
+    }
+}
+```
+
 ## PluginEventPublisherTests
 
 The `PluginEventPublisherTests` class contains unit tests for the `PluginEventPublisher` class, which provides functionality for publishing plugin events to subscribers. It tests various scenarios including publishing with no subscribers, publishing with one or multiple subscribers, unsubscribing handlers, and publishing different event types. Here's a realistic usage example leveraging its public members:
