@@ -31,26 +31,6 @@ public static class PluginMetadataExtensions
     {
         ArgumentNullException.ThrowIfNull(metadata);
 
-        var customProperties = new Dictionary<string, string>();
-
-        // assume we don't know the exact number of custom properties
-        // this could be optimized if we knew the number
-
-        for (int i = 0; i < 100; i++)
-        {
-            var key = $"customProperty{i}";
-            var value = metadata.GetCustomProperty(key);
-            if (value != null)
-            {
-                customProperties.Add(key, value);
-            }
-            else
-            {
-                break;
-            }
-        }
-
-        // We have to actually walk through GetCustomProperty calls
         var keys = new List<string>();
         for (int i = 0; ; i++)
         {
