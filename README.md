@@ -552,3 +552,149 @@ public class MyPluginWithLifecycle : IPluginLifecycle
     }
 }
 ```
+## PluginDependencyResolverTests
+
+The `PluginDependencyResolverTests` class contains unit tests for the `PluginDependencyResolver` service, which provides functionality for resolving plugin dependencies, detecting conflicts, and building installation plans. It tests various dependency resolution scenarios including linear chains, circular dependencies, diamond dependencies, version constraint conflicts, and resolution plan generation. The tests validate that the dependency resolver correctly handles complex dependency graphs and provides appropriate error codes when resolution fails.
+
+Here's a realistic usage example leveraging its public members:
+
+```csharp
+using PluginEngine.Domain.Entities;
+using PluginEngine.Services.Implementations;
+using PluginEngine.Services.Abstractions;
+using Microsoft.Extensions.Logging;
+using Moq;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+
+public class PluginDependencyResolverDemo
+{
+    private readonly Mock<IPluginLoaderService> _mockLoader = new();
+    private readonly Mock<ILogger<PluginDependencyResolver>> _mockLogger = new();
+
+    private PluginDependencyResolver CreateResolver() =>
+        new(_mockLoader.Object, _mockLogger.Object);
+
+    private static Plugin MakePlugin(string name, string version = "1.0.0")
+        => new() { Id = Guid.NewGuid(), Name = name, Version = version, AssemblyPath = $"/{name}.dll" };
+
+    public async Task DemonstratePluginDependencyResolver()
+    {
+        // Create a simple plugin with no dependencies
+        var standalonePlugin = MakePlugin("StandalonePlugin");
+        
+        // Create a plugin with a dependency on another plugin
+        var coreLibrary = MakePlugin("CoreLibrary");
+        var applicationPlugin = MakePlugin("ApplicationPlugin");
+        applicationPlugin.AddDependency(new PluginDependency
+        {
+            PluginId = applicationPlugin.Id,
+            DependencyPluginId = coreLibrary.Id,
+            MinimumVersion = "1.0.0"
+        });
+
+        // Create a diamond dependency structure: A → B, A → C, B → D, C → D
+        var baseDependency = MakePlugin("BaseDependency", "2.0.0");
+        var leftPlugin = MakePlugin("LeftPlugin");
+        var rightPlugin = MakePlugin("RightPlugin");
+        var mainApplication = MakePlugin("MainApplication");
+        
+        leftPlugin.AddDependency(new PluginDependency
+        {
+            PluginId = leftPlugin.Id,
+            DependencyPluginId = baseDependency.Id,
+            MinimumVersion = "2.0.0"
+        });
+        
+        rightPlugin.AddDependency(new PluginDependency
+        {
+            PluginId = rightPlugin.Id,
+            DependencyPluginId = baseDependency.Id,
+            MinimumVersion = "2.0.0"
+        });
+        
+        mainApplication.AddDependency(new PluginDependency
+        {
+            PluginId = mainApplication.Id,
+            DependencyPluginId = leftPlugin.Id,
+            MinimumVersion = "1.0.0"
+        });
+        
+        mainApplication.AddDependency(new PluginDependency
+        {
+            PluginId = mainApplication.Id,
+            DependencyPluginId = rightPlugin.Id,
+            MinimumVersion = "1.0.0"
+        });
+
+        // Setup mock loader for GetInstallOrderAsync tests
+        var resolver = CreateResolver();
+        
+        // Test 1: GetInstallOrderAsync with no dependencies
+        var noDepsResult = await resolver.GetInstallOrderAsync(new[] { standalonePlugin });
+        Console.WriteLine($"No dependencies result - Success: {noDepsResult.Success}, Count: {noDepsResult.Data?.Count}");
+        
+        // Test 2: GetInstallOrderAsync with linear chain
+        var linearResult = await resolver.GetInstallOrderAsync(new[] { applicationPlugin, coreLibrary });
+        Console.WriteLine($"Linear chain result - Success: {linearResult.Success}");
+        if (linearResult.Success && linearResult.Data != null)
+        {
+            Console.WriteLine($"Install order: {string.Join(" → ", linearResult.Data.Select(p => p.Name))}");
+        }
+        
+        // Test 3: GetInstallOrderAsync with diamond dependency
+        var diamondResult = await resolver.GetInstallOrderAsync(new[] { mainApplication, leftPlugin, rightPlugin, baseDependency });
+        Console.WriteLine($"Diamond dependency result - Success: {diamondResult.Success}");
+        if (diamondResult.Success && diamondResult.Data != null)
+        {
+            Console.WriteLine($"Install order: {string.Join(" → ", diamondResult.Data.Select(p => p.Name))}");
+        }
+
+        // Setup mock loader for BuildResolutionPlanAsync tests
+        _mockLoader
+            .Setup(l => l.GetLoadedPluginAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Plugin?)null);
+        
+        // Test 4: BuildResolutionPlanAsync with non-existent plugin
+        var missingPluginResult = await resolver.BuildResolutionPlanAsync(Guid.NewGuid());
+        Console.WriteLine($"Missing plugin result - Success: {missingPluginResult.Success}, ErrorCode: {missingPluginResult.ErrorCode}");
+        
+        // Setup mock loader for successful case
+        _mockLoader
+            .Setup(l => l.GetLoadedPluginAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(standalonePlugin);
+        _mockLoader
+            .Setup(l => l.GetAllLoadedPluginsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new[] { standalonePlugin });
+        
+        // Test 5: BuildResolutionPlanAsync with no dependencies
+        var planResult = await resolver.BuildResolutionPlanAsync(standalonePlugin.Id);
+        Console.WriteLine($"Resolution plan result - Success: {planResult.Success}, Steps: {planResult.Data?.Steps.Count}, Executable: {planResult.Data?.IsExecutable}");
+        
+        // Test 6: FindConflictsAsync with compatible constraints
+        var sharedLib = MakePlugin("SharedLibrary");
+        var pluginA = MakePlugin("PluginA");
+        var pluginB = MakePlugin("PluginB");
+        
+        pluginA.AddDependency(new PluginDependency
+        {
+            PluginId = pluginA.Id,
+            DependencyPluginId = sharedLib.Id,
+            MinimumVersion = "1.0.0",
+            MaximumVersion = "2.0.0"
+        });
+        
+        pluginB.AddDependency(new PluginDependency
+        {
+            PluginId = pluginB.Id,
+            DependencyPluginId = sharedLib.Id,
+            MinimumVersion = "1.5.0",
+            MaximumVersion = "2.0.0"
+        });
+        
+        var conflictsResult = await resolver.FindConflictsAsync(new[] { pluginA, pluginB, sharedLib });
+        Console.WriteLine($"Conflicts check result - Success: {conflictsResult.Success}, Conflicts: {conflictsResult.Data?.Count}");
+    }
+}
+```
