@@ -3,7 +3,7 @@
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
-// =====================================================================
+// ====================================================================
 
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -47,13 +47,15 @@ public static class PluginManagerServiceJsonExtensions
     /// Deserializes a JSON string to a <see cref="PluginManagerService"/> instance.
     /// </summary>
     /// <param name="json">The JSON string to deserialize.</param>
-    /// <returns>The deserialized manager service instance, or null if the JSON is invalid.</returns>
+    /// <returns>The deserialized manager service instance.</returns>
     /// <exception cref="ArgumentException">Thrown when <paramref name="json"/> is null or empty.</exception>
-    public static PluginManagerService? FromJson(string json)
+    /// <exception cref="JsonException">Thrown when the JSON is invalid or cannot be deserialized.</exception>
+    public static PluginManagerService FromJson(string json)
     {
         ArgumentException.ThrowIfNullOrEmpty(json);
 
-        return JsonSerializer.Deserialize<PluginManagerService>(json, _jsonOptions);
+        return JsonSerializer.Deserialize<PluginManagerService>(json, _jsonOptions)
+               ?? throw new JsonException("Deserialization returned null, indicating invalid JSON or missing required properties.");
     }
 
     /// <summary>
@@ -67,14 +69,15 @@ public static class PluginManagerServiceJsonExtensions
     {
         ArgumentException.ThrowIfNullOrEmpty(json);
 
+        value = null;
+
         try
         {
             value = JsonSerializer.Deserialize<PluginManagerService>(json, _jsonOptions);
-            return true;
+            return value is not null;
         }
         catch (JsonException)
         {
-            value = null;
             return false;
         }
     }
