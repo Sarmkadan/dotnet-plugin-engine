@@ -62,11 +62,11 @@ public sealed class HotSwapServiceTests : IDisposable
     private Plugin MakePlugin(PluginStatus status = PluginStatus.Active, string? assemblyPath = null) =>
         new()
         {
-            Id           = Guid.NewGuid(),
-            Name         = "TestPlugin",
-            Version      = "1.0.0",
+            Id = Guid.NewGuid(),
+            Name = "TestPlugin",
+            Version = "1.0.0",
             AssemblyPath = assemblyPath ?? CreateTempDll("current.dll"),
-            Status       = status
+            Status = status
         };
 
     // ── CanSwap ──────────────────────────────────────────────────────────────
@@ -77,7 +77,7 @@ public sealed class HotSwapServiceTests : IDisposable
     public void CanSwap_ActiveOrLoadedPlugin_ReturnsTrue(PluginStatus status)
     {
         var service = CreateService();
-        var plugin  = MakePlugin(status);
+        var plugin = MakePlugin(status);
 
         service.CanSwap(plugin).Should().BeTrue();
     }
@@ -89,7 +89,7 @@ public sealed class HotSwapServiceTests : IDisposable
     public void CanSwap_NonRunningPlugin_ReturnsFalse(PluginStatus status)
     {
         var service = CreateService();
-        var plugin  = MakePlugin(status);
+        var plugin = MakePlugin(status);
 
         service.CanSwap(plugin).Should().BeFalse();
     }
@@ -134,7 +134,7 @@ public sealed class HotSwapServiceTests : IDisposable
             .ReturnsAsync((Plugin?)null);
 
         var service = CreateService();
-        var result  = await service.SwapPluginAsync(Guid.NewGuid(), newDll);
+        var result = await service.SwapPluginAsync(Guid.NewGuid(), newDll);
 
         result.Success.Should().BeFalse();
         result.ErrorCode.Should().Be(404);
@@ -158,7 +158,7 @@ public sealed class HotSwapServiceTests : IDisposable
             .ReturnsAsync(newPlugin);
 
         var service = CreateService();
-        var result  = await service.SwapPluginAsync(plugin.Id, newDll);
+        var result = await service.SwapPluginAsync(plugin.Id, newDll);
 
         result.Success.Should().BeTrue();
 
@@ -201,7 +201,7 @@ public sealed class HotSwapServiceTests : IDisposable
     public async Task RollbackSwapAsync_NoHistory_ReturnsFailure()
     {
         var service = CreateService();
-        var result  = await service.RollbackSwapAsync(Guid.NewGuid());
+        var result = await service.RollbackSwapAsync(Guid.NewGuid());
 
         result.Success.Should().BeFalse();
         result.ErrorCode.Should().Be(404);
@@ -210,9 +210,9 @@ public sealed class HotSwapServiceTests : IDisposable
     [Fact]
     public async Task RollbackSwapAsync_AfterSuccessfulSwap_ReloadsOldAssembly()
     {
-        var oldDll    = CreateTempDll("old.dll");
-        var newDll    = CreateTempDll("new.dll");
-        var plugin    = MakePlugin(assemblyPath: oldDll);
+        var oldDll = CreateTempDll("old.dll");
+        var newDll = CreateTempDll("new.dll");
+        var plugin = MakePlugin(assemblyPath: oldDll);
         var newPlugin = MakePlugin(assemblyPath: newDll);
 
         _mockLoader
@@ -243,7 +243,7 @@ public sealed class HotSwapServiceTests : IDisposable
     public async Task GetSwapHistoryAsync_NoSwaps_ReturnsEmptyList()
     {
         var service = CreateService();
-        var result  = await service.GetSwapHistoryAsync(Guid.NewGuid());
+        var result = await service.GetSwapHistoryAsync(Guid.NewGuid());
 
         result.Success.Should().BeTrue();
         result.Data.Should().BeEmpty();
@@ -254,12 +254,107 @@ public sealed class HotSwapServiceTests : IDisposable
     [Fact]
     public void UnregisterPostSwapCallback_RemovesCallback()
     {
-        var service  = CreateService();
+        var service = CreateService();
         var pluginId = Guid.NewGuid();
 
         service.RegisterPostSwapCallback(pluginId, _ => Task.CompletedTask);
         service.UnregisterPostSwapCallback(pluginId);
 
         // No error thrown; callback no longer tracked (verified via swap test separately)
+    }
+
+    // ── Swap to failing plugin rolls back or marks failed ────────────────────────
+
+    [Fact]
+    public async Task SwapPluginAsync_FailingPlugin_MarksFailedAndRollsBack()
+    {
+        var oldDll = CreateTempDll("old.dll");
+        var newDll = CreateTempDll("new.dll");
+        var plugin = MakePlugin(assemblyPath: oldDll);
+
+        _mockLoader
+            .Setup(l => l.GetLoadedPluginAsync(plugin.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(plugin);
+        _mockLoader
+            .Setup(l => l.UnloadPluginAsync(plugin.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+        _mockLoader
+            .Setup(l => l.LoadPluginAsync(newDll, It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new InvalidOperationException("Invalid plugin assembly"));
+
+        var service = CreateService();
+        var result = await service.SwapPluginAsync(plugin.Id, newDll);
+
+        result.Success.Should().BeFalse();
+        result.ErrorCode.Should().Be(500);
+
+        // Verify failure was recorded
+        var historyResult = await service.GetSwapHistoryAsync(plugin.Id);
+        historyResult.Data.Should().HaveCount(1);
+        historyResult.Data![0].Success.Should().BeFalse();
+        historyResult.Data[0].ErrorMessage.Should().Contain("Invalid plugin assembly");
+        historyResult.Data[0].PreviousAssemblyPath.Should().Be(oldDll);
+        historyResult.Data[0].NewAssemblyPath.Should().Be(newDll);
+    }
+
+    // ── Concurrent swap requests for the same plugin are serialized ────────────────
+
+    [Fact]
+    public async Task SwapPluginAsync_ConcurrentRequests_SerializesAccess()
+    {
+        var plugin = MakePlugin();
+        var newDll1 = CreateTempDll("new1.dll");
+        var newDll2 = CreateTempDll("new2.dll");
+
+        _mockLoader
+            .Setup(l => l.GetLoadedPluginAsync(plugin.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(plugin);
+        _mockLoader
+            .Setup(l => l.UnloadPluginAsync(plugin.Id, It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        // Simulate concurrent loading - only one should succeed
+        _mockLoader
+            .SetupSequence(l => l.LoadPluginAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(MakePlugin(assemblyPath: newDll1))
+            .ReturnsAsync(MakePlugin(assemblyPath: newDll2));
+
+        var service = CreateService();
+
+        // Start two concurrent swaps
+        var task1 = service.SwapPluginAsync(plugin.Id, newDll1);
+        var task2 = service.SwapPluginAsync(plugin.Id, newDll2);
+
+        await Task.WhenAll(task1, task2);
+
+        // Only one swap should have succeeded (the first one)
+        var successCount = new[] { task1.Result.Success, task2.Result.Success }.Count(s => s);
+        successCount.Should().Be(1);
+
+        // Verify history shows both attempts
+        var historyResult = await service.GetSwapHistoryAsync(plugin.Id);
+        historyResult.Data.Should().HaveCount(2);
+        historyResult.Data![0].Success.Should().BeTrue();
+        historyResult.Data[1].Success.Should().BeFalse();
+    }
+
+    // ── Swap of unknown plugin id errors cleanly ────────────────────────────────────
+
+    [Fact]
+    public async Task SwapPluginAsync_UnknownPluginId_ErrorsCleanly()
+    {
+        var service = CreateService();
+        var unknownPluginId = Guid.NewGuid();
+        var newDll = CreateTempDll("new.dll");
+
+        _mockLoader
+            .Setup(l => l.GetLoadedPluginAsync(unknownPluginId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Plugin?)null);
+
+        var result = await service.SwapPluginAsync(unknownPluginId, newDll);
+
+        result.Success.Should().BeFalse();
+        result.ErrorCode.Should().Be(404);
+        result.Message.Should().Contain(unknownPluginId.ToString());
     }
 }
