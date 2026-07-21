@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using PluginEngine.Domain.Entities;
 using PluginEngine.Services.Abstractions;
+using PluginEngine.Services;
 using PluginEngine.Utils.Helpers;
 using Xunit;
 
@@ -89,7 +90,7 @@ public sealed class DependencyGraphAnalyzerTests
         var result = await _sut.FindDependentsAsync(new[] { dependent }, targetId);
 
         result.Should().ContainSingle()
-            .Which.Should().Be(dependent.Id);
+        .Which.Should().Be(dependent.Id);
     }
 
     /// <summary>
@@ -109,8 +110,8 @@ public sealed class DependencyGraphAnalyzerTests
         var result = await _sut.FindDependentsAsync(new[] { dep1, dep2, unrelated }, targetId);
 
         result.Should().HaveCount(2)
-            .And.Contain(dep1.Id)
-            .And.Contain(dep2.Id);
+        .And.Contain(dep1.Id)
+        .And.Contain(dep2.Id);
     }
 
     /// <summary>
@@ -212,7 +213,7 @@ public sealed class DependencyGraphAnalyzerTests
         var result = await _sut.GenerateGraphVisualizationAsync(plugin);
 
         result.Should().NotBeNullOrWhiteSpace()
-            .And.Contain("Root");
+        .And.Contain("Root");
     }
 
     // ── DependencyAnalysisReport.GetComplexityLevel ─────────────────────────
@@ -237,5 +238,209 @@ public sealed class DependencyGraphAnalyzerTests
         report.ComplexityScore = score;
 
         report.GetComplexityLevel().Should().Be(expected);
+    }
+
+    // ── Self-Dependency and Cycle Detection Tests ─────────────────────────────────
+
+    /// <summary>
+    /// Tests that AnalyzeAsync detects self-dependency (plugin depending on itself).
+    /// </summary>
+    [Fact]
+    public async Task AnalyzeAsync_WithSelfDependency_ReportsCircularDependency()
+    {
+        // Arrange
+        var plugin = MakePlugin("SelfDependent");
+        var selfDependency = new PluginDependency
+        {
+            PluginId = plugin.Id,
+            DependencyPluginId = plugin.Id, // Self-dependency
+            MinimumVersion = "1.0.0"
+        };
+        plugin.AddDependency(selfDependency);
+
+        _mockResolver.Setup(x => x.ResolveDependenciesAsync(plugin, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Array.Empty<Plugin>());
+        _mockResolver.Setup(x => x.HasCircularDependenciesAsync(plugin, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true); // Self-dependency should be detected as circular
+
+        // Act
+        var report = await _sut.AnalyzeAsync(plugin);
+
+        // Assert
+        report.HasCircularDependencies.Should().BeTrue();
+        report.Issues.Should().Contain(i => i.Contains("Circular"));
+    }
+
+    /// <summary>
+    /// Tests that AnalyzeAsync detects long circular dependency A->B->C->D->A.
+    /// </summary>
+    [Fact]
+    public async Task AnalyzeAsync_WithLongCircularDependency_ReportsCircularDependency()
+    {
+        // Arrange
+        var pluginA = MakePlugin("PluginA");
+        var pluginB = MakePlugin("PluginB");
+        var pluginC = MakePlugin("PluginC");
+        var pluginD = MakePlugin("PluginD");
+
+        // Create circular dependency: A->B->C->D->A
+        pluginA.AddDependency(new PluginDependency
+        {
+            PluginId = pluginA.Id,
+            DependencyPluginId = pluginB.Id,
+            MinimumVersion = "1.0.0"
+        });
+        pluginB.AddDependency(new PluginDependency
+        {
+            PluginId = pluginB.Id,
+            DependencyPluginId = pluginC.Id,
+            MinimumVersion = "1.0.0"
+        });
+        pluginC.AddDependency(new PluginDependency
+        {
+            PluginId = pluginC.Id,
+            DependencyPluginId = pluginD.Id,
+            MinimumVersion = "1.0.0"
+        });
+        pluginD.AddDependency(new PluginDependency
+        {
+            PluginId = pluginD.Id,
+            DependencyPluginId = pluginA.Id,
+            MinimumVersion = "1.0.0"
+        });
+
+        var allPlugins = new[] { pluginA, pluginB, pluginC, pluginD };
+
+        _mockResolver.Setup(x => x.ResolveDependenciesAsync(pluginA, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(allPlugins);
+        _mockResolver.Setup(x => x.HasCircularDependenciesAsync(pluginA, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        // Act
+        var report = await _sut.AnalyzeAsync(pluginA);
+
+        // Assert
+        report.HasCircularDependencies.Should().BeTrue();
+        report.Issues.Should().Contain(i => i.Contains("Circular"));
+        report.TotalDependencies.Should().Be(4); // All plugins in the cycle
+    }
+
+    /// <summary>
+    /// Tests that AnalyzeAsync handles two independent circular dependencies correctly.
+    /// </summary>
+    [Fact]
+    public async Task AnalyzeAsync_WithTwoIndependentCycles_ReportsCircularDependency()
+    {
+        // Arrange
+        // First cycle: A->B->A
+        var pluginA = MakePlugin("PluginA");
+        var pluginB = MakePlugin("PluginB");
+        pluginA.AddDependency(new PluginDependency
+        {
+            PluginId = pluginA.Id,
+            DependencyPluginId = pluginB.Id,
+            MinimumVersion = "1.0.0"
+        });
+        pluginB.AddDependency(new PluginDependency
+        {
+            PluginId = pluginB.Id,
+            DependencyPluginId = pluginA.Id,
+            MinimumVersion = "1.0.0"
+        });
+
+        // Second cycle: C->D->E->C (independent from first cycle)
+        var pluginC = MakePlugin("PluginC");
+        var pluginD = MakePlugin("PluginD");
+        var pluginE = MakePlugin("PluginE");
+        pluginC.AddDependency(new PluginDependency
+        {
+            PluginId = pluginC.Id,
+            DependencyPluginId = pluginD.Id,
+            MinimumVersion = "1.0.0"
+        });
+        pluginD.AddDependency(new PluginDependency
+        {
+            PluginId = pluginD.Id,
+            DependencyPluginId = pluginE.Id,
+            MinimumVersion = "1.0.0"
+        });
+        pluginE.AddDependency(new PluginDependency
+        {
+            PluginId = pluginE.Id,
+            DependencyPluginId = pluginC.Id,
+            MinimumVersion = "1.0.0"
+        });
+
+        var allPlugins = new[] { pluginA, pluginB, pluginC, pluginD, pluginE };
+
+        _mockResolver.Setup(x => x.ResolveDependenciesAsync(pluginA, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(allPlugins);
+        _mockResolver.Setup(x => x.HasCircularDependenciesAsync(pluginA, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true); // At least one cycle exists
+
+        // Act
+        var report = await _sut.AnalyzeAsync(pluginA);
+
+        // Assert
+        report.HasCircularDependencies.Should().BeTrue();
+        report.Issues.Should().Contain(i => i.Contains("Circular"));
+        report.TotalDependencies.Should().Be(5); // All plugins are reachable
+    }
+
+    /// <summary>
+    /// Tests that AnalyzeAsync correctly handles diamond dependency pattern without cycles.
+    /// </summary>
+    [Fact]
+    public async Task AnalyzeAsync_WithDiamondDependency_NoCircularDependency_ValidTopologicalOrder()
+    {
+        // Arrange
+        // Diamond pattern: A depends on B and C, both B and C depend on D
+        // No cycles: A -> B -> D, A -> C -> D
+        var pluginA = MakePlugin("PluginA");
+        var pluginB = MakePlugin("PluginB");
+        var pluginC = MakePlugin("PluginC");
+        var pluginD = MakePlugin("PluginD");
+
+        pluginA.AddDependency(new PluginDependency
+        {
+            PluginId = pluginA.Id,
+            DependencyPluginId = pluginB.Id,
+            MinimumVersion = "1.0.0"
+        });
+        pluginA.AddDependency(new PluginDependency
+        {
+            PluginId = pluginA.Id,
+            DependencyPluginId = pluginC.Id,
+            MinimumVersion = "1.0.0"
+        });
+        pluginB.AddDependency(new PluginDependency
+        {
+            PluginId = pluginB.Id,
+            DependencyPluginId = pluginD.Id,
+            MinimumVersion = "1.0.0"
+        });
+        pluginC.AddDependency(new PluginDependency
+        {
+            PluginId = pluginC.Id,
+            DependencyPluginId = pluginD.Id,
+            MinimumVersion = "1.0.0"
+        });
+        // D has no dependencies
+
+        var allPlugins = new[] { pluginA, pluginB, pluginC, pluginD };
+
+        _mockResolver.Setup(x => x.ResolveDependenciesAsync(pluginA, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(allPlugins);
+        _mockResolver.Setup(x => x.HasCircularDependenciesAsync(pluginA, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false); // No circular dependencies in diamond pattern
+
+        // Act
+        var report = await _sut.AnalyzeAsync(pluginA);
+
+        // Assert
+        report.HasCircularDependencies.Should().BeFalse();
+        report.TotalDependencies.Should().Be(4); // All four plugins
+        report.DirectDependencies.Should().Be(2); // A directly depends on B and C
+        report.Issues.Should().NotContain(i => i.Contains("Circular"));
     }
 }
