@@ -14,15 +14,17 @@ public sealed class PluginIncompatibleException : PluginException
     /// <summary>
     /// Gets the declared constraint that was not satisfied.
     /// </summary>
-    public string DeclaredConstraint { get; }
+    public string? DeclaredConstraint { get; }
 
     /// <summary>
     /// Gets the host engine version.
     /// </summary>
-    public string HostEngineVersion { get; }
+    public string? HostEngineVersion { get; }
 
-    public PluginIncompatibleException(string pluginName, string constraint, string hostVersion)
-        : base($"Plugin '{pluginName}' is incompatible with the host engine version {hostVersion}. Constraint '{constraint}' is not satisfied.", "PLUGIN_INCOMPATIBLE")
+    public PluginIncompatibleException(string? pluginName, string? constraint, string? hostVersion)
+        : base(
+            $"Plugin '{pluginName ?? "null"}' is incompatible with the host engine version {hostVersion ?? "null"}. Constraint '{constraint ?? "null"}' is not satisfied.",
+            "PLUGIN_INCOMPATIBLE")
     {
         DeclaredConstraint = constraint;
         HostEngineVersion = hostVersion;
