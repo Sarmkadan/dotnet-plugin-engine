@@ -4,6 +4,8 @@
 // CTO & Software Architect
 // =============================================================================
 
+using System.Collections.Immutable;
+
 namespace PluginEngine.Events;
 
 /// <summary>
@@ -23,6 +25,19 @@ public sealed class PluginEventPublisher : IPluginEventPublisher
         _logger = logger;
     }
 
+    /// <summary>
+    /// Publishes an event to all registered subscribers.
+    /// </summary>
+    /// <typeparam name="T">The type of event to publish.</typeparam>
+    /// <param name="@event">The event to publish.</param>
+    /// <exception cref="AggregateException">
+    /// Thrown when one or more event handlers fail. The <see cref="AggregateException.InnerExceptions"/>
+    /// property contains all exceptions thrown by individual handlers.
+    /// </exception>
+    /// <remarks>
+    /// If a handler throws an exception, the publisher catches it and continues dispatching to remaining subscribers.
+    /// All exceptions are collected and thrown as an <see cref="AggregateException"/> after all handlers have been invoked.
+    /// </remarks>
     public async Task PublishAsync<T>(T @event) where T : IPluginEvent
     {
         try
@@ -51,21 +66,61 @@ public sealed class PluginEventPublisher : IPluginEventPublisher
             }
 
             var tasks = new List<Task>();
+            var exceptions = new List<Exception>();
 
             foreach (var handler in handlers)
             {
                 if (handler is Func<T, Task> asyncHandler)
                 {
-                    tasks.Add(asyncHandler(@event));
+                    try
+                    {
+                        tasks.Add(asyncHandler(@event));
+                    }
+                    catch (Exception ex) when (ex is not OperationCanceledException)
+                    {
+                        _logger.LogError(ex, "Handler registration threw exception for event: {EventType}", @event.EventType);
+                        exceptions.Add(ex);
+                    }
                 }
             }
 
             if (tasks.Count > 0)
             {
-                await Task.WhenAll(tasks);
-                _logger.LogInformation(
-                    "Event published to {HandlerCount} subscribers: {EventType}",
-                    tasks.Count, @event.EventType);
+                try
+                {
+                    await Task.WhenAll(tasks);
+                }
+                catch (Exception ex) when (ex is not OperationCanceledException)
+                {
+                    if (ex is AggregateException aggregateException)
+                    {
+                        exceptions.AddRange(aggregateException.InnerExceptions);
+                    }
+                    else
+                    {
+                        exceptions.Add(ex);
+                    }
+                }
+
+                if (exceptions.Count > 0)
+                {
+                    _logger.LogWarning(
+                        "Event published with {HandlerCount} successful subscribers, but {FailedCount} failed: {EventType}",
+                        tasks.Count - exceptions.Count,
+                        exceptions.Count,
+                        @event.EventType);
+
+                    throw new AggregateException(
+                        $"One or more event handlers failed for event type {typeof(T).Name}",
+                        exceptions.ToImmutableArray());
+                }
+                else
+                {
+                    _logger.LogInformation(
+                        "Event published to {HandlerCount} subscribers: {EventType}",
+                        tasks.Count,
+                        @event.EventType);
+                }
             }
         }
         catch (Exception ex)
@@ -147,15 +202,15 @@ public sealed class PluginEventPublisher : IPluginEventPublisher
             foreach (var key in _subscribers.Keys.ToList())
             {
                 var handlers = _subscribers[key];
-                int removed = handlers.RemoveAll(h => 
+                int removed = handlers.RemoveAll(h =>
                 {
                     var assembly = h.Method.DeclaringType?.Assembly;
                     return assembly != null && System.Runtime.Loader.AssemblyLoadContext.GetLoadContext(assembly) == context;
                 });
-                
+
                 if (removed > 0)
                 {
-                    _logger.LogDebug("Removed {Count} subscribers for context {ContextName} on event {EventType}", 
+                    _logger.LogDebug("Removed {Count} subscribers for context {ContextName} on event {EventType}",
                         removed, context.Name, key.Name);
                 }
 
