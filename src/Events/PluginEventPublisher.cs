@@ -30,6 +30,26 @@ namespace Events
 
         public async Task PublishAsync(PluginEvent pluginEvent, [CallerMemberName] string memberName = null)
         {
+            var subscribersSnapshot = _subscribers.ToList();
+            await Task.Run(() =>
+            {
+                lock (_lock)
+                {
+                    foreach (var subscriber in subscribersSnapshot)
+                    {
+                        try
+                        {
+                            subscriber.HandleEvent(pluginEvent);
+                        }
+                        catch (Exception ex)
+                        {
+                            // Handle exception
+                        }
+                    }
+                }
+            });
+        }
+        {
             await Task.Run(() =>
             {
                 lock (_lock)
