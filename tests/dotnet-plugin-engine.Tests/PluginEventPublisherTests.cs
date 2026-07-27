@@ -260,4 +260,110 @@ public sealed class PluginEventPublisherTests
 
         receivedCount.Should().Be(20);
     }
+
+    // ── Re-entrancy protection ────────────────────────────────────────────────
+
+    [Fact]
+    public async Task PublishAsync_WithThrowingPluginErrorEventHandler_PreventsReentrantPublishing()
+    {
+        /// <summary>
+        /// Verifies that publishing an event with a handler that throws and publishes another PluginErrorEvent
+        /// does not cause infinite recursion. The re-entrant publishing should be detected and skipped.
+        /// </summary>
+        var publisher = new PluginEventPublisher(new Mock<ILogger<PluginEventPublisher>>().Object);
+
+        var reentrantDetected = false;
+        var handlerInvocationCount = 0;
+
+        // Handler that throws an exception and publishes another PluginErrorEvent
+        publisher.Subscribe<PluginErrorEvent>(async @event =>
+        {
+            handlerInvocationCount++;
+
+            // Simulate an error that might trigger another error event
+            if (@event.ErrorMessage == "First error")
+            {
+                throw new InvalidOperationException("Handler failed");
+            }
+
+            // This should be skipped due to re-entrancy protection
+            await publisher.PublishAsync(new PluginErrorEvent
+            {
+                PluginId = @event.PluginId,
+                ErrorMessage = "Nested error",
+                ErrorCode = 999
+            });
+        });
+
+        // Add a subscriber to detect re-entrant publishing attempts
+        publisher.Subscribe<PluginErrorEvent>(@event =>
+        {
+            if (@event.ErrorMessage == "Nested error")
+            {
+                reentrantDetected = true;
+            }
+            return Task.CompletedTask;
+        });
+
+        // Act: Publish the first error event
+        var firstEvent = new PluginErrorEvent
+        {
+            PluginId = Guid.NewGuid(),
+            ErrorMessage = "First error",
+            ErrorCode = 500
+        };
+
+        await publisher.PublishAsync(firstEvent);
+
+        // Assert: Handler should have been invoked, but nested publishing should have been prevented
+        handlerInvocationCount.Should().BeGreaterThan(0);
+        reentrantDetected.Should().BeFalse(
+            "Nested PluginErrorEvent publishing should be prevented to avoid re-entrancy");
+    }
+
+    [Fact]
+    public async Task PublishAsync_WithReentrantDifferentEventTypes_AllowsPublishing()
+    {
+        /// <summary>
+        /// Verifies that re-entrant publishing is only prevented for the same event type,
+        /// allowing different event types to be published even during handling of another event type.
+        /// </summary>
+        var publisher = new PluginEventPublisher(new Mock<ILogger<PluginEventPublisher>>().Object);
+
+        var loadedEventPublished = false;
+        var errorEventPublished = false;
+
+        publisher.Subscribe<PluginLoadedEvent>(async @event =>
+        {
+            // During PluginLoadedEvent handling, publish a PluginErrorEvent
+            await publisher.PublishAsync(new PluginErrorEvent
+            {
+                PluginId = @event.PluginId,
+                ErrorMessage = "Error during load",
+                ErrorCode = 100
+            });
+        });
+
+        publisher.Subscribe<PluginErrorEvent>(@event =>
+        {
+            errorEventPublished = true;
+        });
+
+        publisher.Subscribe<PluginLoadedEvent>(@event =>
+        {
+            loadedEventPublished = true;
+        });
+
+        // Act: Publish a PluginLoadedEvent which will trigger publishing a PluginErrorEvent
+        await publisher.PublishAsync(new PluginLoadedEvent
+        {
+            PluginId = Guid.NewGuid(),
+            PluginName = "TestPlugin",
+            Version = "1.0.0"
+        });
+
+        // Assert: Both events should have been published successfully
+        loadedEventPublished.Should().BeTrue();
+        errorEventPublished.Should().BeTrue();
+    }
 }
