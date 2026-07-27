@@ -2,7 +2,7 @@
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
-// =============================================================================
+// =====================================================================
 
 using System.Collections.Immutable;
 
@@ -18,6 +18,8 @@ public sealed class PluginEventPublisher : IPluginEventPublisher
     private readonly ILogger<PluginEventPublisher> _logger;
     private readonly Dictionary<Type, List<Delegate>> _subscribers = [];
     private readonly object _subscribersLock = new();
+    private readonly HashSet<Type> _publishingEventTypes = [];
+    private readonly object _publishingEventTypesLock = new();
     private long _eventsPublished;
 
     public PluginEventPublisher(ILogger<PluginEventPublisher> logger)
@@ -34,9 +36,16 @@ public sealed class PluginEventPublisher : IPluginEventPublisher
     /// Thrown when one or more event handlers fail. The <see cref="AggregateException.InnerExceptions"/>
     /// property contains all exceptions thrown by individual handlers.
     /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when attempting to publish an event of a type that is already being published,
+    /// indicating a re-entrant event publishing loop.
+    /// </exception>
     /// <remarks>
     /// If a handler throws an exception, the publisher catches it and continues dispatching to remaining subscribers.
     /// All exceptions are collected and thrown as an <see cref="AggregateException"/> after all handlers have been invoked.
+    ///
+    /// Re-entrant publishing is prevented to avoid infinite recursion when error handlers themselves
+    /// publish events that could trigger the same error handlers.
     /// </remarks>
     public async Task PublishAsync<T>(T @event) where T : IPluginEvent
     {
@@ -47,85 +56,111 @@ public sealed class PluginEventPublisher : IPluginEventPublisher
                 _eventsPublished++;
             }
 
-            _logger.LogInformation(
-                "Publishing event: {EventType} for plugin {PluginId} [EventId: {EventId}]",
-                @event.EventType, @event.PluginId, @event.EventId);
-
             var eventType = typeof(T);
-            List<Delegate>? handlers;
 
-            lock (_subscribersLock)
+            // Check for re-entrant publishing to prevent infinite recursion
+            lock (_publishingEventTypesLock)
             {
-                if (!_subscribers.TryGetValue(eventType, out handlers))
+                if (_publishingEventTypes.Contains(eventType))
                 {
-                    _logger.LogDebug("No subscribers for event type: {EventType}", @event.EventType);
+                    _logger.LogWarning(
+                        "Re-entrant event publishing detected for event type: {EventType}. " +
+                        "Event publishing was skipped to prevent infinite recursion.",
+                        @event.EventType);
                     return;
                 }
 
-                handlers = new(handlers);
+                _publishingEventTypes.Add(eventType);
             }
 
-            var tasks = new List<Task>();
-            var exceptions = new List<Exception>();
-
-            foreach (var handler in handlers)
+            try
             {
-                if (handler is Func<T, Task> asyncHandler)
+                _logger.LogInformation(
+                    "Publishing event: {EventType} for plugin {PluginId} [EventId: {EventId}]",
+                    @event.EventType, @event.PluginId, @event.EventId);
+
+                List<Delegate>? handlers;
+
+                lock (_subscribersLock)
+                {
+                    if (!_subscribers.TryGetValue(eventType, out handlers))
+                    {
+                        _logger.LogDebug("No subscribers for event type: {EventType}", @event.EventType);
+                        return;
+                    }
+
+                    handlers = new(handlers);
+                }
+
+                var tasks = new List<Task>();
+                var exceptions = new List<Exception>();
+
+                foreach (var handler in handlers)
+                {
+                    if (handler is Func<T, Task> asyncHandler)
+                    {
+                        try
+                        {
+                            tasks.Add(asyncHandler(@event));
+                        }
+                        catch (Exception ex) when (ex is not OperationCanceledException)
+                        {
+                            _logger.LogError(ex, "Handler registration threw exception for event: {EventType}", @event.EventType);
+                            exceptions.Add(ex);
+                        }
+                    }
+                }
+
+                if (tasks.Count > 0)
                 {
                     try
                     {
-                        tasks.Add(asyncHandler(@event));
+                        await Task.WhenAll(tasks);
                     }
                     catch (Exception ex) when (ex is not OperationCanceledException)
                     {
-                        _logger.LogError(ex, "Handler registration threw exception for event: {EventType}", @event.EventType);
-                        exceptions.Add(ex);
+                        if (ex is AggregateException aggregateException)
+                        {
+                            exceptions.AddRange(aggregateException.InnerExceptions);
+                        }
+                        else
+                        {
+                            exceptions.Add(ex);
+                        }
                     }
-                }
-            }
 
-            if (tasks.Count > 0)
-            {
-                try
-                {
-                    await Task.WhenAll(tasks);
-                }
-                catch (Exception ex) when (ex is not OperationCanceledException)
-                {
-                    if (ex is AggregateException aggregateException)
+                    if (exceptions.Count > 0)
                     {
-                        exceptions.AddRange(aggregateException.InnerExceptions);
+                        _logger.LogWarning(
+                            "Event published with {HandlerCount} successful subscribers, but {FailedCount} failed: {EventType}",
+                            tasks.Count - exceptions.Count,
+                            exceptions.Count,
+                            @event.EventType);
+
+                        throw new AggregateException(
+                            $"One or more event handlers failed for event type {typeof(T).Name}",
+                            exceptions.ToImmutableArray());
                     }
                     else
                     {
-                        exceptions.Add(ex);
+                        _logger.LogInformation("Event published to {HandlerCount} subscribers: {EventType}",
+                            tasks.Count,
+                            @event.EventType);
                     }
                 }
-
-                if (exceptions.Count > 0)
+            }
+            finally
+            {
+                // Always remove the event type from the publishing set when done
+                lock (_publishingEventTypesLock)
                 {
-                    _logger.LogWarning(
-                        "Event published with {HandlerCount} successful subscribers, but {FailedCount} failed: {EventType}",
-                        tasks.Count - exceptions.Count,
-                        exceptions.Count,
-                        @event.EventType);
-
-                    throw new AggregateException(
-                        $"One or more event handlers failed for event type {typeof(T).Name}",
-                        exceptions.ToImmutableArray());
-                }
-                else
-                {
-                    _logger.LogInformation(
-                        "Event published to {HandlerCount} subscribers: {EventType}",
-                        tasks.Count,
-                        @event.EventType);
+                    _publishingEventTypes.Remove(eventType);
                 }
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error publishing event: {EventType}", @event.EventType);
+            _logger.LogError(ex, "Error publishing event: {EventType}", @event?.EventType ?? typeof(T).Name);
         }
     }
 
@@ -134,6 +169,8 @@ public sealed class PluginEventPublisher : IPluginEventPublisher
     /// </summary>
     public void Subscribe<T>(Func<T, Task> handler) where T : IPluginEvent
     {
+        ArgumentNullException.ThrowIfNull(handler);
+
         lock (_subscribersLock)
         {
             var eventType = typeof(T);
@@ -154,6 +191,8 @@ public sealed class PluginEventPublisher : IPluginEventPublisher
     /// </summary>
     public void Unsubscribe<T>(Func<T, Task> handler) where T : IPluginEvent
     {
+        ArgumentNullException.ThrowIfNull(handler);
+
         lock (_subscribersLock)
         {
             var eventType = typeof(T);
@@ -197,6 +236,8 @@ public sealed class PluginEventPublisher : IPluginEventPublisher
     /// </summary>
     public void RemoveSubscribersForContext(System.Runtime.Loader.AssemblyLoadContext context)
     {
+        ArgumentNullException.ThrowIfNull(context);
+
         lock (_subscribersLock)
         {
             foreach (var key in _subscribers.Keys.ToList())
