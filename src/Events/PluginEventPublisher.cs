@@ -28,7 +28,7 @@ namespace Events
             }
         }
 
-        public async Task PublishAsync(PluginEvent pluginEvent, [CallerMemberName] string memberName = null)
+        public async Task PublishAsync(PluginEvent pluginEvent, [CallerMemberName] string memberName = null, int maxRetries = 3, TimeSpan retryBackoff = default, bool breakOnFailure = true)
         {
             var subscribersSnapshot = _subscribers.ToList();
             await Task.Run(() =>
