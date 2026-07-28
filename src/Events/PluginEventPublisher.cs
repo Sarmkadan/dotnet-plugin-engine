@@ -28,45 +28,6 @@ namespace Events
             }
         }
 
-        public async Task PublishAsync(PluginEvent pluginEvent, [CallerMemberName] string memberName = null, int maxRetries = 3, TimeSpan retryBackoff = default, bool breakOnFailure = true)
-        {
-            var subscribersSnapshot = _subscribers.ToList();
-            await Task.Run(() =>
-            {
-                lock (_lock)
-                {
-                    foreach (var subscriber in subscribersSnapshot)
-                    {
-                        try
-                        {
-                            subscriber.HandleEvent(pluginEvent);
-                        }
-                        catch (Exception ex)
-                        {
-                            // Handle exception
-                        }
-                    }
-                }
-            });
-        }
-        {
-            await Task.Run(() =>
-            {
-                lock (_lock)
-                {
-                    foreach (var subscriber in _subscribers.ToList())
-                    {
-                        try
-                        {
-                            subscriber.HandleEvent(pluginEvent);
-                        }
-                        catch (Exception ex)
-                        {
-                            // Handle exception
-                        }
-                    }
-                }
-            });
-        }
+        public async Task PublishAsync(PluginEvent pluginEvent, [CallerMemberName] string memberName = null, int maxRetries = 3, TimeSpan retryBackoff = default, bool breakOnFailure = true) = _subscribers.ToList().ForEach(subscriber => subscriber.HandleEvent(pluginEvent));
     }
 }
