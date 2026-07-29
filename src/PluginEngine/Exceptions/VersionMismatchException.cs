@@ -4,6 +4,8 @@
 // CTO & Software Architect
 // =============================================================================
 
+using System;
+
 namespace PluginEngine.Exceptions;
 
 /// <summary>
@@ -32,27 +34,86 @@ public sealed class VersionMismatchException : PluginException
     public string ComponentName { get; set; } = string.Empty;
 
     /// <summary>
-    /// Initializes a new instance of the VersionMismatchException class.
+    /// Initializes a new instance of the <see cref="VersionMismatchException"/> class.
     /// </summary>
-    public VersionMismatchException() : base()
+    public VersionMismatchException()
+        : base()
     {
         ErrorCode = "VERSION_MISMATCH_ERROR";
     }
 
     /// <summary>
-    /// Initializes a new instance with a message.
+    /// Initializes a new instance with a custom message.
     /// </summary>
-    public VersionMismatchException(string message) : base(message)
+    /// <param name="message">The error message.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="message"/> is <c>null</c>.</exception>
+    public VersionMismatchException(string message)
+        : base(message)
     {
+        ArgumentNullException.ThrowIfNull(message);
         ErrorCode = "VERSION_MISMATCH_ERROR";
+    }
+
+    /// <summary>
+    /// Initializes a new instance with a custom message and error code.
+    /// </summary>
+    /// <param name="message">The error message.</param>
+    /// <param name="errorCode">The error code.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="message"/> or <paramref name="errorCode"/> is <c>null</c>.</exception>
+    public VersionMismatchException(string message, string errorCode)
+        : base(message, errorCode)
+    {
+        ArgumentNullException.ThrowIfNull(message);
+        ArgumentNullException.ThrowIfNull(errorCode);
+    }
+
+    /// <summary>
+    /// Initializes a new instance with a custom message and inner exception.
+    /// </summary>
+    /// <param name="message">The error message.</param>
+    /// <param name="innerException">The inner exception.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="message"/> or <paramref name="innerException"/> is <c>null</c>.</exception>
+    public VersionMismatchException(string message, Exception innerException)
+        : base(message, innerException)
+    {
+        ArgumentNullException.ThrowIfNull(message);
+        ArgumentNullException.ThrowIfNull(innerException);
+        ErrorCode = "VERSION_MISMATCH_ERROR";
+    }
+
+    /// <summary>
+    /// Initializes a new instance with a custom message, error code, and inner exception.
+    /// </summary>
+    /// <param name="message">The error message.</param>
+    /// <param name="errorCode">The error code.</param>
+    /// <param name="innerException">The inner exception.</param>
+    /// <exception cref="ArgumentNullException">Thrown when any argument is <c>null</c>.</exception>
+    public VersionMismatchException(string message, string errorCode, Exception innerException)
+        : base(message, errorCode, innerException)
+    {
+        ArgumentNullException.ThrowIfNull(message);
+        ArgumentNullException.ThrowIfNull(errorCode);
+        ArgumentNullException.ThrowIfNull(innerException);
     }
 
     /// <summary>
     /// Initializes a new instance with full details.
     /// </summary>
+    /// <param name="message">The error message.</param>
+    /// <param name="expectedVersion">The expected version constraint.</param>
+    /// <param name="actualVersion">The actual version found.</param>
+    /// <param name="componentType">The component type (e.g., Plugin).</param>
+    /// <param name="componentName">The component name.</param>
+    /// <exception cref="ArgumentNullException">Thrown when any argument is <c>null</c>.</exception>
     public VersionMismatchException(string message, string expectedVersion, string actualVersion, string componentType, string componentName)
         : base(message)
     {
+        ArgumentNullException.ThrowIfNull(message);
+        ArgumentNullException.ThrowIfNull(expectedVersion);
+        ArgumentNullException.ThrowIfNull(actualVersion);
+        ArgumentNullException.ThrowIfNull(componentType);
+        ArgumentNullException.ThrowIfNull(componentName);
+
         ErrorCode = "VERSION_MISMATCH_ERROR";
         ExpectedVersion = expectedVersion;
         ActualVersion = actualVersion;
@@ -63,9 +124,23 @@ public sealed class VersionMismatchException : PluginException
     /// <summary>
     /// Initializes a new instance with full details and inner exception.
     /// </summary>
+    /// <param name="message">The error message.</param>
+    /// <param name="expectedVersion">The expected version constraint.</param>
+    /// <param name="actualVersion">The actual version found.</param>
+    /// <param name="componentType">The component type (e.g., Plugin).</param>
+    /// <param name="componentName">The component name.</param>
+    /// <param name="innerException">The inner exception.</param>
+    /// <exception cref="ArgumentNullException">Thrown when any argument is <c>null</c>.</exception>
     public VersionMismatchException(string message, string expectedVersion, string actualVersion, string componentType, string componentName, Exception innerException)
         : base(message, innerException)
     {
+        ArgumentNullException.ThrowIfNull(message);
+        ArgumentNullException.ThrowIfNull(expectedVersion);
+        ArgumentNullException.ThrowIfNull(actualVersion);
+        ArgumentNullException.ThrowIfNull(componentType);
+        ArgumentNullException.ThrowIfNull(componentName);
+        ArgumentNullException.ThrowIfNull(innerException);
+
         ErrorCode = "VERSION_MISMATCH_ERROR";
         ExpectedVersion = expectedVersion;
         ActualVersion = actualVersion;
@@ -76,6 +151,7 @@ public sealed class VersionMismatchException : PluginException
     /// <summary>
     /// Gets a detailed error description.
     /// </summary>
+    /// <returns>A formatted string containing the error details.</returns>
     public override string ToString()
     {
         var result = base.ToString();
