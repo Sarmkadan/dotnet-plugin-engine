@@ -11,7 +11,7 @@ namespace PluginEngine.Domain.Entities;
 /// <summary>
 /// Represents a capability or feature provided by a plugin.
 /// </summary>
-public sealed class PluginCapability
+public sealed class PluginCapability : IEquatable<PluginCapability>
 {
     /// <summary>
     /// Gets the unique identifier for this capability record.
@@ -67,6 +67,40 @@ public sealed class PluginCapability
     /// Gets or sets the last modified timestamp.
     /// </summary>
     public DateTime ModifiedAt { get; set; } = DateTime.UtcNow;
+
+    public bool Equals(PluginCapability? other)
+    {
+        if (ReferenceEquals(null, other)) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return Id.Equals(other.Id) &&
+               PluginId.Equals(other.PluginId) &&
+               Name == other.Name &&
+               Version == other.Version &&
+               InterfaceTypeName == other.InterfaceTypeName &&
+               ImplementationTypeName == other.ImplementationTypeName &&
+               Description == other.Description &&
+               Tags == other.Tags;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return ReferenceEquals(this, obj) || (obj is PluginCapability other && Equals(other));
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Id, PluginId, Name, Version, InterfaceTypeName, ImplementationTypeName, Description, Tags);
+    }
+
+    public static bool operator ==(PluginCapability? left, PluginCapability? right)
+    {
+        return Equals(left, right);
+    }
+
+    public static bool operator !=(PluginCapability? left, PluginCapability? right)
+    {
+        return !Equals(left, right);
+    }
 
     /// <summary>
     /// Gets the list of tags as an enumerable.
