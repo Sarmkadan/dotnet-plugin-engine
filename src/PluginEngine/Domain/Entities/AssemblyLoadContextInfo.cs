@@ -11,7 +11,7 @@ namespace PluginEngine.Domain.Entities;
 /// <summary>
 /// Represents information about an AssemblyLoadContext used for plugin isolation.
 /// </summary>
-public sealed class AssemblyLoadContextInfo
+public sealed class AssemblyLoadContextInfo : IEquatable<AssemblyLoadContextInfo>
 {
     private List<string> _loadedAssemblies = new();
 
@@ -134,5 +134,35 @@ public sealed class AssemblyLoadContextInfo
     {
         var status = IsActive ? "Active" : "Inactive";
         return $"{Name} ({status}) - {GetAssemblyCount()} assemblies, {LoadedTypeCount} types, {MemoryUsageBytes} bytes";
+    }
+
+    public bool Equals(AssemblyLoadContextInfo? other)
+    {
+        return other != null &&
+               Id == other.Id &&
+               ContextId == other.ContextId &&
+               PluginId == other.PluginId &&
+               Name == other.Name &&
+               CreatedAt == other.CreatedAt &&
+               LastActivityAt == other.LastActivityAt &&
+               IsActive == other.IsActive &&
+               MemoryUsageBytes == other.MemoryUsageBytes;
+    }
+
+    public override bool Equals(object? obj) => Equals(obj as AssemblyLoadContextInfo);
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Id, ContextId, PluginId, Name, CreatedAt, LastActivityAt, IsActive, MemoryUsageBytes);
+    }
+
+    public static bool operator ==(AssemblyLoadContextInfo? left, AssemblyLoadContextInfo? right)
+    {
+        return left?.Equals(right) ?? ReferenceEquals(right, null);
+    }
+
+    public static bool operator !=(AssemblyLoadContextInfo? left, AssemblyLoadContextInfo? right)
+    {
+        return !(left == right);
     }
 }
