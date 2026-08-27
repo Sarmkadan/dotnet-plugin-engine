@@ -3,7 +3,7 @@ using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
-using Domain.Entities;
+using PluginEngine.Domain.Entities;
 using PluginEngine.Services.Implementations;
 
 namespace dotnet_plugin_engine.Tests
@@ -87,7 +87,7 @@ namespace dotnet_plugin_engine.Tests
         }
 
         [Fact]
-        public async Task<IEnumerable<Domain.Entities.VersionInfo>> GetVersionHistoryAsync_ValidVersion_ReturnsVersionHistory()
+        public async Task<IEnumerable<PluginEngine.Domain.Entities.VersionInfo>> GetVersionHistoryAsync_ValidVersion_ReturnsVersionHistory()
         {
             // Arrange
             var versioningService = new VersioningService();
@@ -138,7 +138,7 @@ namespace dotnet_plugin_engine.Tests
         }
 
         [Fact]
-        public async Task<Domain.Entities.VersionInfo?> GetLatestVersionAsync_ValidVersion_ReturnsLatestVersion()
+        public async Task<PluginEngine.Domain.Entities.VersionInfo?> GetLatestVersionAsync_ValidVersion_ReturnsLatestVersion()
         {
             // Arrange
             var versioningService = new VersioningService();

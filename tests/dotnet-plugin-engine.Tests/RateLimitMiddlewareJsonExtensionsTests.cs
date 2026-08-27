@@ -1,4 +1,8 @@
-namespace tests.dotnet-plugin-engine.Tests;
+using System;
+using Xunit;
+using PluginEngine.Middleware;
+
+namespace dotnet_plugin_engine.Tests;
 
 public class RateLimitMiddlewareJsonExtensionsTests
 {
