@@ -2,7 +2,7 @@ using Xunit;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using PluginEngine.Data.Repositories;
-using PluginEngine.Data.Models;
+using PluginEngine.Domain.Entities;
 
 namespace dotnet_plugin_engine.Tests
 {

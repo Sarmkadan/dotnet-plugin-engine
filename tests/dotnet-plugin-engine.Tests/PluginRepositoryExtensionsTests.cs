@@ -1,9 +1,11 @@
 using Xunit;
+using System;
 using System.Threading.Tasks;
 using PluginEngine.Data.Repositories;
-using PluginEngine.Data.Models;
+using PluginEngine.Domain.Entities;
 using System.Collections.Generic;
 using Moq;
+using FluentAssertions;
 
 namespace dotnet_plugin_engine.Tests
 {
@@ -28,12 +30,12 @@ namespace dotnet_plugin_engine.Tests
         public async Task TestGetByNameAsync_InvalidInput_ThrowsException()
         {
             // Arrange
-            var mockPluginRepository = new Mock<PluginRepository>>();
+            var mockPluginRepository = new Mock<PluginRepository>();
             mockPluginRepository.Setup(repo => repo.GetByNameAsync(It.IsAny<string>())).Throws(new Exception());
             var pluginRepositoryExtensions = new PluginRepositoryExtensions(mockPluginRepository.Object);
 
             // Act and Assert
-            await Assert.ThrowsAsync<Exception>>(async () => await pluginRepositoryExtensions.GetByNameAsync(null));
+            await Assert.ThrowsAsync<Exception>(async () => await pluginRepositoryExtensions.GetByNameAsync(null));
         }
 
         [Fact]
@@ -41,7 +43,7 @@ namespace dotnet_plugin_engine.Tests
         {
             // Arrange
             var mockPluginRepository = new Mock<PluginRepository>();
-            mockPluginRepository.Setup(repo => repo.GetByStatusAsync(It.IsAny<PluginStatus>())).ReturnsAsync(new List<Plugin>> { new Plugin() });
+            mockPluginRepository.Setup(repo => repo.GetByStatusAsync(It.IsAny<PluginStatus>())).ReturnsAsync(new List<Plugin> { new Plugin() });
             var pluginRepositoryExtensions = new PluginRepositoryExtensions(mockPluginRepository.Object);
 
             // Act
@@ -55,24 +57,24 @@ namespace dotnet_plugin_engine.Tests
         public async Task TestGetByStatusAsync_InvalidInput_ThrowsException()
         {
             // Arrange
-            var mockPluginRepository = new Mock<PluginRepository>>();
+            var mockPluginRepository = new Mock<PluginRepository>();
             mockPluginRepository.Setup(repo => repo.GetByStatusAsync(It.IsAny<PluginStatus>())).Throws(new Exception());
             var pluginRepositoryExtensions = new PluginRepositoryExtensions(mockPluginRepository.Object);
 
             // Act and Assert
-            await Assert.ThrowsAsync<Exception>>(async () => await pluginRepositoryExtensions.GetByStatusAsync((PluginStatus)(-1));
+            await Assert.ThrowsAsync<Exception>(async () => await pluginRepositoryExtensions.GetByStatusAsync((PluginStatus)(-1)));
         }
 
         [Fact]
         public async Task TestGetByStatusesAsync_ValidInput_ReturnsPlugins()
         {
             // Arrange
-            var mockPluginRepository = new Mock<PluginRepository>>();
-            mockPluginRepository.Setup(repo => repo.GetByStatusesAsync(It.IsAny<IEnumerable<PluginStatus>>())).ReturnsAsync(new List<Plugin>> { new Plugin() });
+            var mockPluginRepository = new Mock<PluginRepository>();
+            mockPluginRepository.Setup(repo => repo.GetByStatusesAsync(It.IsAny<IEnumerable<PluginStatus>>())).ReturnsAsync(new List<Plugin> { new Plugin() });
             var pluginRepositoryExtensions = new PluginRepositoryExtensions(mockPluginRepository.Object);
 
             // Act
-            var result = await pluginRepositoryExtensions.GetByStatusesAsync(new List<PluginStatus>> { PluginStatus.Enabled });
+            var result = await pluginRepositoryExtensions.GetByStatusesAsync(new List<PluginStatus> { PluginStatus.Enabled });
 
             // Assert
             result.Should().NotBeNull();
@@ -82,20 +84,20 @@ namespace dotnet_plugin_engine.Tests
         public async Task TestGetByStatusesAsync_InvalidInput_ThrowsException()
         {
             // Arrange
-            var mockPluginRepository = new Mock<PluginRepository>>();
+            var mockPluginRepository = new Mock<PluginRepository>();
             mockPluginRepository.Setup(repo => repo.GetByStatusesAsync(It.IsAny<IEnumerable<PluginStatus>>())).Throws(new Exception());
             var pluginRepositoryExtensions = new PluginRepositoryExtensions(mockPluginRepository.Object);
 
             // Act and Assert
-            await Assert.ThrowsAsync<Exception>>(async () => await pluginRepositoryExtensions.GetByStatusesAsync(null);
+            await Assert.ThrowsAsync<Exception>(async () => await pluginRepositoryExtensions.GetByStatusesAsync(null));
         }
 
         [Fact]
         public async Task TestGetDependentPluginsAsync_ValidInput_ReturnsPlugins()
         {
             // Arrange
-            var mockPluginRepository = new Mock<PluginRepository>>();
-            mockPluginRepository.Setup(repo => repo.GetDependentPluginsAsync(It.IsAny<Plugin>>())).ReturnsAsync(new List<Plugin>> { new Plugin() });
+            var mockPluginRepository = new Mock<PluginRepository>();
+            mockPluginRepository.Setup(repo => repo.GetDependentPluginsAsync(It.IsAny<Plugin>())).ReturnsAsync(new List<Plugin> { new Plugin() });
             var pluginRepositoryExtensions = new PluginRepositoryExtensions(mockPluginRepository.Object);
 
             // Act
@@ -109,12 +111,12 @@ namespace dotnet_plugin_engine.Tests
         public async Task TestGetDependentPluginsAsync_InvalidInput_ThrowsException()
         {
             // Arrange
-            var mockPluginRepository = new Mock<PluginRepository>>();
-            mockPluginRepository.Setup(repo => repo.GetDependentPluginsAsync(It.IsAny<Plugin>>())).Throws(new Exception());
+            var mockPluginRepository = new Mock<PluginRepository>();
+            mockPluginRepository.Setup(repo => repo.GetDependentPluginsAsync(It.IsAny<Plugin>())).Throws(new Exception());
             var pluginRepositoryExtensions = new PluginRepositoryExtensions(mockPluginRepository.Object);
 
             // Act and Assert
-            await Assert.ThrowsAsync<Exception>>(async () => await pluginRepositoryExtensions.GetDependentPluginsAsync(null);
+            await Assert.ThrowsAsync<Exception>(async () => await pluginRepositoryExtensions.GetDependentPluginsAsync(null));
         }
     }
 }

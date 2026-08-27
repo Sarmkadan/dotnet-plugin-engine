@@ -2,7 +2,7 @@ using Xunit;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using PluginEngine.Utils.Helpers;
-using PluginEngine.Data.Models;
+using PluginEngine.Domain.Entities;
 using Moq;
 
 namespace dotnet_plugin_engine.Tests
