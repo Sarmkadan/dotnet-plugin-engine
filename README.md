@@ -69,3 +69,24 @@ var ex = new VersionMismatchException(
 // The ToString method includes the version and component information
 string errorMessage = ex.ToString();
 ```
+
+## VersionMismatchExceptionExtensionsTests
+
+The `VersionMismatchExceptionExtensionsTests` class contains unit tests for the extension methods that operate on `VersionMismatchException`. These tests verify that the extension methods correctly format error messages, determine critical version mismatches based on version numbers, add contextual information, and produce simplified messages.
+
+Example usage:
+```csharp
+using PluginEngine.Exceptions;
+
+var ex = new VersionMismatchException(
+    "Version mismatch detected",
+    "1.0.0",
+    "2.0.0",
+    "Plugin",
+    "MyPlugin");
+
+bool isCritical = ex.IsCriticalVersionMismatch();
+string formattedMessage = ex.GetFormattedErrorMessage();
+string simplifiedMessage = ex.GetSimplifiedMessage();
+var exWithContext = ex.WithContext("operation", "plugin loading");
+```
