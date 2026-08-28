@@ -49,3 +49,23 @@ else
     Console.WriteLine("Exception is valid.");
 }
 ```
+
+## VersionMismatchExceptionTests
+
+The `VersionMismatchExceptionTests` class contains unit tests for the `VersionMismatchException` class, verifying its constructors and the `ToString` method under various conditions.
+
+Example usage:
+```csharp
+using PluginEngine.Exceptions;
+
+// Create an exception with version details
+var ex = new VersionMismatchException(
+    "Version mismatch detected",
+    "1.0.0",
+    "2.0.0",
+    "Plugin",
+    "MyPlugin");
+
+// The ToString method includes the version and component information
+string errorMessage = ex.ToString();
+```
