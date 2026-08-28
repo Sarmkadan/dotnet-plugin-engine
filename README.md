@@ -1,3 +1,5 @@
+# dotnet-plugin-engine
+
 The `IPluginEventPublisher` interface provides a set of extension methods for event publishing, subscription management, and diagnostics.
 
 ## PluginIncompatibleExceptionExtensionsTests
@@ -20,3 +22,30 @@ string summary = ex.GetLoadFailureSummary(); // returns "Failed to load plugin '
 var updatedEx = ex.WithLoadStage(PluginLoadStage.TypeLoading); // returns a new exception with LoadStage set to TypeLoading
 ```
 
+## DependencyResolutionExceptionValidationTests
+
+The `DependencyResolutionExceptionValidationTests` class verifies the validation logic for `DependencyResolutionException` objects. It ensures that the exception contains valid version constraints, reasons, and a list of unresolved dependencies, and that the validation methods correctly report problems or confirm validity.
+
+Example usage:
+```csharp
+using PluginEngine.Exceptions;
+using PluginEngine.Validation;
+
+var ex = new DependencyResolutionException(
+    "Missing dependency",
+    "MyPlugin",
+    new[] { "DependencyA", "DependencyB" });
+
+var problems = DependencyResolutionExceptionValidator.Validate(ex);
+if (problems.Any())
+{
+    foreach (var p in problems)
+    {
+        Console.WriteLine(p);
+    }
+}
+else
+{
+    Console.WriteLine("Exception is valid.");
+}
+```
