@@ -1,4 +1,6 @@
 #nullable enable
+using System.Diagnostics;
+
 // =============================================================================
 // Author: Vladyslav Zaiets | https://sarmkadan.com
 // CTO & Software Architect
@@ -48,25 +50,36 @@ public sealed class RemotePluginRegistry : IRemotePluginRegistry
     /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="limit"/> is not positive.</exception>
     public async Task<List<PluginInfo>> SearchAsync(string query, int limit = 20)
     {
+        _logger.LogDebug("Starting registry plugin search for {Query} with limit {Limit}", query, limit);
+
         ArgumentException.ThrowIfNullOrWhiteSpace(query);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(limit);
 
-        var cacheKey = $"registry_search_{query}_{limit.ToString(CultureInfo.InvariantCulture)}";
-
-        if (_cache.TryGetValue(cacheKey, out List<PluginInfo>? cached))
-            return cached ?? [];
-
-        var results = await _httpClient.SearchPluginsAsync(query, limit);
-
-        var cacheOptions = new MemoryCacheEntryOptions
+        var stopwatch = Stopwatch.StartNew();
+        try
         {
-            AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1)
-        };
+            var cacheKey = $"registry_search_{query}_{limit.ToString(CultureInfo.InvariantCulture)}";
 
-        _cache.Set(cacheKey, results, cacheOptions);
-        _logger.LogDebug("Registry search for '{Query}' returned {Count} result(s)", query, results.Count);
+            if (_cache.TryGetValue(cacheKey, out List<PluginInfo>? cached))
+                return cached ?? [];
 
-        return results;
+            var results = await _httpClient.SearchPluginsAsync(query, limit);
+
+            var cacheOptions = new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1)
+            };
+
+            _cache.Set(cacheKey, results, cacheOptions);
+            _logger.LogDebug("Registry search for '{Query}' returned {Count} result(s)", query, results.Count);
+
+            return results;
+        }
+        finally
+        {
+            stopwatch.Stop();
+            _logger.LogDebug("Registry plugin search completed in {ElapsedMs} ms", stopwatch.ElapsedMilliseconds);
+        }
     }
 
     /// <summary>
@@ -74,25 +87,36 @@ public sealed class RemotePluginRegistry : IRemotePluginRegistry
     /// </summary>
     public async Task<PluginInfo?> GetPluginAsync(Guid pluginId)
     {
-        var cacheKey = $"registry_plugin_{pluginId}";
+        _logger.LogDebug("Starting registry plugin lookup for {PluginId}", pluginId);
 
-        if (_cache.TryGetValue(cacheKey, out PluginInfo? cached))
-            return cached;
-
-        var pluginInfo = await _httpClient.GetPluginInfoAsync(pluginId);
-
-        if (pluginInfo is not null)
+        var stopwatch = Stopwatch.StartNew();
+        try
         {
-            var cacheOptions = new MemoryCacheEntryOptions
+            var cacheKey = $"registry_plugin_{pluginId}";
+
+            if (_cache.TryGetValue(cacheKey, out PluginInfo? cached))
+                return cached;
+
+            var pluginInfo = await _httpClient.GetPluginInfoAsync(pluginId);
+
+            if (pluginInfo is not null)
             {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1),
-                SlidingExpiration = TimeSpan.FromMinutes(30)
-            };
+                var cacheOptions = new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1),
+                    SlidingExpiration = TimeSpan.FromMinutes(30)
+                };
 
-            _cache.Set(cacheKey, pluginInfo, cacheOptions);
+                _cache.Set(cacheKey, pluginInfo, cacheOptions);
+            }
+
+            return pluginInfo;
         }
-
-        return pluginInfo;
+        finally
+        {
+            stopwatch.Stop();
+            _logger.LogDebug("Registry plugin lookup for {PluginId} completed in {ElapsedMs} ms", pluginId, stopwatch.ElapsedMilliseconds);
+        }
     }
 
     /// <summary>
@@ -100,20 +124,31 @@ public sealed class RemotePluginRegistry : IRemotePluginRegistry
     /// </summary>
     public async Task<List<PluginVersionInfo>> GetVersionsAsync(Guid pluginId)
     {
-        var cacheKey = $"registry_versions_{pluginId}";
+        _logger.LogDebug("Starting registry version lookup for {PluginId}", pluginId);
 
-        if (_cache.TryGetValue(cacheKey, out List<PluginVersionInfo>? cached))
-            return cached ?? [];
-
-        var versions = await _httpClient.GetPluginVersionsAsync(pluginId);
-
-        var cacheOptions = new MemoryCacheEntryOptions
+        var stopwatch = Stopwatch.StartNew();
+        try
         {
-            AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(2)
-        };
+            var cacheKey = $"registry_versions_{pluginId}";
 
-        _cache.Set(cacheKey, versions, cacheOptions);
-        return versions;
+            if (_cache.TryGetValue(cacheKey, out List<PluginVersionInfo>? cached))
+                return cached ?? [];
+
+            var versions = await _httpClient.GetPluginVersionsAsync(pluginId);
+
+            var cacheOptions = new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(2)
+            };
+
+            _cache.Set(cacheKey, versions, cacheOptions);
+            return versions;
+        }
+        finally
+        {
+            stopwatch.Stop();
+            _logger.LogDebug("Registry version lookup for {PluginId} completed in {ElapsedMs} ms", pluginId, stopwatch.ElapsedMilliseconds);
+        }
     }
 
     /// <summary>
@@ -122,9 +157,13 @@ public sealed class RemotePluginRegistry : IRemotePluginRegistry
     /// <exception cref="ArgumentException">Thrown when <paramref name="version"/> or <paramref name="downloadPath"/> is null or whitespace.</exception>
     public async Task<string?> DownloadPluginAsync(Guid pluginId, string version, string downloadPath)
     {
+        _logger.LogInformation("Starting plugin download for {PluginId} version {Version} to {DownloadPath}",
+            pluginId, version, downloadPath);
+
         ArgumentException.ThrowIfNullOrWhiteSpace(version);
         ArgumentException.ThrowIfNullOrWhiteSpace(downloadPath);
 
+        var stopwatch = Stopwatch.StartNew();
         try
         {
             var pluginInfo = await GetPluginAsync(pluginId);
@@ -159,6 +198,12 @@ public sealed class RemotePluginRegistry : IRemotePluginRegistry
             _logger.LogError(ex, "Error downloading plugin: {PluginId}", pluginId);
             return null;
         }
+        finally
+        {
+            stopwatch.Stop();
+            _logger.LogInformation("Plugin download for {PluginId} completed in {ElapsedMs} ms",
+                pluginId, stopwatch.ElapsedMilliseconds);
+        }
     }
 
     /// <summary>
@@ -168,9 +213,12 @@ public sealed class RemotePluginRegistry : IRemotePluginRegistry
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="metadata"/> is null.</exception>
     public async Task<bool> PublishPluginAsync(string filePath, PluginPublishMetadata metadata)
     {
+        _logger.LogInformation("Starting plugin publish from {FilePath}", filePath);
+
         ArgumentException.ThrowIfNullOrWhiteSpace(filePath);
         ArgumentNullException.ThrowIfNull(metadata);
 
+        var stopwatch = Stopwatch.StartNew();
         try
         {
             if (!File.Exists(filePath))
@@ -195,6 +243,12 @@ public sealed class RemotePluginRegistry : IRemotePluginRegistry
             _logger.LogError(ex, "Error publishing plugin: {FilePath}", filePath);
             return false;
         }
+        finally
+        {
+            stopwatch.Stop();
+            _logger.LogInformation("Plugin publish from {FilePath} completed in {ElapsedMs} ms",
+                filePath, stopwatch.ElapsedMilliseconds);
+        }
     }
 
     /// <summary>
@@ -202,6 +256,8 @@ public sealed class RemotePluginRegistry : IRemotePluginRegistry
     /// </summary>
     public void InvalidateCache(Guid pluginId)
     {
+        _logger.LogDebug("Starting registry cache invalidation for {PluginId}", pluginId);
+
         _cache.Remove($"registry_plugin_{pluginId}");
         _cache.Remove($"registry_versions_{pluginId}");
     }
