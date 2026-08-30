@@ -12,6 +12,25 @@ namespace PluginEngine.Integration;
 /// </summary>
 public sealed class HttpPluginClient : IIntegrationClient
 {
+    private const string RegistryBaseUrlConfigKey = "PluginRegistry:BaseUrl";
+    private const string HealthRoute = "/health";
+    private const string PluginsRoute = "/plugins";
+    private const string PluginRouteFormat = PluginsRoute + "/{0}";
+    private const string PluginEventsRouteFormat = PluginRouteFormat + "/events";
+    private const string PluginVersionsRouteFormat = PluginRouteFormat + "/versions";
+    private const string PluginUploadRoute = PluginsRoute + "/upload";
+    private const string PluginSearchRoute = PluginsRoute + "/search";
+    private const string PluginUpdateCheckRoute = PluginsRoute + "/check-updates";
+    private const string JsonContentType = "application/json";
+
+    private static readonly TimeSpan HealthCheckTimeout = TimeSpan.FromSeconds(5);
+    private static readonly TimeSpan NotificationTimeout = TimeSpan.FromSeconds(30);
+    private static readonly TimeSpan PluginInfoTimeout = TimeSpan.FromSeconds(10);
+    private static readonly TimeSpan UploadTimeout = TimeSpan.FromMinutes(5);
+    private static readonly TimeSpan PluginSearchTimeout = TimeSpan.FromSeconds(15);
+    private static readonly TimeSpan PluginVersionsTimeout = TimeSpan.FromSeconds(15);
+    private static readonly TimeSpan UpdateCheckTimeout = TimeSpan.FromSeconds(30);
+
     private static readonly System.Text.Json.JsonSerializerOptions JsonOptions = new()
     {
         PropertyNameCaseInsensitive = true
@@ -47,7 +66,7 @@ public sealed class HttpPluginClient : IIntegrationClient
 
         _httpClient = httpClient;
         _logger = logger;
-        _registryBaseUrl = configuration?["PluginRegistry:BaseUrl"];
+        _registryBaseUrl = configuration?[RegistryBaseUrlConfigKey];
     }
 
     /// <summary>
@@ -82,8 +101,8 @@ public sealed class HttpPluginClient : IIntegrationClient
         try
         {
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            cts.CancelAfter(TimeSpan.FromSeconds(5));
-            using var response = await _httpClient.GetAsync(_registryBaseUrl + "/health", cts.Token);
+            cts.CancelAfter(HealthCheckTimeout);
+            using var response = await _httpClient.GetAsync(_registryBaseUrl + HealthRoute, cts.Token);
             return response.IsSuccessStatusCode;
         }
         catch (Exception ex) when (!(ex is OperationCanceledException && cancellationToken.IsCancellationRequested))
@@ -125,11 +144,14 @@ public sealed class HttpPluginClient : IIntegrationClient
                 notification.Metadata
             });
 
-            using var content = new StringContent(payload, System.Text.Encoding.UTF8, "application/json");
-            var url = $"{_registryBaseUrl}/plugins/{notification.PluginId}/events";
+            using var content = new StringContent(payload, System.Text.Encoding.UTF8, JsonContentType);
+            var url = _registryBaseUrl + string.Format(
+                CultureInfo.InvariantCulture,
+                PluginEventsRouteFormat,
+                notification.PluginId);
 
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            cts.CancelAfter(TimeSpan.FromSeconds(30));
+            cts.CancelAfter(NotificationTimeout);
             using var response = await _httpClient.PostAsync(url, content, cts.Token);
 
             if (!response.IsSuccessStatusCode)
@@ -175,10 +197,10 @@ public sealed class HttpPluginClient : IIntegrationClient
 
         try
         {
-            var url = $"{_registryBaseUrl}/plugins/{pluginId}";
+            var url = _registryBaseUrl + string.Format(CultureInfo.InvariantCulture, PluginRouteFormat, pluginId);
 
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            cts.CancelAfter(TimeSpan.FromSeconds(10));
+            cts.CancelAfter(PluginInfoTimeout);
             using var response = await _httpClient.GetAsync(url, cts.Token);
 
             if (!response.IsSuccessStatusCode)
@@ -224,10 +246,10 @@ public sealed class HttpPluginClient : IIntegrationClient
             content.Add(new StreamContent(fileStream), "file", Path.GetFileName(filePath));
             content.Add(new StringContent(description), "description");
 
-            var url = $"{_registryBaseUrl}/plugins/upload";
+            var url = _registryBaseUrl + PluginUploadRoute;
 
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            cts.CancelAfter(TimeSpan.FromMinutes(5));
+            cts.CancelAfter(UploadTimeout);
             using var response = await _httpClient.PostAsync(url, content, cts.Token);
 
             return response.IsSuccessStatusCode;
@@ -270,12 +292,12 @@ public sealed class HttpPluginClient : IIntegrationClient
 
         try
         {
-            var url = $"{_registryBaseUrl}/plugins/search" +
+            var url = _registryBaseUrl + PluginSearchRoute +
                       $"?query={Uri.EscapeDataString(query)}" +
                       $"&limit={limit.ToString(CultureInfo.InvariantCulture)}";
 
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            cts.CancelAfter(TimeSpan.FromSeconds(15));
+            cts.CancelAfter(PluginSearchTimeout);
             using var response = await _httpClient.GetAsync(url, cts.Token);
 
             if (!response.IsSuccessStatusCode)
@@ -321,10 +343,13 @@ public sealed class HttpPluginClient : IIntegrationClient
 
         try
         {
-            var url = $"{_registryBaseUrl}/plugins/{pluginId}/versions";
+            var url = _registryBaseUrl + string.Format(
+                CultureInfo.InvariantCulture,
+                PluginVersionsRouteFormat,
+                pluginId);
 
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            cts.CancelAfter(TimeSpan.FromSeconds(15));
+            cts.CancelAfter(PluginVersionsTimeout);
             using var response = await _httpClient.GetAsync(url, cts.Token);
 
             if (!response.IsSuccessStatusCode)
@@ -367,11 +392,11 @@ public sealed class HttpPluginClient : IIntegrationClient
         try
         {
             var payload = System.Text.Json.JsonSerializer.Serialize(pluginIds);
-            using var content = new StringContent(payload, System.Text.Encoding.UTF8, "application/json");
-            var url = $"{_registryBaseUrl}/plugins/check-updates";
+            using var content = new StringContent(payload, System.Text.Encoding.UTF8, JsonContentType);
+            var url = _registryBaseUrl + PluginUpdateCheckRoute;
 
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            cts.CancelAfter(TimeSpan.FromSeconds(30));
+            cts.CancelAfter(UpdateCheckTimeout);
             using var response = await _httpClient.PostAsync(url, content, cts.Token);
 
             if (response.IsSuccessStatusCode)
