@@ -50,28 +50,63 @@ public sealed class HttpPluginClient : IIntegrationClient
         _registryBaseUrl = configuration?["PluginRegistry:BaseUrl"];
     }
 
-    public Task<HttpResponseMessage> GetAsync(string url)
-        => _httpClient.GetAsync(url);
+    /// <summary>
+    /// Sends a GET request to the specified URL.
+    /// </summary>
+    /// <param name="url">The URL to send the request to.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+    /// <returns>The HTTP response message.</returns>
+    public Task<HttpResponseMessage> GetAsync(string url, CancellationToken cancellationToken = default)
+    {
+        return _httpClient.GetAsync(url, cancellationToken);
+    }
 
-    public async Task<bool> IsAvailableAsync()
+    /// <summary>
+    /// Sends a GET request to the specified URL.
+    /// </summary>
+    /// <param name="url">The URL to send the request to.</param>
+    /// <returns>The HTTP response message.</returns>
+    public Task<HttpResponseMessage> GetAsync(string url)
+        => GetAsync(url, CancellationToken.None);
+
+    /// <summary>
+    /// Checks if the plugin registry is available.
+    /// </summary>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+    /// <returns>True if the registry is available; otherwise, false.</returns>
+    public async Task<bool> IsAvailableAsync(CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(_registryBaseUrl))
             return false;
 
         try
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            cts.CancelAfter(TimeSpan.FromSeconds(5));
             using var response = await _httpClient.GetAsync(_registryBaseUrl + "/health", cts.Token);
             return response.IsSuccessStatusCode;
         }
-        catch (Exception ex)
+        catch (Exception ex) when (!(ex is OperationCanceledException && cancellationToken.IsCancellationRequested))
         {
             _logger.LogWarning(ex, "Registry availability check failed");
             return false;
         }
     }
 
-    public async Task SendNotificationAsync(string eventType, PluginNotification notification)
+    /// <summary>
+    /// Checks if the plugin registry is available.
+    /// </summary>
+    /// <returns>True if the registry is available; otherwise, false.</returns>
+    public Task<bool> IsAvailableAsync()
+        => IsAvailableAsync(CancellationToken.None);
+
+    /// <summary>
+    /// Sends a notification to the plugin registry.
+    /// </summary>
+    /// <param name="eventType">The type of event.</param>
+    /// <param name="notification">The notification details.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+    public async Task SendNotificationAsync(string eventType, PluginNotification notification, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(_registryBaseUrl))
         {
@@ -93,7 +128,8 @@ public sealed class HttpPluginClient : IIntegrationClient
             using var content = new StringContent(payload, System.Text.Encoding.UTF8, "application/json");
             var url = $"{_registryBaseUrl}/plugins/{notification.PluginId}/events";
 
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            cts.CancelAfter(TimeSpan.FromSeconds(30));
             using var response = await _httpClient.PostAsync(url, content, cts.Token);
 
             if (!response.IsSuccessStatusCode)
@@ -109,13 +145,27 @@ public sealed class HttpPluginClient : IIntegrationClient
                     notification.PluginName, eventType);
             }
         }
-        catch (Exception ex)
+        catch (Exception ex) when (!(ex is OperationCanceledException && cancellationToken.IsCancellationRequested))
         {
             _logger.LogError(ex, "Error sending plugin notification for {PluginName}", notification.PluginName);
         }
     }
 
-    public async Task<PluginInfo?> GetPluginInfoAsync(Guid pluginId)
+    /// <summary>
+    /// Sends a notification to the plugin registry.
+    /// </summary>
+    /// <param name="eventType">The type of event.</param>
+    /// <param name="notification">The notification details.</param>
+    public Task SendNotificationAsync(string eventType, PluginNotification notification)
+        => SendNotificationAsync(eventType, notification, CancellationToken.None);
+
+    /// <summary>
+    /// Retrieves plugin information from the registry.
+    /// </summary>
+    /// <param name="pluginId">The plugin identifier.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+    /// <returns>The plugin information, or null if not found or an error occurred.</returns>
+    public async Task<PluginInfo?> GetPluginInfoAsync(Guid pluginId, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(_registryBaseUrl))
         {
@@ -127,7 +177,8 @@ public sealed class HttpPluginClient : IIntegrationClient
         {
             var url = $"{_registryBaseUrl}/plugins/{pluginId}";
 
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            cts.CancelAfter(TimeSpan.FromSeconds(10));
             using var response = await _httpClient.GetAsync(url, cts.Token);
 
             if (!response.IsSuccessStatusCode)
@@ -139,7 +190,7 @@ public sealed class HttpPluginClient : IIntegrationClient
             var content = await response.Content.ReadAsStringAsync(cts.Token);
             return System.Text.Json.JsonSerializer.Deserialize<PluginInfo>(content, JsonOptions);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (!(ex is OperationCanceledException && cancellationToken.IsCancellationRequested))
         {
             _logger.LogError(ex, "Error retrieving plugin info for {PluginId}", pluginId);
             return null;
@@ -147,9 +198,21 @@ public sealed class HttpPluginClient : IIntegrationClient
     }
 
     /// <summary>
+    /// Retrieves plugin information from the registry.
+    /// </summary>
+    /// <param name="pluginId">The plugin identifier.</param>
+    /// <returns>The plugin information, or null if not found or an error occurred.</returns>
+    public Task<PluginInfo?> GetPluginInfoAsync(Guid pluginId)
+        => GetPluginInfoAsync(pluginId, CancellationToken.None);
+
+    /// <summary>
     /// Uploads a plugin to the remote registry.
     /// </summary>
-    public async Task<bool> UploadPluginAsync(string filePath, string description = "")
+    /// <param name="filePath">The path to the plugin file to upload.</param>
+    /// <param name="description">Optional description of the plugin.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+    /// <returns>True if the upload was successful; otherwise, false.</returns>
+    public async Task<bool> UploadPluginAsync(string filePath, string description = "", CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(_registryBaseUrl) || !File.Exists(filePath))
             return false;
@@ -163,12 +226,13 @@ public sealed class HttpPluginClient : IIntegrationClient
 
             var url = $"{_registryBaseUrl}/plugins/upload";
 
-            using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            cts.CancelAfter(TimeSpan.FromMinutes(5));
             using var response = await _httpClient.PostAsync(url, content, cts.Token);
 
             return response.IsSuccessStatusCode;
         }
-        catch (Exception ex)
+        catch (Exception ex) when (!(ex is OperationCanceledException && cancellationToken.IsCancellationRequested))
         {
             _logger.LogError(ex, "Error uploading plugin: {FilePath}", filePath);
             return false;
@@ -176,14 +240,24 @@ public sealed class HttpPluginClient : IIntegrationClient
     }
 
     /// <summary>
+    /// Uploads a plugin to the remote registry.
+    /// </summary>
+    /// <param name="filePath">The path to the plugin file to upload.</param>
+    /// <param name="description">Optional description of the plugin.</param>
+    /// <returns>True if the upload was successful; otherwise, false.</returns>
+    public Task<bool> UploadPluginAsync(string filePath, string description = "")
+        => UploadPluginAsync(filePath, description, CancellationToken.None);
+
+    /// <summary>
     /// Searches the remote registry for plugins matching a free-text query.
     /// </summary>
     /// <param name="query">The search query. Cannot be null or whitespace.</param>
     /// <param name="limit">Maximum number of results to return. Must be greater than zero.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
     /// <returns>The matching plugins, or an empty list when the registry is not configured or unreachable.</returns>
     /// <exception cref="ArgumentException">Thrown when <paramref name="query"/> is null or whitespace.</exception>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="limit"/> is not positive.</exception>
-    public async Task<List<PluginInfo>> SearchPluginsAsync(string query, int limit = 20)
+    public async Task<List<PluginInfo>> SearchPluginsAsync(string query, int limit = 20, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(query);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(limit);
@@ -200,7 +274,8 @@ public sealed class HttpPluginClient : IIntegrationClient
                       $"?query={Uri.EscapeDataString(query)}" +
                       $"&limit={limit.ToString(CultureInfo.InvariantCulture)}";
 
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            cts.CancelAfter(TimeSpan.FromSeconds(15));
             using var response = await _httpClient.GetAsync(url, cts.Token);
 
             if (!response.IsSuccessStatusCode)
@@ -212,7 +287,7 @@ public sealed class HttpPluginClient : IIntegrationClient
             var content = await response.Content.ReadAsStringAsync(cts.Token);
             return System.Text.Json.JsonSerializer.Deserialize<List<PluginInfo>>(content, JsonOptions) ?? [];
         }
-        catch (Exception ex)
+        catch (Exception ex) when (!(ex is OperationCanceledException && cancellationToken.IsCancellationRequested))
         {
             _logger.LogError(ex, "Error searching plugins for query: {Query}", query);
             return [];
@@ -220,11 +295,23 @@ public sealed class HttpPluginClient : IIntegrationClient
     }
 
     /// <summary>
+    /// Searches the remote registry for plugins matching a free-text query.
+    /// </summary>
+    /// <param name="query">The search query. Cannot be null or whitespace.</param>
+    /// <param name="limit">Maximum number of results to return. Must be greater than zero.</param>
+    /// <returns>The matching plugins, or an empty list when the registry is not configured or unreachable.</returns>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="query"/> is null or whitespace.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="limit"/> is not positive.</exception>
+    public Task<List<PluginInfo>> SearchPluginsAsync(string query, int limit = 20)
+        => SearchPluginsAsync(query, limit, CancellationToken.None);
+
+    /// <summary>
     /// Retrieves all published versions of a plugin from the remote registry.
     /// </summary>
     /// <param name="pluginId">The plugin identifier.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
     /// <returns>The published versions, or an empty list when the registry is not configured or unreachable.</returns>
-    public async Task<List<PluginVersionInfo>> GetPluginVersionsAsync(Guid pluginId)
+    public async Task<List<PluginVersionInfo>> GetPluginVersionsAsync(Guid pluginId, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(_registryBaseUrl))
         {
@@ -236,7 +323,8 @@ public sealed class HttpPluginClient : IIntegrationClient
         {
             var url = $"{_registryBaseUrl}/plugins/{pluginId}/versions";
 
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            cts.CancelAfter(TimeSpan.FromSeconds(15));
             using var response = await _httpClient.GetAsync(url, cts.Token);
 
             if (!response.IsSuccessStatusCode)
@@ -248,7 +336,7 @@ public sealed class HttpPluginClient : IIntegrationClient
             var content = await response.Content.ReadAsStringAsync(cts.Token);
             return System.Text.Json.JsonSerializer.Deserialize<List<PluginVersionInfo>>(content, JsonOptions) ?? [];
         }
-        catch (Exception ex)
+        catch (Exception ex) when (!(ex is OperationCanceledException && cancellationToken.IsCancellationRequested))
         {
             _logger.LogError(ex, "Error retrieving versions for plugin: {PluginId}", pluginId);
             return [];
@@ -256,9 +344,20 @@ public sealed class HttpPluginClient : IIntegrationClient
     }
 
     /// <summary>
+    /// Retrieves all published versions of a plugin from the remote registry.
+    /// </summary>
+    /// <param name="pluginId">The plugin identifier.</param>
+    /// <returns>The published versions, or an empty list when the registry is not configured or unreachable.</returns>
+    public Task<List<PluginVersionInfo>> GetPluginVersionsAsync(Guid pluginId)
+        => GetPluginVersionsAsync(pluginId, CancellationToken.None);
+
+    /// <summary>
     /// Checks for plugin updates from the registry.
     /// </summary>
-    public async Task<List<PluginUpdateInfo>> CheckForUpdatesAsync(List<Guid> pluginIds)
+    /// <param name="pluginIds">The plugin identifiers to check for updates.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+    /// <returns>A list of update information for the plugins.</returns>
+    public async Task<List<PluginUpdateInfo>> CheckForUpdatesAsync(List<Guid> pluginIds, CancellationToken cancellationToken = default)
     {
         var updates = new List<PluginUpdateInfo>();
 
@@ -271,7 +370,8 @@ public sealed class HttpPluginClient : IIntegrationClient
             using var content = new StringContent(payload, System.Text.Encoding.UTF8, "application/json");
             var url = $"{_registryBaseUrl}/plugins/check-updates";
 
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            cts.CancelAfter(TimeSpan.FromSeconds(30));
             using var response = await _httpClient.PostAsync(url, content, cts.Token);
 
             if (response.IsSuccessStatusCode)
@@ -281,13 +381,21 @@ public sealed class HttpPluginClient : IIntegrationClient
                     responseContent, JsonOptions) ?? [];
             }
         }
-        catch (Exception ex)
+        catch (Exception ex) when (!(ex is OperationCanceledException && cancellationToken.IsCancellationRequested))
         {
             _logger.LogError(ex, "Error checking for plugin updates");
         }
 
         return updates;
     }
+
+    /// <summary>
+    /// Checks for plugin updates from the registry.
+    /// </summary>
+    /// <param name="pluginIds">The plugin identifiers to check for updates.</param>
+    /// <returns>A list of update information for the plugins.</returns>
+    public Task<List<PluginUpdateInfo>> CheckForUpdatesAsync(List<Guid> pluginIds)
+        => CheckForUpdatesAsync(pluginIds, CancellationToken.None);
 }
 
 /// <summary>
