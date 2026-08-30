@@ -17,14 +17,27 @@ public sealed class PluginEventSubscriber : IPluginEventSubscriber
     private readonly Dictionary<Type, List<Delegate>> _subscriptions = [];
     private readonly object _subscriptionsLock = new();
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PluginEventSubscriber"/> class.
+    /// </summary>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="publisher"/> or <paramref name="logger"/> is <see langword="null"/>.</exception>
     public PluginEventSubscriber(PluginEventPublisher publisher, ILogger<PluginEventSubscriber> logger)
     {
+        ArgumentNullException.ThrowIfNull(publisher);
+        ArgumentNullException.ThrowIfNull(logger);
+
         _publisher = publisher;
         _logger = logger;
     }
 
+    /// <summary>
+    /// Subscribes a handler to events of the specified type.
+    /// </summary>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="handler"/> is <see langword="null"/>.</exception>
     public void Subscribe<T>(Func<T, Task> handler) where T : IPluginEvent
     {
+        ArgumentNullException.ThrowIfNull(handler);
+
         _publisher.Subscribe(handler);
 
         lock (_subscriptionsLock)
@@ -43,8 +56,14 @@ public sealed class PluginEventSubscriber : IPluginEventSubscriber
         _logger.LogInformation("Subscribed to event: {EventType}", typeof(T).Name);
     }
 
+    /// <summary>
+    /// Unsubscribes a handler from events of the specified type.
+    /// </summary>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="handler"/> is <see langword="null"/>.</exception>
     public void Unsubscribe<T>(Func<T, Task> handler) where T : IPluginEvent
     {
+        ArgumentNullException.ThrowIfNull(handler);
+
         _publisher.Unsubscribe(handler);
 
         lock (_subscriptionsLock)
@@ -68,40 +87,55 @@ public sealed class PluginEventSubscriber : IPluginEventSubscriber
     /// <summary>
     /// Subscribes to plugin loaded events.
     /// </summary>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="handler"/> is <see langword="null"/>.</exception>
     public void OnPluginLoaded(Func<PluginLoadedEvent, Task> handler)
     {
+        ArgumentNullException.ThrowIfNull(handler);
+
         Subscribe(handler);
     }
 
     /// <summary>
     /// Subscribes to plugin unloaded events.
     /// </summary>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="handler"/> is <see langword="null"/>.</exception>
     public void OnPluginUnloaded(Func<PluginUnloadedEvent, Task> handler)
     {
+        ArgumentNullException.ThrowIfNull(handler);
+
         Subscribe(handler);
     }
 
     /// <summary>
     /// Subscribes to plugin updated events.
     /// </summary>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="handler"/> is <see langword="null"/>.</exception>
     public void OnPluginUpdated(Func<PluginUpdatedEvent, Task> handler)
     {
+        ArgumentNullException.ThrowIfNull(handler);
+
         Subscribe(handler);
     }
 
     /// <summary>
     /// Subscribes to plugin error events.
     /// </summary>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="handler"/> is <see langword="null"/>.</exception>
     public void OnPluginError(Func<PluginErrorEvent, Task> handler)
     {
+        ArgumentNullException.ThrowIfNull(handler);
+
         Subscribe(handler);
     }
 
     /// <summary>
     /// Subscribes to dependencies resolved events.
     /// </summary>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="handler"/> is <see langword="null"/>.</exception>
     public void OnDependenciesResolved(Func<DependenciesResolvedEvent, Task> handler)
     {
+        ArgumentNullException.ThrowIfNull(handler);
+
         Subscribe(handler);
     }
 
@@ -150,8 +184,11 @@ public sealed class PluginEventSubscriber : IPluginEventSubscriber
     /// <summary>
     /// Removes all subscriptions belonging to the specified AssemblyLoadContext.
     /// </summary>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="context"/> is <see langword="null"/>.</exception>
     public void RemoveSubscribersForContext(System.Runtime.Loader.AssemblyLoadContext context)
     {
+        ArgumentNullException.ThrowIfNull(context);
+
         lock (_subscriptionsLock)
         {
             foreach (var key in _subscriptions.Keys.ToList())
