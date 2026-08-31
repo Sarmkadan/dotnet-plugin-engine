@@ -51,10 +51,7 @@ public sealed class PluginEventPublisher : IPluginEventPublisher
     {
         try
         {
-            lock (_subscribersLock)
-            {
-                _eventsPublished++;
-            }
+            Interlocked.Increment(ref _eventsPublished);
 
             var eventType = typeof(T);
 
@@ -119,11 +116,18 @@ public sealed class PluginEventPublisher : IPluginEventPublisher
                     }
                     catch (Exception ex) when (ex is not OperationCanceledException)
                     {
-                        if (ex is AggregateException aggregateException)
+                        foreach (var task in tasks.Where(task => task.IsFaulted))
                         {
-                            exceptions.AddRange(aggregateException.InnerExceptions);
+                            foreach (var taskException in task.Exception?.InnerExceptions ?? [])
+                            {
+                                if (!exceptions.Contains(taskException))
+                                {
+                                    exceptions.Add(taskException);
+                                }
+                            }
                         }
-                        else
+
+                        if (!exceptions.Contains(ex))
                         {
                             exceptions.Add(ex);
                         }
