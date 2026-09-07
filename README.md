@@ -201,3 +201,42 @@ batch.AddResult(Guid.NewGuid(), "OtherPlugin", failed);
 
 Console.WriteLine(batch.GetSummary());
 ```
+
+## Getting Started
+
+Register the plugin engine with an `IServiceCollection`, configure it through `PluginEngineOptions`, and resolve the `PluginEngine` facade from the service provider:
+
+```csharp
+using Microsoft.Extensions.DependencyInjection;
+using PluginEngine.Configuration;
+using PluginEngineFacade = PluginEngine.PluginEngine;
+
+var services = new ServiceCollection();
+
+DependencyInjectionSetup.AddPluginEngine(
+    services,
+    (PluginEngineOptions options) =>
+    {
+        options.PluginDirectory = Path.Combine(AppContext.BaseDirectory, "plugins");
+        options.EnableHotReload = true;
+        options.MaxConcurrentPluginLoads = 4;
+    });
+
+using var serviceProvider = services.BuildServiceProvider();
+var pluginEngine = serviceProvider.GetRequiredService<PluginEngineFacade>();
+
+try
+{
+    await pluginEngine.InitializeAsync();
+
+    var loadedPluginCount = await pluginEngine.LoadAllPluginsAsync();
+    Console.WriteLine($"Loaded {loadedPluginCount} plugin(s).");
+
+    var healthInfo = await pluginEngine.GetHealthInfoAsync();
+    Console.WriteLine(healthInfo);
+}
+finally
+{
+    await pluginEngine.ShutdownAsync();
+}
+```
