@@ -105,3 +105,69 @@ PluginOperationDelegate middleware = new PluginMiddlewarePipeline()
 
 await middleware(context);
 ```
+
+## Hot Swapping Plugins
+
+`IHotSwapService` replaces a running plugin assembly while keeping the host application available. A plugin must be loaded or active and its assembly file must be accessible for `CanSwap` to return `true`.
+
+- `SwapPluginAsync` unloads the current plugin, loads the replacement assembly in a new assembly load context, and invokes the registered post-swap callback. If the swap fails, the service makes a best-effort attempt to reload the previous assembly.
+- `RollbackSwapAsync` restores the assembly used immediately before the most recent successful swap.
+- `GetSwapHistoryAsync` returns the plugin's complete swap history in oldest-first order.
+- `RegisterPostSwapCallback` registers one callback for a plugin. Registering another callback for the same plugin replaces the existing callback.
+- `CanSwap` checks whether a plugin is currently eligible for hot swapping.
+
+Example usage:
+
+```csharp
+using PluginEngine.Domain.Entities;
+using PluginEngine.Services.Abstractions;
+
+async Task UpdatePluginAsync(
+    IHotSwapService hotSwapService,
+    Plugin plugin,
+    string replacementAssemblyPath,
+    CancellationToken cancellationToken)
+{
+    if (!hotSwapService.CanSwap(plugin))
+    {
+        throw new InvalidOperationException("The plugin cannot be hot-swapped.");
+    }
+
+    hotSwapService.RegisterPostSwapCallback(
+        plugin.Id,
+        swappedPlugin =>
+        {
+            Console.WriteLine($"Swapped {swappedPlugin.Name}");
+            return Task.CompletedTask;
+        });
+
+    var swapResult = await hotSwapService.SwapPluginAsync(
+        plugin.Id,
+        replacementAssemblyPath,
+        cancellationToken);
+
+    if (!swapResult.Success)
+    {
+        return;
+    }
+
+    var historyResult = await hotSwapService.GetSwapHistoryAsync(
+        plugin.Id,
+        cancellationToken);
+
+    if (historyResult.Success && historyResult.Data is not null)
+    {
+        foreach (var record in historyResult.Data)
+        {
+            Console.WriteLine($"{record.SwappedAtUtc:u}: {record.PreviousAssemblyPath} -> {record.NewAssemblyPath}");
+        }
+    }
+
+    // Restore the assembly that was active before the successful swap if needed.
+    var rollbackResult = await hotSwapService.RollbackSwapAsync(
+        plugin.Id,
+        cancellationToken);
+
+    Console.WriteLine(rollbackResult.Message);
+}
+```
