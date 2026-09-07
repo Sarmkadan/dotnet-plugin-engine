@@ -171,3 +171,33 @@ async Task UpdatePluginAsync(
     Console.WriteLine(rollbackResult.Message);
 }
 ```
+
+## PluginOperationResult
+
+`PluginOperationResult` represents an operation without return data, while `PluginOperationResult<T>` adds a nullable `Data` value. Both expose `Success`, `Message`, `ErrorCode`, `ErrorDetails`, `DurationMs`, and `TimestampUtc`.
+
+- `CreateSuccess` creates a successful result and clears error information. The generic overload accepts the returned data.
+- `CreateFailure` requires a non-empty message and uses error code `500` by default. The optional `details` and `durationMs` arguments populate `ErrorDetails` and `DurationMs`.
+- `FromException` uses the exception message, the inner exception message as error details, and maps `PluginLoadException` to `1001`, `DependencyResolutionException` to `1002`, `VersionMismatchException` to `1003`, and all other exceptions to `500`.
+
+`PluginBatchOperationResult` collects per-plugin results through `AddResult`, updates `SuccessCount` and `FailureCount`, and exposes `TotalCount`, `TotalDurationMs`, and `GetSummary()`. `IsSuccessful` is `true` when there are no failures or when successes outnumber failures.
+
+```csharp
+using PluginEngine.Results;
+
+var loaded = PluginOperationResult<string>.CreateSuccess(
+    "MyPlugin",
+    "Plugin loaded",
+    durationMs: 18);
+
+var failed = PluginOperationResult.CreateFailure(
+    "Plugin configuration is invalid",
+    errorCode: 400,
+    details: "The entry point is missing.");
+
+var batch = new PluginBatchOperationResult();
+batch.AddResult(Guid.NewGuid(), "MyPlugin", loaded);
+batch.AddResult(Guid.NewGuid(), "OtherPlugin", failed);
+
+Console.WriteLine(batch.GetSummary());
+```
