@@ -90,3 +90,18 @@ string formattedMessage = ex.GetFormattedErrorMessage();
 string simplifiedMessage = ex.GetSimplifiedMessage();
 var exWithContext = ex.WithContext("operation", "plugin loading");
 ```
+
+## Middleware Pipeline
+
+Create a `PluginMiddlewarePipeline` and register caching and rate limiting before building the operation delegate:
+
+```csharp
+using PluginEngine.Middleware;
+
+PluginOperationDelegate middleware = new PluginMiddlewarePipeline()
+    .UseCaching(cacheDuration: TimeSpan.FromMinutes(10))
+    .UseRateLimit(maxTokensPerSecond: 50, windowSizeSeconds: 1)
+    .Build();
+
+await middleware(context);
+```
