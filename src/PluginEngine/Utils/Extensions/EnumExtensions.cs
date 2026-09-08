@@ -12,6 +12,13 @@ namespace PluginEngine.Utils.Extensions;
 /// </summary>
 public static class EnumExtensions
 {
+    private const string ColorRunning = "#0066CC"; // Blue
+    private const string ColorCompleted = "#00AA00"; // Green
+    private const string ColorFailed = "#CC0000"; // Red
+    private const string ColorCancelled = "#999999"; // Gray
+    private const string ColorTimeout = "#FF6600"; // Orange
+    private const string ColorDefault = "#000000";
+
     /// <summary>
     /// Gets the description of an enum value from its Display attribute.
     /// Falls back to the enum name if no description is found.
@@ -178,12 +185,12 @@ public static class EnumExtensions
     {
         return state switch
         {
-            ExecutionState.Running => "#0066CC", // Blue
-            ExecutionState.Completed => "#00AA00", // Green
-            ExecutionState.Failed => "#CC0000", // Red
-            ExecutionState.Cancelled => "#999999", // Gray
-            ExecutionState.Timeout => "#FF6600", // Orange
-            _ => "#000000"
+            ExecutionState.Running => ColorRunning,
+            ExecutionState.Completed => ColorCompleted,
+            ExecutionState.Failed => ColorFailed,
+            ExecutionState.Cancelled => ColorCancelled,
+            ExecutionState.Timeout => ColorTimeout,
+            _ => ColorDefault
         };
     }
 
