@@ -18,7 +18,10 @@ public sealed class RateLimitMiddleware : IPluginMiddleware
     private readonly int _windowSizeSeconds;
     private readonly object _lock = new();
 
-    public RateLimitMiddleware(int maxTokensPerSecond = 100, int windowSizeSeconds = 1)
+    public const int DefaultMaxTokensPerSecond = 100;
+    public const int DefaultWindowSizeSeconds = 1;
+
+    public RateLimitMiddleware(int maxTokensPerSecond = DefaultMaxTokensPerSecond, int windowSizeSeconds = DefaultWindowSizeSeconds)
     {
         _maxTokensPerSecond = maxTokensPerSecond;
         _windowSizeSeconds = windowSizeSeconds;
@@ -66,6 +69,7 @@ public sealed class RateLimitMiddleware : IPluginMiddleware
         private readonly int _refillRatePerSecond;
         private int _tokens;
         private long _lastRefillMs;
+        private const int MillisecondsPerSecond = 1000;
 
         public int RemainingTokens => _tokens;
 
@@ -80,7 +84,7 @@ public sealed class RateLimitMiddleware : IPluginMiddleware
         public void Refill()
         {
             var nowMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-            var elapsedSeconds = (nowMs - _lastRefillMs) / 1000.0;
+            var elapsedSeconds = (nowMs - _lastRefillMs) / (double)MillisecondsPerSecond;
             var tokensToAdd = (int)(elapsedSeconds * _refillRatePerSecond);
 
             if (tokensToAdd > 0)
