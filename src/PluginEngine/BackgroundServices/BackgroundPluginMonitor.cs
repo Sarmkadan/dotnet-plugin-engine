@@ -18,6 +18,10 @@ public sealed class BackgroundPluginMonitor : BackgroundService
     private readonly PluginEngineOptions _options;
     private FileSystemWatcher? _watcher;
 
+    private const int MonitorIntervalMs = 5000;
+    private const int FileWriteSettleDelayMs = 1000;
+    private const int HotReloadDebounceDelayMs = 500;
+
     public BackgroundPluginMonitor(
         IPluginManagerService pluginManager,
         IHotReloadService hotReloadService,
@@ -47,7 +51,7 @@ public sealed class BackgroundPluginMonitor : BackgroundService
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                await Task.Delay(5000, stoppingToken);
+                await Task.Delay(MonitorIntervalMs, stoppingToken);
             }
         }
         catch (OperationCanceledException)
@@ -98,7 +102,7 @@ public sealed class BackgroundPluginMonitor : BackgroundService
         _logger.LogInformation("Plugin file created: {FileName}", e.Name);
 
         // Wait for file to be fully written
-        Task.Delay(1000).ContinueWith(async _ =>
+        Task.Delay(FileWriteSettleDelayMs).ContinueWith(async _ =>
         {
             try
             {
@@ -117,7 +121,7 @@ public sealed class BackgroundPluginMonitor : BackgroundService
         _logger.LogInformation("Plugin file changed: {FileName}", e.Name);
 
         // Trigger hot reload for the changed plugin
-        Task.Delay(500).ContinueWith(async _ =>
+        Task.Delay(HotReloadDebounceDelayMs).ContinueWith(async _ =>
         {
             try
             {
