@@ -90,6 +90,19 @@ public static class PluginExtensions
     }
 
     /// <summary>
+    /// Determines whether the plugin has a dependency on the specified plugin.
+    /// </summary>
+    /// <param name="plugin">The plugin to check.</param>
+    /// <param name="dependencyPluginId">The identifier of the dependency plugin.</param>
+    /// <returns><see langword="true"/> if the plugin has a dependency with the specified identifier; otherwise, <see langword="false"/>.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="plugin"/> is <see langword="null"/>.</exception>
+    public static bool HasDependencyOn(this Plugin plugin, Guid dependencyPluginId)
+    {
+        ArgumentNullException.ThrowIfNull(plugin);
+        return plugin.Dependencies.Any(dependency => dependency.DependencyPluginId == dependencyPluginId);
+    }
+
+    /// <summary>
     /// Determines whether the plugin has any capabilities.
     /// </summary>
     /// <param name="plugin">The plugin to check.</param>
