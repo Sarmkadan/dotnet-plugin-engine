@@ -15,6 +15,11 @@ namespace PluginEngine.Utils.Helpers;
 /// </summary>
 public static class DependencyGraphAnalyzerExtensions
 {
+    private const string CircularIssueIndicator = "Circular";
+    private const string HighNumberIssueIndicator = "High number";
+    private const string MajorityIssueIndicator = "More than 50%";
+    private const int SeparatorWidth = 60;
+
     /// <summary>
     /// Filters the issues list to return only critical issues that require immediate attention.
     /// </summary>
@@ -28,9 +33,9 @@ public static class DependencyGraphAnalyzerExtensions
         ArgumentNullException.ThrowIfNull(report);
 
         return report.Issues
-            .Where(issue => issue.Contains("Circular", StringComparison.Ordinal) ||
-                           issue.Contains("High number", StringComparison.Ordinal) ||
-                           issue.Contains("More than 50%", StringComparison.Ordinal))
+            .Where(issue => issue.Contains(CircularIssueIndicator, StringComparison.Ordinal) ||
+                           issue.Contains(HighNumberIssueIndicator, StringComparison.Ordinal) ||
+                           issue.Contains(MajorityIssueIndicator, StringComparison.Ordinal))
             .ToList();
     }
 
@@ -97,7 +102,7 @@ public static class DependencyGraphAnalyzerExtensions
         var visited = new HashSet<Guid>();
 
         sb.AppendLine($"Dependency Graph for: {rootPlugin.Name} v{rootPlugin.Version}");
-        sb.AppendLine(new string('-', 60));
+        sb.AppendLine(new string('-', SeparatorWidth));
 
         await GenerateDependencyNodeAsync(sb, rootPlugin, 0, maxDepth, visited);
 
