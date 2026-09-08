@@ -106,6 +106,24 @@ namespace PluginEngine.Domain.Entities
         }
 
         /// <summary>
+        /// Determines whether the dependency has an upper version bound.
+        /// </summary>
+        /// <param name="dependency">The dependency to evaluate.</param>
+        /// <returns>
+        /// <c>true</c> if <see cref="PluginDependency.MaximumVersion"/> contains a value;
+        /// otherwise, <c>false</c>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="dependency"/> is <c>null</c>.
+        /// </exception>
+        public static bool HasUpperBound(this PluginDependency dependency)
+        {
+            ArgumentNullException.ThrowIfNull(dependency);
+
+            return !string.IsNullOrWhiteSpace(dependency.MaximumVersion);
+        }
+
+        /// <summary>
         /// Returns a concise, human‑readable summary of the dependency.
         /// </summary>
         /// <param name="dependency">The dependency to summarise.</param>
