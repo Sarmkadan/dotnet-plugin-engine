@@ -47,6 +47,36 @@ public static class StringExtensions
 	}
 
 	/// <summary>
+	/// Converts a string to kebab case by replacing whitespace and underscores with hyphens.
+	/// </summary>
+	/// <exception cref="ArgumentNullException">Thrown when <paramref name="value"/> is null.</exception>
+	public static string ToKebabCase(this string value)
+	{
+		ArgumentNullException.ThrowIfNull(value);
+
+		var result = new char[value.Length];
+		var length = 0;
+
+		foreach (var character in value)
+		{
+			if (char.IsWhiteSpace(character) || character is '_' or '-')
+			{
+				if (length > 0 && result[length - 1] != '-')
+					result[length++] = '-';
+
+				continue;
+			}
+
+			result[length++] = char.ToLowerInvariant(character);
+		}
+
+		if (length > 0 && result[length - 1] == '-')
+			length--;
+
+		return new string(result, 0, length);
+	}
+
+	/// <summary>
 	/// Removes unsafe characters from a plugin name for safe file operations.
 	/// </summary>
 	/// <exception cref="ArgumentNullException">Thrown when <paramref name="value"/> is null.</exception>
