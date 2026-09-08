@@ -26,6 +26,24 @@ namespace PluginEngine.Utils.Helpers
         }
 
         /// <summary>
+        /// Determines whether the specified version string is greater than or equal to the target version.
+        /// </summary>
+        /// <param name="helper">The version helper instance.</param>
+        /// <param name="versionString">The version string to compare.</param>
+        /// <param name="targetVersion">The target version to compare against.</param>
+        /// <returns>True if versionString is greater than or equal to targetVersion; otherwise, false.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="helper"/> is null.</exception>
+        /// <exception cref="ArgumentException"><paramref name="versionString"/> or <paramref name="targetVersion"/> is null or whitespace.</exception>
+        public static bool IsGreaterThanOrEqualTo(this VersionHelper helper, string versionString, string targetVersion)
+        {
+            ArgumentNullException.ThrowIfNull(helper);
+            ArgumentException.ThrowIfNullOrEmpty(versionString);
+            ArgumentException.ThrowIfNullOrEmpty(targetVersion);
+
+            return helper.CompareVersions(versionString, targetVersion) >= 0;
+        }
+
+        /// <summary>
         /// Determines whether the specified version string is less than the target version.
         /// </summary>
         /// <param name="helper">The version helper instance.</param>
