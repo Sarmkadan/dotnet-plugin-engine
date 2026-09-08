@@ -1,11 +1,10 @@
 # Event System Guide
 
-This document describes the event system in the dotnet-plugin-engine, including the core interfaces, base classes, built-in events, publisher/subscriber pattern, and usage examples.
+This document describes the event system in the `dotnet-plugin-engine`, covering core interfaces, base classes, built-in events, the publisher/subscriber pattern, and usage examples.
 
 ## Core Interfaces and Base Classes
 
-### IPluginEvent
-
+### `IPluginEvent`
 The base interface for all plugin events in the system.
 
 | Member | Type | Description |
@@ -15,108 +14,75 @@ The base interface for all plugin events in the system.
 | `PluginId` | `Guid` | Identifier of the plugin associated with the event |
 | `EventType` | `string` | Name of the event type |
 
-### IPluginEventHandler<T>
-
-Handler interface for processing specific event types.
-
-| Member | Type | Description |
-|--------|------|-------------|
-| `HandleAsync(T @event)` | `Task` | Asynchronously handles an event of type T |
-
-### PluginEventBase
-
+### `PluginEventBase`
 Abstract base class providing common implementation for plugin events.
 
 | Member | Type | Description |
 |--------|------|-------------|
-| `EventId` | `Guid` | Generated as `Guid.NewGuid()` |
-| `OccurredAtUtc` | `DateTime` | Set to `DateTime.UtcNow` |
+| `EventId` | `Guid` | Generated automatically via `Guid.NewGuid()` |
+| `OccurredAtUtc` | `DateTime` | Set automatically to `DateTime.UtcNow` |
 | `PluginId` | `Guid` | Required property to be set by derived events |
 | `EventType` | `string` | Abstract property to be implemented by derived events |
+
+### `IPluginEventSubscriber`
+Interface for subscribing to event types using callback delegates.
+
+| Member | Type | Description |
+|--------|------|-------------|
+| `Subscribe<T>(Func<T, Task> handler)` | `void` | Registers a handler for events of type `T` |
+| `Unsubscribe<T>(Func<T, Task> handler)` | `void` | Removes a previously registered handler |
 
 ## Built-in Events
 
 The system includes five built-in event types:
 
-### PluginLoadedEvent
-
+### `PluginLoadedEvent`
 Raised when a plugin is successfully loaded.
+- `PluginName` (`string`): Name of the loaded plugin (required)
+- `Version` (`string`): Version of the loaded plugin (required)
+- `LoadTimeMs` (`long`): Time taken to load the plugin in milliseconds
 
-| Member | Type | Description |
-|--------|------|-------------|
-| `PluginName` | `string` | Name of the loaded plugin (required) |
-| `Version` | `string` | Version of the loaded plugin (required) |
-| `LoadTimeMs` | `long` | Time taken to load the plugin in milliseconds |
-
-### PluginUnloadedEvent
-
+### `PluginUnloadedEvent`
 Raised when a plugin is unloaded.
+- `PluginName` (`string`): Name of the unloaded plugin (required)
+- `Reason` (`string?`): Optional reason for unloading
 
-| Member | Type | Description |
-|--------|------|-------------|
-| `PluginName` | `string` | Name of the unloaded plugin (required) |
-| `Reason` | `string?` | Optional reason for unloading |
-
-### PluginUpdatedEvent
-
+### `PluginUpdatedEvent`
 Raised when a plugin is updated to a new version.
+- `PreviousVersion` (`string`): Version before update (required)
+- `NewVersion` (`string`): Version after update (required)
+- `ChangesSummary` (`string`): Summary of changes made (required)
 
-| Member | Type | Description |
-|--------|------|-------------|
-| `PreviousVersion` | `string` | Version before update (required) |
-| `NewVersion` | `string` | Version after update (required) |
-| `ChangesSummary` | `string` | Summary of changes made (required) |
-
-### PluginErrorEvent
-
+### `PluginErrorEvent`
 Raised when a plugin encounters an error.
+- `ErrorMessage` (`string`): Description of the error (required)
+- `ErrorDetails` (`string?`): Additional error details
+- `ErrorCode` (`int`): Numeric error code
 
-| Member | Type | Description |
-|--------|------|-------------|
-| `ErrorMessage` | `string` | Description of the error (required) |
-| `ErrorDetails` | `string?` | Additional error details |
-| `ErrorCode` | `int` | Numeric error code |
-
-### DependenciesResolvedEvent
-
+### `DependenciesResolvedEvent`
 Raised when a plugin's dependencies have been resolved.
+- `ResolvedDependencies` (`List<Guid>`): List of plugin IDs that were resolved
+- `ResolutionTimeMs` (`long`): Time taken to resolve dependencies in milliseconds
 
-| Member | Type | Description |
-|--------|------|-------------|
-| `ResolvedDependencies` | `List<Guid>` | List of plugin IDs that were resolved |
-| `ResolutionTimeMs` | `long` | Time taken to resolve dependencies in milliseconds |
+## Publisher and Subscriber Pattern
 
-## Event Publisher and Subscriber
-
-### IPluginEventPublisher
-
+### `IPluginEventPublisher`
 Interface for publishing events to subscribers.
 
 | Member | Type | Description |
 |--------|------|-------------|
-| `PublishAsync<T>(T @event)` | `Task` | Publishes an event to all subscribers of type T |
+| `PublishAsync<T>(T @event)` | `Task` | Publishes an event to all subscribers of type `T` |
 | `GetStatistics()` | `EventPublisherStatistics` | Returns current publisher statistics |
-| `RemoveSubscribersForContext(AssemblyLoadContext context)` | `void` | Removes all subscribers associated with the specified load context |
+| `RemoveSubscribersForContext(AssemblyLoadContext)` | `void` | Removes all subscribers associated with the specified load context |
 
-### IPluginEventSubscriber
-
-Interface for subscribing to event types.
-
-| Member | Type | Description |
-|--------|------|-------------|
-| `Subscribe<T>(Func<T, Task> handler)` | `void` | Registers a handler for events of type T |
-| `Unsubscribe<T>(Func<T, Task> handler)` | `void` | Removes a previously registered handler |
-
-### PluginEventPublisher
-
+### `PluginEventPublisher`
 Concrete implementation of `IPluginEventPublisher` that manages event routing.
 
 #### Key Features:
-- Thread-safe subscription management
-- Prevents re-entrant event publishing to avoid infinite recursion
-- Collects and aggregates exceptions from failed handlers
-- Provides detailed logging of event publishing activities
-- Tracks publishing statistics
+- **Thread-Safe Management**: Uses locks to safely manage subscriptions and publishing state.
+- **Re-entrancy Protection**: Detects and prevents infinite recursion if an event handler publishes the same event type again. Logs a warning and skips the nested publish.
+- **Exception Aggregation**: Catches exceptions from individual handlers, continues dispatching to remaining subscribers, and throws an `AggregateException` containing all failures after all handlers are invoked.
+- **Statistics Tracking**: Provides real-time metrics on publishing activity.
 
 #### Statistics (`EventPublisherStatistics`)
 
@@ -127,8 +93,7 @@ Concrete implementation of `IPluginEventPublisher` that manages event routing.
 | `MonitoredEventTypes` | `int` | Number of distinct event types with subscribers |
 | `Timestamp` | `DateTime` | When the statistics were captured |
 
-#### RemoveSubscribersForContext
-
+#### `RemoveSubscribersForContext`
 This method is essential for preventing memory leaks when plugins are unloaded. It removes all event handlers that were registered by types belonging to the specified `AssemblyLoadContext`, which typically corresponds to a plugin's isolation context.
 
 ## Usage Example
