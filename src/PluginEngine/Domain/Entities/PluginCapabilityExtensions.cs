@@ -50,6 +50,35 @@ namespace PluginEngine.Domain.Entities
         }
 
         /// <summary>
+        /// Determines whether this capability has any of the specified tags.
+        /// </summary>
+        /// <param name="capability">The plugin capability.</param>
+        /// <param name="tags">The tags to check.</param>
+        /// <returns>true if any specified tag is present; otherwise, false.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="capability"/> or <paramref name="tags"/> is null.</exception>
+        /// <exception cref="ArgumentException">Thrown when any tag in <paramref name="tags"/> is null or empty.</exception>
+        public static bool HasAnyTag(this PluginCapability capability, IEnumerable<string> tags)
+        {
+            ArgumentNullException.ThrowIfNull(capability);
+            ArgumentNullException.ThrowIfNull(tags);
+
+            foreach (var tag in tags)
+            {
+                if (string.IsNullOrEmpty(tag))
+                {
+                    throw new ArgumentException("Tag cannot be null or empty.", nameof(tags));
+                }
+
+                if (capability.HasTag(tag))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Determines whether this capability's interface type is compatible with another capability.
         /// </summary>
         /// <param name="capability">The plugin capability.</param>
