@@ -4,6 +4,8 @@
 // CTO & Software Architect
 // =============================================================================
 
+using PluginEngine.Execution;
+
 namespace PluginEngine.Utils.Extensions;
 
 /// <summary>
@@ -108,6 +110,19 @@ public static class TypeExtensions
                !type.IsInterface &&
                !type.IsGenericTypeDefinition &&
                type.IsClass;
+    }
+
+    /// <summary>
+    /// Determines if a type is a concrete plugin lifecycle implementation.
+    /// </summary>
+    /// <param name="type">The type to check.</param>
+    /// <returns>True if the type is concrete and implements <see cref="IPluginLifecycle"/>; otherwise, false.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="type"/> is null.</exception>
+    public static bool IsPluginLifecycle(this Type type)
+    {
+        ArgumentNullException.ThrowIfNull(type);
+
+        return type.IsConcreteClass() && type.ImplementsInterface<IPluginLifecycle>();
     }
 
     /// <summary>
