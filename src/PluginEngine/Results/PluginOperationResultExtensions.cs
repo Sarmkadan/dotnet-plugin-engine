@@ -101,6 +101,27 @@ namespace PluginEngine.Results
         }
 
         /// <summary>
+        /// Matches a plugin operation result to a value by invoking the handler for its success state.
+        /// </summary>
+        /// <typeparam name="T">The data type contained in the result.</typeparam>
+        /// <typeparam name="TOut">The type returned by the handlers.</typeparam>
+        /// <param name="result">The plugin operation result to match.</param>
+        /// <param name="onSuccess">The handler to invoke with the result data when the operation succeeded.</param>
+        /// <param name="onFailure">The handler to invoke with the result when the operation failed.</param>
+        /// <returns>The value returned by the invoked handler.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="result"/>, <paramref name="onSuccess"/>, or <paramref name="onFailure"/> is <see langword="null"/>.
+        /// </exception>
+        public static TOut Match<T, TOut>(this PluginOperationResult<T> result, Func<T?, TOut> onSuccess, Func<PluginOperationResult<T>, TOut> onFailure)
+        {
+            ArgumentNullException.ThrowIfNull(result);
+            ArgumentNullException.ThrowIfNull(onSuccess);
+            ArgumentNullException.ThrowIfNull(onFailure);
+
+            return result.Success ? onSuccess(result.Data) : onFailure(result);
+        }
+
+        /// <summary>
         /// Converts a generic plugin operation result to a non-generic result.
         /// </summary>
         /// <typeparam name="T">The data type contained in the result.</typeparam>
