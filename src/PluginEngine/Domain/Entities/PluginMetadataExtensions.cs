@@ -6,6 +6,24 @@ namespace PluginEngine.Domain.Entities;
 public static class PluginMetadataExtensions
 {
     /// <summary>
+    /// Attempts to get the custom property with the specified key.
+    /// </summary>
+    /// <param name="metadata">The plugin metadata.</param>
+    /// <param name="key">The key of the custom property.</param>
+    /// <param name="value">When this method returns, contains the custom property value if the key was found; otherwise, <c>null</c>.</param>
+    /// <returns><c>true</c> if the custom property was found; otherwise, <c>false</c>.</returns>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="metadata"/> is <c>null</c>.</exception>
+    /// <exception cref="ArgumentException">Thrown if <paramref name="key"/> is <c>null</c>, empty, or consists only of white-space characters.</exception>
+    public static bool TryGetCustomProperty(this PluginMetadata metadata, string key, out string? value)
+    {
+        ArgumentNullException.ThrowIfNull(metadata);
+        ArgumentException.ThrowIfNullOrWhiteSpace(key);
+
+        value = metadata.GetCustomProperty(key);
+        return metadata.CustomProperties.ContainsKey(key);
+    }
+
+    /// <summary>
     /// Determines whether the plugin metadata has a custom property with the specified key.
     /// </summary>
     /// <param name="metadata">The plugin metadata.</param>
