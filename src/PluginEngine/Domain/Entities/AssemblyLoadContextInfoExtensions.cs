@@ -18,6 +18,18 @@ namespace PluginEngine.Domain.Entities;
 public static class AssemblyLoadContextInfoExtensions
 {
 	/// <summary>
+	/// Determines whether the load context has any loaded assemblies.
+	/// </summary>
+	/// <param name="context">The assembly load context.</param>
+	/// <returns>True if the context has loaded assemblies; otherwise, false.</returns>
+	/// <exception cref="ArgumentNullException">Thrown when <paramref name="context"/> is null.</exception>
+	public static bool HasLoadedAssemblies(this AssemblyLoadContextInfo context)
+	{
+		ArgumentNullException.ThrowIfNull(context);
+		return context.GetAssemblyCount() > 0;
+	}
+
+	/// <summary>
 	/// Determines if the load context has exceeded the specified memory threshold.
 	/// </summary>
 	/// <param name="context">The assembly load context.</param>
