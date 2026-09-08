@@ -13,6 +13,25 @@ namespace PluginEngine.Results;
 public class PluginOperationResult
 {
     /// <summary>
+    /// Default error code for unexpected failures.
+    /// </summary>
+    public const int DefaultErrorCode = 500;
+
+    /// <summary>
+    /// Error code for plugin load failures.
+    /// </summary>
+    public const int PluginLoadErrorCode = 1001;
+
+    /// <summary>
+    /// Error code for dependency resolution failures.
+    /// </summary>
+    public const int DependencyResolutionErrorCode = 1002;
+
+    /// <summary>
+    /// Error code for version mismatch failures.
+    /// </summary>
+    public const int VersionMismatchErrorCode = 1003;
+    /// <summary>
     /// Initializes a result for object-initializer compatibility.
     /// Prefer the static factory methods when creating operation results.
     /// </summary>
@@ -100,7 +119,7 @@ public class PluginOperationResult
     /// <exception cref="ArgumentException"><paramref name="message"/> is empty.</exception>
     public static PluginOperationResult CreateFailure(
         string message,
-        int errorCode = 500,
+        int errorCode = DefaultErrorCode,
         string? details = null,
         long durationMs = 0)
     {
@@ -134,10 +153,10 @@ public class PluginOperationResult
     {
         return exception switch
         {
-            PluginLoadException => 1001,
-            DependencyResolutionException => 1002,
-            VersionMismatchException => 1003,
-            _ => 500
+            PluginLoadException => PluginLoadErrorCode,
+            DependencyResolutionException => DependencyResolutionErrorCode,
+            VersionMismatchException => VersionMismatchErrorCode,
+            _ => DefaultErrorCode
         };
     }
 }
@@ -198,7 +217,7 @@ public sealed class PluginOperationResult<T> : PluginOperationResult
     /// <exception cref="ArgumentException"><paramref name="message"/> is empty.</exception>
     public static PluginOperationResult<T> CreateFailure(
         string message,
-        int errorCode = 500,
+        int errorCode = DefaultErrorCode,
         string? details = null,
         long durationMs = 0)
     {
