@@ -7,6 +7,7 @@
 
 using PluginEngine.Domain.Entities;
 using PluginEngine.Results;
+using PluginEngine.Services.Abstractions;
 
 namespace PluginEngine.Services.Implementations;
 
@@ -166,6 +167,25 @@ public static class HotSwapServiceExtensions
         ArgumentNullException.ThrowIfNull(service);
         var result = await service.GetLastSwapRecordAsync(pluginId);
         return result.Success && result.Data != null;
+    }
+
+    /// <summary>
+    /// Checks if any swap records exist for a plugin.
+    /// </summary>
+    /// <param name="service">The hot swap service instance. Cannot be null.</param>
+    /// <param name="pluginId">The plugin identifier.</param>
+    /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains
+    /// true if swap history exists; otherwise false.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="service"/> is null.</exception>
+    public static async Task<bool> HasSwapHistoryAsync(
+        this IHotSwapService service,
+        Guid pluginId,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(service);
+        var result = await service.GetSwapHistoryAsync(pluginId, cancellationToken);
+        return result.Success && result.Data is { Count: > 0 };
     }
 
     /// <summary>
