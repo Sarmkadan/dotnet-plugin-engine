@@ -14,6 +14,35 @@ namespace PluginEngine.Data.Repositories;
 public static class PluginRepositoryExtensions
 {
     /// <summary>
+    /// Gets the plugins with the specified IDs asynchronously.
+    /// </summary>
+    /// <param name="repository">The plugin repository.</param>
+    /// <param name="pluginIds">The IDs of the plugins to retrieve.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>A read-only list containing the plugins that were found.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="repository"/> or <paramref name="pluginIds"/> is null.</exception>
+    /// <exception cref="ArgumentException"><paramref name="pluginIds"/> contains an empty ID.</exception>
+    public static async Task<IReadOnlyList<Plugin>> GetByIdsAsync(this IPluginRepository repository, IEnumerable<Guid> pluginIds, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(repository);
+        ArgumentNullException.ThrowIfNull(pluginIds);
+
+        var ids = pluginIds.ToArray();
+        if (ids.Contains(Guid.Empty))
+            throw new ArgumentException("Plugin IDs cannot contain an empty ID.", nameof(pluginIds));
+
+        var plugins = new List<Plugin>();
+        foreach (var pluginId in ids)
+        {
+            var plugin = await repository.GetByIdAsync(pluginId, cancellationToken).ConfigureAwait(false);
+            if (plugin is not null)
+                plugins.Add(plugin);
+        }
+
+        return plugins;
+    }
+
+    /// <summary>
     /// Gets a plugin by name asynchronously.
     /// </summary>
     /// <param name="repository">The plugin repository.</param>
