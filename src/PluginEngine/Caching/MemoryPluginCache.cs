@@ -13,6 +13,11 @@ namespace PluginEngine.Caching;
 /// </summary>
 public sealed class MemoryPluginCache : IPluginCache
 {
+    /// <summary>
+    /// The default sliding expiration for cached entries.
+    /// </summary>
+    private static readonly TimeSpan DefaultSlidingExpiration = TimeSpan.FromMinutes(15);
+
     private readonly IMemoryCache _cache;
     private readonly ILogger<MemoryPluginCache> _logger;
     private readonly ConcurrentDictionary<string, byte> _keys = new(StringComparer.Ordinal);
@@ -75,7 +80,7 @@ public sealed class MemoryPluginCache : IPluginCache
             }
 
             // Add sliding expiration for frequently accessed items
-            options.SlidingExpiration = TimeSpan.FromMinutes(15);
+            options.SlidingExpiration = DefaultSlidingExpiration;
 
             // Keep the key index in sync with the underlying cache so entry counts and
             // an explicit clear stay accurate even when entries expire on their own.
