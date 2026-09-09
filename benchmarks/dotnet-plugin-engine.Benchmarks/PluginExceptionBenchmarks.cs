@@ -7,12 +7,19 @@ using System.Collections.Generic;
 namespace dotnet_plugin_engine.Benchmarks
 {
     [MemoryDiagnoser]
+    /// <summary>
+    /// Benchmarks for measuring the performance of PluginException operations.
+    /// </summary>
     public class PluginExceptionBenchmarks
     {
         private PluginException _exception;
         private Dictionary<string, object> _context;
         private Guid _entityId;
 
+        /// <summary>
+        /// Sets up the benchmark by creating a PluginException instance with a test message,
+        /// initializing a context dictionary with 100 entries, and generating a new Guid for entity ID.
+        /// </summary>
         [GlobalSetup]
         public void Setup()
         {
@@ -25,6 +32,9 @@ namespace dotnet_plugin_engine.Benchmarks
             _entityId = Guid.NewGuid();
         }
 
+        /// <summary>
+        /// Measures the performance of adding context to a PluginException with varying sizes (10, 100, 1000).
+        /// </summary>
         [Benchmark]
         [Params(10, 100, 1000)]
         public void WithContext_Benchmark(int size)
@@ -35,6 +45,9 @@ namespace dotnet_plugin_engine.Benchmarks
             }
         }
 
+        /// <summary>
+        /// Measures the performance of setting the EntityId on a PluginException 1000 times.
+        /// </summary>
         [Benchmark]
         public void WithEntityId_Benchmark()
         {
@@ -44,6 +57,9 @@ namespace dotnet_plugin_engine.Benchmarks
             }
         }
 
+        /// <summary>
+        /// Measures the performance of calling ToString() on a PluginException 1000 times.
+        /// </summary>
         [Benchmark]
         public void ToString_Benchmark()
         {
