@@ -73,6 +73,18 @@ public static class PluginEventPublisherExtensions
     }
 
     /// <summary>
+    /// Returns a concise summary of the event publisher statistics.
+    /// </summary>
+    /// <param name="stats">The event publisher statistics to summarize.</param>
+    /// <returns>A summary containing the published event, subscriber, event type, and timestamp values.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="stats"/> is null.</exception>
+    public static string ToSummaryString(this EventPublisherStatistics stats)
+    {
+        ArgumentNullException.ThrowIfNull(stats);
+        return $"Published={stats.EventsPublished}, Subscribers={stats.RegisteredSubscribers}, EventTypes={stats.MonitoredEventTypes}, At={stats.Timestamp:O}";
+    }
+
+    /// <summary>
     /// Subscribes a synchronous handler to an event type.
     /// The handler will be invoked on the thread pool.
     /// </summary>
