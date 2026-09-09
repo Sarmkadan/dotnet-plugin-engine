@@ -13,6 +13,10 @@ namespace PluginEngine.Utils.Validators;
 /// </summary>
 public sealed class PluginValidator
 {
+    private const int MaxNameLength = 100;
+    private const int MaxAuthorLength = 100;
+    private const int MaxDependencyCount = 50;
+
     private readonly ILogger<PluginValidator> _logger;
     private readonly VersionHelper _versionHelper;
 
@@ -55,9 +59,9 @@ public sealed class PluginValidator
             return;
         }
 
-        if (name.Length > 100)
+        if (name.Length > MaxNameLength)
         {
-            errors.Add($"Plugin name exceeds maximum length of 100 characters: {name.Length}");
+            errors.Add($"Plugin name exceeds maximum length of {MaxNameLength} characters: {name.Length}");
         }
 
         if (name.StartsWith("System.") || name.StartsWith("Microsoft."))
@@ -116,7 +120,7 @@ public sealed class PluginValidator
         {
             errors.Add("Plugin author cannot be empty");
         }
-        else if (metadata.Author.Length > 100)
+        else if (metadata.Author.Length > MaxAuthorLength)
         {
             errors.Add("Plugin author name exceeds maximum length");
         }
@@ -127,9 +131,9 @@ public sealed class PluginValidator
     /// </summary>
     private void ValidateDependencies(IReadOnlyList<PluginDependency> dependencies, List<string> errors)
     {
-        if (dependencies.Count > 50)
+        if (dependencies.Count > MaxDependencyCount)
         {
-            errors.Add($"Plugin has too many dependencies: {dependencies.Count} (max 50)");
+            errors.Add($"Plugin has too many dependencies: {dependencies.Count} (max {MaxDependencyCount})");
         }
 
         var seenIds = new HashSet<Guid>();
