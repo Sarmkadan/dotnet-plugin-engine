@@ -120,6 +120,17 @@ public sealed class ResolutionStep
 
     /// <summary>Gets or sets whether this step is for an optional dependency.</summary>
     public bool IsOptional { get; set; }
+
+    /// <summary>
+    /// Returns a string representation of the resolution step.
+    /// </summary>
+    /// <returns>
+    /// A string in the format: "{Order}. {Action} {PluginName} v{Version}{(IsOptional ? " (optional)" : string.Empty)}"
+    /// </returns>
+    public override string ToString()
+    {
+        return $"{Order}. {Action} {PluginName} v{Version}{(IsOptional ? " (optional)" : string.Empty)}";
+    }
 }
 
 /// <summary>Recommended action for a resolution step.</summary>
