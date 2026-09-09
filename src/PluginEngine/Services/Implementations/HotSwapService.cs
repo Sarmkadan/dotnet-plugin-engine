@@ -17,6 +17,11 @@ namespace PluginEngine.Services.Implementations;
 /// </summary>
 public sealed class HotSwapService : IHotSwapService
 {
+    private const int MaxHistoryEntriesPerPlugin = 50;
+    private const int ErrorCodeBadRequest = 400;
+    private const int ErrorCodeNotFound = 404;
+    private const int ErrorCodeConflict = 409;
+
     private readonly IPluginLoaderService _loader;
     private readonly ILogger<HotSwapService> _logger;
 
@@ -35,20 +40,20 @@ public sealed class HotSwapService : IHotSwapService
         Guid pluginId, string newAssemblyPath, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(newAssemblyPath))
-            return PluginOperationResult.CreateFailure("New assembly path must not be empty.", 400);
+            return PluginOperationResult.CreateFailure("New assembly path must not be empty.", ErrorCodeBadRequest);
 
         if (!File.Exists(newAssemblyPath))
-            return PluginOperationResult.CreateFailure($"Assembly not found: {newAssemblyPath}", 404);
+            return PluginOperationResult.CreateFailure($"Assembly not found: {newAssemblyPath}", ErrorCodeNotFound);
 
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
         var currentPlugin = await _loader.GetLoadedPluginAsync(pluginId, cancellationToken);
 
         if (currentPlugin is null)
-            return PluginOperationResult.CreateFailure($"Plugin {pluginId} is not loaded.", 404);
+            return PluginOperationResult.CreateFailure($"Plugin {pluginId} is not loaded.", ErrorCodeNotFound);
 
         if (!CanSwap(currentPlugin))
             return PluginOperationResult.CreateFailure(
-                $"Plugin '{currentPlugin.Name}' cannot be swapped in its current state ({currentPlugin.Status}).", 409);
+                $"Plugin '{currentPlugin.Name}' cannot be swapped in its current state ({currentPlugin.Status}).", ErrorCodeConflict);
 
         var previousPath = currentPlugin.AssemblyPath;
 
@@ -129,7 +134,7 @@ public sealed class HotSwapService : IHotSwapService
 
         if (lastSuccessful is null)
             return PluginOperationResult.CreateFailure(
-                $"No successful, un-rolled-back swap found for plugin {pluginId}.", 404);
+                $"No successful, un-rolled-back swap found for plugin {pluginId}.", ErrorCodeNotFound);
 
         var rollbackPath = lastSuccessful.PreviousAssemblyPath;
         _logger.LogInformation(
@@ -211,7 +216,7 @@ public sealed class HotSwapService : IHotSwapService
         {
             list.Add(record);
             // Cap history at 50 entries per plugin to avoid unbounded growth
-            if (list.Count > 50)
+            if (list.Count > MaxHistoryEntriesPerPlugin)
                 list.RemoveAt(0);
         }
     }
