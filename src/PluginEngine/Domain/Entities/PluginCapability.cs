@@ -157,4 +157,13 @@ public sealed class PluginCapability : IEquatable<PluginCapability>
     {
         return $"{Name} v{Version}";
     }
+
+    /// <summary>
+    /// Returns a string representation of the capability.
+    /// </summary>
+    /// <returns>The display name of the capability.</returns>
+    public override string ToString()
+    {
+        return GetDisplayName();
+    }
 }
