@@ -25,6 +25,7 @@ public sealed class PluginEngine
     /// <summary>
     /// Initializes a new instance of the <see cref="PluginEngine"/> class.
     /// </summary>
+    /// <exception cref="ArgumentNullException">Thrown when any parameter is null.</exception>
     /// <param name="pluginManagerService">The plugin manager service.</param>
     /// <param name="pluginLoaderService">The plugin loader service.</param>
     /// <param name="dependencyResolutionService">The dependency resolution service.</param>
@@ -39,12 +40,19 @@ public sealed class PluginEngine
         IHotReloadService hotReloadService,
         PluginEngineOptions options)
     {
-        _pluginManagerService = pluginManagerService ?? throw new ArgumentNullException(nameof(pluginManagerService));
-        _pluginLoaderService = pluginLoaderService ?? throw new ArgumentNullException(nameof(pluginLoaderService));
-        _dependencyResolutionService = dependencyResolutionService ?? throw new ArgumentNullException(nameof(dependencyResolutionService));
-        _versioningService = versioningService ?? throw new ArgumentNullException(nameof(versioningService));
-        _hotReloadService = hotReloadService ?? throw new ArgumentNullException(nameof(hotReloadService));
-        _options = options ?? throw new ArgumentNullException(nameof(options));
+        ArgumentNullException.ThrowIfNull(pluginManagerService);
+        ArgumentNullException.ThrowIfNull(pluginLoaderService);
+        ArgumentNullException.ThrowIfNull(dependencyResolutionService);
+        ArgumentNullException.ThrowIfNull(versioningService);
+        ArgumentNullException.ThrowIfNull(hotReloadService);
+        ArgumentNullException.ThrowIfNull(options);
+
+        _pluginManagerService = pluginManagerService;
+        _pluginLoaderService = pluginLoaderService;
+        _dependencyResolutionService = dependencyResolutionService;
+        _versioningService = versioningService;
+        _hotReloadService = hotReloadService;
+        _options = options;
     }
 
     /// <summary>
