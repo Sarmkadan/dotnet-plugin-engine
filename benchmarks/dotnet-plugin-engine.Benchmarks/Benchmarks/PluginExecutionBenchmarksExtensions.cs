@@ -14,6 +14,7 @@ namespace PluginEngine.Benchmarks
         /// This prepares the plugin lifecycle by initializing and cleaning up before actual benchmarking.
         /// </summary>
         /// <param name="benchmarks">The benchmark instance to warm up.</param>
+        /// <returns>A task that represents the asynchronous warmup operation.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="benchmarks"/> is <see langword="null"/>.</exception>
         public static async Task Warmup(this PluginExecutionBenchmarks benchmarks)
         {
@@ -28,6 +29,7 @@ namespace PluginEngine.Benchmarks
         /// </summary>
         /// <param name="benchmarks">The benchmark instance.</param>
         /// <param name="iterations">The number of iterations to execute.</param>
+        /// <returns>A task that represents the asynchronous measurement operation.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="benchmarks"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="iterations"/> is less than 1.</exception>
         public static async Task MeasurePluginOperationDuration(this PluginExecutionBenchmarks benchmarks, int iterations)
@@ -51,6 +53,7 @@ namespace PluginEngine.Benchmarks
         /// </summary>
         /// <param name="benchmarks">The benchmark instance.</param>
         /// <param name="batchSize">The batch size to test.</param>
+        /// <returns>A task that represents the asynchronous comparison operation.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="benchmarks"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="batchSize"/> is less than 1.</exception>
         public static async Task CompareBatchExecution(this PluginExecutionBenchmarks benchmarks, int batchSize)
