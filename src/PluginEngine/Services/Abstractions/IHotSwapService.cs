@@ -95,4 +95,13 @@ public sealed class SwapRecord
 
     /// <summary>Gets whether this swap has been rolled back.</summary>
     public bool RolledBack { get; set; }
+
+    /// <summary>
+    /// Returns a string representation of the swap record.
+    /// </summary>
+    /// <returns>A string summarizing PluginId, Success, SwappedAtUtc, Duration and RolledBack.</returns>
+    public override string ToString()
+    {
+        return $"PluginId: {PluginId}, Success: {Success}, SwappedAtUtc: {SwappedAtUtc:O}, Duration: {Duration}, RolledBack: {RolledBack}";
+    }
 }
