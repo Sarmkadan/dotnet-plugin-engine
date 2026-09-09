@@ -19,10 +19,12 @@ public static class DependencyInjectionSetup
     /// <summary>
     /// Adds plugin engine services to the dependency injection container.
     /// </summary>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="services"/> is null.</exception>
     public static IServiceCollection AddPluginEngine(
         this IServiceCollection services,
         Action<PluginEngineOptions>? configureOptions = null)
     {
+        ArgumentNullException.ThrowIfNull(services);
         var options = new PluginEngineOptions();
         configureOptions?.Invoke(options);
 
@@ -56,8 +58,10 @@ public static class DependencyInjectionSetup
     /// <summary>
     /// Adds plugin engine services with default options.
     /// </summary>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="services"/> is null.</exception>
     public static IServiceCollection AddPluginEngine(this IServiceCollection services)
     {
+        ArgumentNullException.ThrowIfNull(services);
         return services.AddPluginEngine(null);
     }
 }
