@@ -137,6 +137,15 @@ public sealed class PluginAssembly
         ErrorMessage = errorMessage ?? "Unknown error.";
         LoadedAt = null;
     }
+
+    /// <summary>
+    /// Returns a string representation of the assembly, including its qualified name and load status.
+    /// </summary>
+    /// <returns>A string in the format "<qualified name> [<status>]"</returns>
+    public override string ToString()
+    {
+        return $"{GetQualifiedName()} [{Status}]";
+    }
 }
 
 /// <summary>
