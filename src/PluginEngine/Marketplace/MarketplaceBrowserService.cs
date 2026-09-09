@@ -118,14 +118,24 @@ public sealed class MarketplaceBrowserService : IMarketplaceBrowserService
     ];
 
     /// <summary>Initialises a new instance of <see cref="MarketplaceBrowserService"/>.</summary>
+    /// <param name="marketplace">The plugin marketplace service.</param>
+    /// <param name="cache">The memory cache.</param>
+    /// <param name="logger">The logger.</param>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="marketplace"/>, <paramref name="cache"/>, or <paramref name="logger"/> is <see langword="null"/>.
+    /// </exception>
     public MarketplaceBrowserService(
         IPluginMarketplaceService marketplace,
         IMemoryCache cache,
         ILogger<MarketplaceBrowserService> logger)
     {
-        _marketplace = marketplace ?? throw new ArgumentNullException(nameof(marketplace));
-        _cache       = cache       ?? throw new ArgumentNullException(nameof(cache));
-        _logger      = logger      ?? throw new ArgumentNullException(nameof(logger));
+        ArgumentNullException.ThrowIfNull(marketplace);
+        ArgumentNullException.ThrowIfNull(cache);
+        ArgumentNullException.ThrowIfNull(logger);
+
+        _marketplace = marketplace;
+        _cache       = cache;
+        _logger      = logger;
     }
 
     /// <inheritdoc />
