@@ -161,4 +161,13 @@ public sealed class VersionInfo
                !string.IsNullOrWhiteSpace(Version) &&
                SystemVersion.TryParse(this.Version, out _);
     }
+
+    /// <summary>
+    /// Returns the display string representation of the version.
+    /// </summary>
+    /// <returns>The display string.</returns>
+    public override string ToString()
+    {
+        return GetDisplayString();
+    }
 }
