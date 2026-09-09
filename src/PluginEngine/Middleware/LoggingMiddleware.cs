@@ -15,11 +15,16 @@ public sealed class LoggingMiddleware : IPluginMiddleware
 {
     private readonly ILogger<LoggingMiddleware> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="LoggingMiddleware"/> class.
+    /// </summary>
+    /// <param name="logger">The logger instance used for logging.</param>
     public LoggingMiddleware(ILogger<LoggingMiddleware> logger)
     {
         _logger = logger;
     }
 
+    /// <inheritdoc/>
     public async Task InvokeAsync(PluginOperationContext context, PluginOperationDelegate next)
     {
         var startTime = DateTime.UtcNow;
