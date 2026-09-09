@@ -52,6 +52,7 @@ public static class CachingMiddlewareValidation
     /// Ensures that the specified <see cref="CachingMiddleware"/> instance is valid.
     /// </summary>
     /// <param name="value">The middleware instance to validate.</param>
+    /// <returns>None.</returns>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="value"/> is null.</exception>
     /// <exception cref="ArgumentException">Thrown if <paramref name="value"/> is not valid, containing a list of validation errors.</exception>
     public static void EnsureValid(this CachingMiddleware? value)
