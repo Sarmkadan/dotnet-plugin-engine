@@ -21,16 +21,29 @@ public sealed class PluginManagerService : IPluginManagerService
     private bool _initialized = false;
     private DateTime _initializedAt = DateTime.MinValue;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PluginManagerService"/> class.
+    /// </summary>
+    /// <param name="pluginLoaderService">The plugin loader service.</param>
+    /// <param name="dependencyResolutionService">The dependency resolution service.</param>
+    /// <param name="versioningService">The versioning service.</param>
+    /// <param name="hotReloadService">The hot reload service.</param>
+    /// <exception cref="ArgumentNullException">Thrown when any parameter is null.</exception>
     public PluginManagerService(
         IPluginLoaderService pluginLoaderService,
         IDependencyResolutionService dependencyResolutionService,
         IVersioningService versioningService,
         IHotReloadService hotReloadService)
     {
-        _pluginLoaderService = pluginLoaderService ?? throw new ArgumentNullException(nameof(pluginLoaderService));
-        _dependencyResolutionService = dependencyResolutionService ?? throw new ArgumentNullException(nameof(dependencyResolutionService));
-        _versioningService = versioningService ?? throw new ArgumentNullException(nameof(versioningService));
-        _hotReloadService = hotReloadService ?? throw new ArgumentNullException(nameof(hotReloadService));
+        ArgumentNullException.ThrowIfNull(pluginLoaderService);
+        ArgumentNullException.ThrowIfNull(dependencyResolutionService);
+        ArgumentNullException.ThrowIfNull(versioningService);
+        ArgumentNullException.ThrowIfNull(hotReloadService);
+
+        _pluginLoaderService = pluginLoaderService;
+        _dependencyResolutionService = dependencyResolutionService;
+        _versioningService = versioningService;
+        _hotReloadService = hotReloadService;
     }
 
     /// <summary>
