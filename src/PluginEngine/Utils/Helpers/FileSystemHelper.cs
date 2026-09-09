@@ -17,6 +17,7 @@ public sealed class FileSystemHelper
 
     public FileSystemHelper(ILogger<FileSystemHelper> logger)
     {
+        ArgumentNullException.ThrowIfNull(logger);
         _logger = logger;
     }
 
