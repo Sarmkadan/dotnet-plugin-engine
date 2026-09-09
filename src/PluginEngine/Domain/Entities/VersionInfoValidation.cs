@@ -20,7 +20,9 @@ public static class VersionInfoValidation
     /// </summary>
     /// <param name="value">The version info to validate.</param>
     /// <returns>A read-only list of validation error messages. Empty if valid.</returns>
-    /// <exception cref="ArgumentNullException">Thrown if <paramref name="value"/> is null.</exception>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown if <paramref name="value"/> or one of its required string properties is null.
+    /// </exception>
     public static IReadOnlyList<string> Validate(this VersionInfo value)
     {
         ArgumentNullException.ThrowIfNull(value);
@@ -77,7 +79,9 @@ public static class VersionInfoValidation
     /// </summary>
     /// <param name="value">The version info to check.</param>
     /// <returns><see langword="true"/> if valid; otherwise, <see langword="false"/>.</returns>
-    /// <exception cref="ArgumentNullException">Thrown if <paramref name="value"/> is null.</exception>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown if <paramref name="value"/> or one of its required string properties is null.
+    /// </exception>
     public static bool IsValid(this VersionInfo value)
     {
         return value.Validate().Count == 0;
@@ -87,7 +91,9 @@ public static class VersionInfoValidation
     /// Ensures that the specified <see cref="VersionInfo"/> is valid, throwing an exception if not.
     /// </summary>
     /// <param name="value">The version info to validate.</param>
-    /// <exception cref="ArgumentNullException">Thrown if <paramref name="value"/> is null.</exception>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown if <paramref name="value"/> or one of its required string properties is null.
+    /// </exception>
     /// <exception cref="ArgumentException">Thrown if <paramref name="value"/> is invalid, containing the validation errors.</exception>
     public static void EnsureValid(this VersionInfo value)
     {
