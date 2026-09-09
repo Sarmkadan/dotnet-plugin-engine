@@ -21,12 +21,18 @@ public sealed class PluginDependencyResolver : IPluginDependencyResolver
     private readonly ILogger<PluginDependencyResolver> _logger;
 
     /// <summary>Initialises a new instance of <see cref="PluginDependencyResolver"/>.</summary>
+    /// <param name="loader">The plugin loader service.</param>
+    /// <param name="logger">The logger.</param>
+    /// <exception cref="ArgumentNullException"><paramref name="loader"/> or <paramref name="logger"/> is <see langword="null"/>.</exception>
     public PluginDependencyResolver(
         IPluginLoaderService loader,
         ILogger<PluginDependencyResolver> logger)
     {
-        _loader = loader ?? throw new ArgumentNullException(nameof(loader));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        ArgumentNullException.ThrowIfNull(loader);
+        ArgumentNullException.ThrowIfNull(logger);
+
+        _loader = loader;
+        _logger = logger;
     }
 
     /// <inheritdoc />
