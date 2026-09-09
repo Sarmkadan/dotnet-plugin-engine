@@ -24,18 +24,18 @@ public static class CachingMiddlewareValidation
         var errors = new List<string>();
 
         var cacheDuration = value.GetCacheDuration();
-    if (cacheDuration <= TimeSpan.Zero)
-    {
-        errors.Add("Cache duration must be a positive time span.");
-    }
+        if (cacheDuration <= TimeSpan.Zero)
+        {
+            errors.Add("Cache duration must be a positive time span.");
+        }
 
-    var cachableOperations = value.GetCachableOperations();
-    if (cachableOperations is null || cachableOperations.Count == 0)
-    {
-        errors.Add("Cachable operations collection cannot be null or empty.");
-    }
+        var cachableOperations = value.GetCachableOperations();
+        if (cachableOperations is null || cachableOperations.Count == 0)
+        {
+            errors.Add("Cachable operations collection cannot be null or empty.");
+        }
 
-    return errors.AsReadOnly();
+        return errors.AsReadOnly();
     }
 
     /// <summary>
@@ -63,7 +63,7 @@ public static class CachingMiddlewareValidation
         if (errors.Count > 0)
         {
             throw new ArgumentException(
-            $"CachingMiddleware configuration is invalid. {string.Join(" ", errors)}",
+                $"CachingMiddleware configuration is invalid. {string.Join(" ", errors)}",
                 nameof(value));
         }
     }
