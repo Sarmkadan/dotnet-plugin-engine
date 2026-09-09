@@ -19,6 +19,9 @@ public class PluginDiscoveryBenchmarks
     private const int PluginCount = 50;
     private const int LargePluginCount = 200;
 
+    /// <summary>
+    /// Creates the test plugin directory and configures the plugin loader service.
+    /// </summary>
     [GlobalSetup]
     public async Task GlobalSetup()
     {
@@ -42,6 +45,9 @@ public class PluginDiscoveryBenchmarks
         _pluginLoaderService = serviceProvider.GetRequiredService<IPluginLoaderService>();
     }
 
+    /// <summary>
+    /// Removes the test plugin directory and its generated files.
+    /// </summary>
     [GlobalCleanup]
     public void GlobalCleanup()
     {
