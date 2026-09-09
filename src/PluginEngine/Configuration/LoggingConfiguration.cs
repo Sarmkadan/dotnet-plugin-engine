@@ -76,10 +76,13 @@ public static class LoggingConfigurationExtensions
     /// <summary>
     /// Adds plugin engine logging configuration to the service collection.
     /// </summary>
+    /// <exception cref="ArgumentNullException"><paramref name="services"/> is <see langword="null"/>.</exception>
     public static IServiceCollection AddPluginEngineLogging(
         this IServiceCollection services,
         Action<LoggingConfiguration>? configure = null)
     {
+        ArgumentNullException.ThrowIfNull(services);
+
         var config = new LoggingConfiguration();
         configure?.Invoke(config);
 
@@ -102,8 +105,11 @@ public static class LoggingConfigurationExtensions
     /// <summary>
     /// Configures verbose logging for debugging.
     /// </summary>
+    /// <exception cref="ArgumentNullException"><paramref name="config"/> is <see langword="null"/>.</exception>
     public static LoggingConfiguration WithVerboseLogging(this LoggingConfiguration config)
     {
+        ArgumentNullException.ThrowIfNull(config);
+
         config.MinimumLogLevel = LogLevel.Debug;
         config.EnableDetailedMetrics = true;
         config.EnablePerformanceProfiling = true;
@@ -113,8 +119,11 @@ public static class LoggingConfigurationExtensions
     /// <summary>
     /// Configures minimal logging for production.
     /// </summary>
+    /// <exception cref="ArgumentNullException"><paramref name="config"/> is <see langword="null"/>.</exception>
     public static LoggingConfiguration WithProductionLogging(this LoggingConfiguration config)
     {
+        ArgumentNullException.ThrowIfNull(config);
+
         config.MinimumLogLevel = LogLevel.Warning;
         config.EnableDetailedMetrics = false;
         config.EnablePerformanceProfiling = false;
@@ -124,12 +133,15 @@ public static class LoggingConfigurationExtensions
     /// <summary>
     /// Configures file-based logging output.
     /// </summary>
+    /// <exception cref="ArgumentNullException"><paramref name="config"/> is <see langword="null"/>.</exception>
     public static LoggingConfiguration WithFileLogging(
         this LoggingConfiguration config,
         string filePath,
         int maxSizeMb = 100,
         int maxFiles = 10)
     {
+        ArgumentNullException.ThrowIfNull(config);
+
         config.LogFilePath = filePath;
         config.MaxLogFileSizeMb = maxSizeMb;
         config.MaxLogFiles = maxFiles;
