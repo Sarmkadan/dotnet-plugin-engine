@@ -4,6 +4,8 @@
 // CTO & Software Architect
 // =============================================================================
 
+using PluginEngine.Constants;
+
 namespace PluginEngine.Configuration;
 
 /// <summary>
@@ -14,7 +16,7 @@ public sealed class PluginEngineOptions
     /// <summary>
     /// Gets or sets the plugin directory path.
     /// </summary>
-    public string PluginDirectory { get; set; } = "plugins";
+    public string PluginDirectory { get; set; } = PluginEngineConstants.DefaultPluginDirectory;
 
     /// <summary>
     /// Gets or sets whether hot reload is enabled.
@@ -24,7 +26,7 @@ public sealed class PluginEngineOptions
     /// <summary>
     /// Gets or sets the hot reload check interval in milliseconds.
     /// </summary>
-    public int HotReloadCheckIntervalMs { get; set; } = 5000;
+    public int HotReloadCheckIntervalMs { get; set; } = PluginEngineConstants.DefaultHotReloadCheckIntervalMs;
 
     /// <summary>
     /// Gets or sets whether dependency caching is enabled.
@@ -34,7 +36,7 @@ public sealed class PluginEngineOptions
     /// <summary>
     /// Gets or sets the operation timeout in milliseconds.
     /// </summary>
-    public int OperationTimeoutMs { get; set; } = 30000;
+    public int OperationTimeoutMs { get; set; } = PluginEngineConstants.DefaultOperationTimeoutMs;
 
     /// <summary>
     /// Gets or sets whether logging is enabled.
@@ -49,17 +51,17 @@ public sealed class PluginEngineOptions
     /// <summary>
     /// Gets or sets the maximum concurrent plugin loads.
     /// </summary>
-    public int MaxConcurrentPluginLoads { get; set; } = 4;
+    public int MaxConcurrentPluginLoads { get; set; } = DefaultMaxConcurrentPluginLoads;
 
     /// <summary>
     /// Gets or sets the dependency cache TTL in minutes.
     /// </summary>
-    public int DependencyCacheTtlMinutes { get; set; } = 60;
+    public int DependencyCacheTtlMinutes { get; set; } = PluginEngineConstants.DependencyCacheTtlMinutes;
 
     /// <summary>
     /// Gets or sets the target framework.
     /// </summary>
-    public string TargetFramework { get; set; } = "net10.0";
+    public string TargetFramework { get; set; } = PluginEngineConstants.TargetFramework;
 
     /// <summary>
     /// Gets or sets whether strict version checking is enabled.
@@ -74,7 +76,7 @@ public sealed class PluginEngineOptions
     /// <summary>
     /// Gets or sets the maximum dependency resolution attempts.
     /// </summary>
-    public int MaxDependencyResolutionAttempts { get; set; } = 10;
+    public int MaxDependencyResolutionAttempts { get; set; } = PluginEngineConstants.MaxDependencyResolutionAttempts;
 
     /// <summary>
     /// Validates the configuration options.
@@ -123,6 +125,8 @@ public sealed class PluginEngineOptions
 
         return errors;
     }
+
+    private const int DefaultMaxConcurrentPluginLoads = 4;
 }
 
 /// <summary>
