@@ -18,9 +18,15 @@ public sealed class DependencyResolutionService : IDependencyResolutionService
     private readonly IPluginLoaderService _pluginLoaderService;
     private readonly Dictionary<Guid, List<Plugin>> _dependencyCache = new();
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DependencyResolutionService"/> class.
+    /// </summary>
+    /// <param name="pluginLoaderService">The plugin loader service.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="pluginLoaderService"/> is null.</exception>
     public DependencyResolutionService(IPluginLoaderService pluginLoaderService)
     {
-        _pluginLoaderService = pluginLoaderService ?? throw new ArgumentNullException(nameof(pluginLoaderService));
+        ArgumentNullException.ThrowIfNull(pluginLoaderService);
+        _pluginLoaderService = pluginLoaderService;
     }
 
     /// <summary>
