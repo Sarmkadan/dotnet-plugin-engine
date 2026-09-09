@@ -10,6 +10,9 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
+/// <summary>
+/// Benchmarks for the PluginEngine class, measuring performance of plugin loading, initialization, status, health, and unloading operations.
+/// </summary>
 [MemoryDiagnoser]
 public class PluginEngineBenchmarks
 {
@@ -21,6 +24,9 @@ public class PluginEngineBenchmarks
     private IVersioningService _versioningService;
     private IHotReloadService _hotReloadService;
 
+    /// <summary>
+    /// Sets up the plugin engine and its services for benchmarking.
+    /// </summary>
     [GlobalSetup]
     public void Setup()
     {
@@ -33,6 +39,9 @@ public class PluginEngineBenchmarks
         _pluginEngine = new PluginEngine(_pluginManagerService, _pluginLoaderService, _dependencyResolutionService, _versioningService, _hotReloadService, _options);
     }
 
+    /// <summary>
+    /// Measures the time to load a specified number of test plugins.
+    /// </summary>
     [Benchmark]
     [Params(10, 100, 1000)]
     public async Task LoadAllPluginsAsync(int count)
@@ -49,24 +58,36 @@ public class PluginEngineBenchmarks
         await _pluginEngine.LoadAllPluginsAsync();
     }
 
+    /// <summary>
+    /// Measures the time to initialize the plugin engine.
+    /// </summary>
     [Benchmark]
     public async Task InitializeAsync()
     {
         await _pluginEngine.InitializeAsync();
     }
 
+    /// <summary>
+    /// Measures the time to get the status of the plugin engine.
+    /// </summary>
     [Benchmark]
     public async Task GetStatusAsync()
     {
         await _pluginEngine.GetStatusAsync();
     }
 
+    /// <summary>
+    /// Measures the time to get health information of the plugin engine.
+    /// </summary>
     [Benchmark]
     public async Task GetHealthInfoAsync()
     {
         await _pluginEngine.GetHealthInfoAsync();
     }
 
+    /// <summary>
+    /// Measures the time to unload all loaded plugins.
+    /// </summary>
     [Benchmark]
     public async Task UnloadAllPluginsAsync()
     {
