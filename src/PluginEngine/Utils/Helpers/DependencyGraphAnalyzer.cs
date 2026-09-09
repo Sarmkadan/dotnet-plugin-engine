@@ -12,6 +12,12 @@ namespace PluginEngine.Utils.Helpers;
 /// </summary>
 public sealed class DependencyGraphAnalyzer
 {
+    private const int SeparatorWidth = 50;
+    private const int DirectDependencyThreshold = 20;
+    private const int PerDependencyWeight = 10;
+    private const int TransitiveDependencyWeight = 2;
+    private const int ComplexityScoreCap = 100;
+
     private readonly IDependencyResolutionService _dependencyResolver;
     private readonly ILogger<DependencyGraphAnalyzer> _logger;
 
@@ -34,7 +40,7 @@ public sealed class DependencyGraphAnalyzer
             var sb = new StringBuilder();
 
             sb.AppendLine($"Dependency Graph for: {rootPlugin.Name}");
-            sb.AppendLine(new string('=', 50));
+            sb.AppendLine(new string('=', SeparatorWidth));
 
             await VisualizeNodeAsync(sb, rootPlugin, 0, new HashSet<Guid>());
 
@@ -97,7 +103,7 @@ public sealed class DependencyGraphAnalyzer
             report.ComplexityScore = CalculateComplexityScore(plugin, dependencies.Count());
 
             // Identify potential issues
-            if (plugin.Dependencies.Count > 20)
+            if (plugin.Dependencies.Count > DirectDependencyThreshold)
             {
                 report.Issues.Add("High number of direct dependencies (>20)");
             }
@@ -148,10 +154,10 @@ public sealed class DependencyGraphAnalyzer
         var score = 0;
 
         // Direct dependency score
-        score += plugin.Dependencies.Count * 10;
+        score += plugin.Dependencies.Count * PerDependencyWeight;
 
         // Total dependency score
-        score += Math.Min(totalDependencies * 2, 100);
+        score += Math.Min(totalDependencies * TransitiveDependencyWeight, ComplexityScoreCap);
 
         // Circular dependency penalty
         // Would need additional logic here
@@ -160,7 +166,7 @@ public sealed class DependencyGraphAnalyzer
         var optionalCount = plugin.Dependencies.Count(d => d.IsOptional);
         score += optionalCount * 5;
 
-        return Math.Min(score, 100); // Cap at 100
+        return Math.Min(score, ComplexityScoreCap); // Cap at 100
     }
 
     private static string GetIndent(int depth) => new(' ', depth * 2);
@@ -171,6 +177,10 @@ public sealed class DependencyGraphAnalyzer
 /// </summary>
 public sealed class DependencyAnalysisReport
 {
+    private const int SimpleComplexityThreshold = 20;
+    private const int ModerateComplexityThreshold = 50;
+    private const int ComplexComplexityThreshold = 75;
+
     public required string PluginName { get; set; }
     public int DirectDependencies { get; set; }
     public int TotalDependencies { get; set; }
@@ -181,9 +191,9 @@ public sealed class DependencyAnalysisReport
 
     public string GetComplexityLevel() => ComplexityScore switch
     {
-        < 20 => "Simple",
-        < 50 => "Moderate",
-        < 75 => "Complex",
+        < SimpleComplexityThreshold => "Simple",
+        < ModerateComplexityThreshold => "Moderate",
+        < ComplexComplexityThreshold => "Complex",
         _ => "Very Complex"
     };
 }
