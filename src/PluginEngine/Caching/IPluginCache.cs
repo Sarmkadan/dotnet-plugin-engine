@@ -43,12 +43,38 @@ public interface IPluginCache
 /// </summary>
 public sealed class CacheStatistics
 {
+    /// <summary>
+    /// Gets the total number of cache hits.
+    /// </summary>
     public long TotalHits { get; set; }
+
+    /// <summary>
+    /// Gets the total number of cache misses.
+    /// </summary>
     public long TotalMisses { get; set; }
+
+    /// <summary>
+    /// Gets the current number of entries in the cache.
+    /// </summary>
     public int CurrentEntries { get; set; }
+
+    /// <summary>
+    /// Gets the total memory usage of the cache in bytes.
+    /// </summary>
     public long TotalMemoryBytes { get; set; }
 
+    /// <summary>
+    /// Gets the hit rate of the cache.
+    /// </summary>
     public double HitRate => TotalHits + TotalMisses > 0
         ? (double)TotalHits / (TotalHits + TotalMisses)
         : 0;
+
+    /// <summary>
+    /// Returns a string representation of the cache statistics.
+    /// </summary>
+    public override string ToString()
+    {
+        return $"Hits={TotalHits}, Misses={TotalMisses}, Entries={CurrentEntries}, Memory={TotalMemoryBytes} B, HitRate={HitRate:P1}";
+    }
 }
