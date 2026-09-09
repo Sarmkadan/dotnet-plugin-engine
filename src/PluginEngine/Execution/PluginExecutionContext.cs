@@ -118,10 +118,25 @@ public sealed class PluginExecutionContext
 /// </summary>
 public enum ExecutionState
 {
+    /// <summary>
+    /// The plugin is currently running.
+    /// </summary>
     Running,
+    /// <summary>
+    /// The plugin completed successfully.
+    /// </summary>
     Completed,
+    /// <summary>
+    /// The plugin failed during execution.
+    /// </summary>
     Failed,
+    /// <summary>
+    /// The plugin execution was cancelled.
+    /// </summary>
     Cancelled,
+    /// <summary>
+    /// The plugin execution timed out.
+    /// </summary>
     Timeout
 }
 
@@ -130,11 +145,29 @@ public enum ExecutionState
 /// </summary>
 public sealed class ExecutionMetrics
 {
+    /// <summary>
+    /// CPU time consumed during execution, in milliseconds.
+    /// </summary>
     public long CpuTimeMs { get; set; }
+
+    /// <summary>
+    /// Total memory bytes allocated during execution.
+    /// </summary>
     public long MemoryBytesAllocated { get; set; }
+
+    /// <summary>
+    /// Number of garbage collections that occurred during execution.
+    /// </summary>
     public int GarbageCollections { get; set; }
+
+    /// <summary>
+    /// Timestamp when the metrics were collected (UTC).
+    /// </summary>
     public DateTime CollectedAtUtc { get; } = DateTime.UtcNow;
 
+    /// <summary>
+    /// Custom metrics collected during execution.
+    /// </summary>
     public Dictionary<string, long> CustomMetrics { get; } = [];
 }
 
@@ -143,16 +176,55 @@ public sealed class ExecutionMetrics
 /// </summary>
 public sealed class ExecutionSummary
 {
+    /// <summary>
+    /// Unique identifier for the execution.
+    /// </summary>
     public required Guid ExecutionId { get; set; }
+
+    /// <summary>
+    /// Name of the plugin that was executed.
+    /// </summary>
     public required string PluginName { get; set; }
+
+    /// <summary>
+    /// Type of operation that was performed (Load, Unload, Execute, etc.).
+    /// </summary>
     public required string OperationType { get; set; }
+
+    /// <summary>
+    /// Final state of the execution.
+    /// </summary>
     public required ExecutionState State { get; set; }
+
+    /// <summary>
+    /// Total duration of the execution.
+    /// </summary>
     public required TimeSpan Duration { get; set; }
+
+    /// <summary>
+    /// Start time of the execution (UTC).
+    /// </summary>
     public required DateTime StartedAtUtc { get; set; }
+
+    /// <summary>
+    /// Completion time of the execution (UTC), if completed.
+    /// </summary>
     public DateTime? CompletedAtUtc { get; set; }
+
+    /// <summary>
+    /// Whether the execution was successful.
+    /// </summary>
     public required bool IsSuccessful { get; set; }
+
+    /// <summary>
+    /// Error message if the execution failed.
+    /// </summary>
     public string? ErrorMessage { get; set; }
 
+    /// <summary>
+    /// Returns a string representation of the execution summary.
+    /// </summary>
+    /// <returns>A formatted string containing plugin name, operation type, status, and duration.</returns>
     public override string ToString()
     {
         var status = IsSuccessful ? "Success" : "Failed";
