@@ -16,13 +16,19 @@ public sealed class ErrorHandlingMiddleware : IPluginMiddleware
     private readonly ILogger<ErrorHandlingMiddleware> _logger;
     private readonly bool _continueOnError;
 
-    public ErrorHandlingMiddleware(ILogger<ErrorHandlingMiddleware> logger, bool continueOnError = false)
+    /// <summary>
+/// Initializes a new instance of the ErrorHandlingMiddleware.
+/// </summary>
+/// <param name="logger">The logger instance for error logging.</param>
+/// <param name="continueOnError">Whether to continue processing after an error occurs.</param>
+public ErrorHandlingMiddleware(ILogger<ErrorHandlingMiddleware> logger, bool continueOnError = false)
     {
         _logger = logger;
         _continueOnError = continueOnError;
     }
 
-    public async Task InvokeAsync(PluginOperationContext context, PluginOperationDelegate next)
+    /// <inheritdoc/>
+public async Task InvokeAsync(PluginOperationContext context, PluginOperationDelegate next)
     {
         try
         {
