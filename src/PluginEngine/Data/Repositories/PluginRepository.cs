@@ -18,9 +18,7 @@ public sealed class PluginRepository : IPluginRepository
     private readonly Dictionary<Guid, List<PluginCapability>> _capabilities = new();
     private readonly object _lockObject = new object();
 
-    /// <summary>
-    /// Adds a new plugin to the repository.
-    /// </summary>
+    /// <inheritdoc/>
     public Task<Plugin> AddAsync(Plugin plugin, CancellationToken cancellationToken = default)
     {
         if (plugin is null)
@@ -39,9 +37,7 @@ public sealed class PluginRepository : IPluginRepository
         return Task.FromResult(plugin);
     }
 
-    /// <summary>
-    /// Updates an existing plugin.
-    /// </summary>
+    /// <inheritdoc/>
     public Task<bool> UpdateAsync(Plugin plugin, CancellationToken cancellationToken = default)
     {
         if (plugin is null)
@@ -58,9 +54,7 @@ public sealed class PluginRepository : IPluginRepository
         }
     }
 
-    /// <summary>
-    /// Deletes a plugin by ID.
-    /// </summary>
+    /// <inheritdoc/>
     public Task<bool> DeleteAsync(Guid pluginId, CancellationToken cancellationToken = default)
     {
         lock (_lockObject)
@@ -74,9 +68,7 @@ public sealed class PluginRepository : IPluginRepository
         }
     }
 
-    /// <summary>
-    /// Gets a plugin by ID.
-    /// </summary>
+    /// <inheritdoc/>
     public Task<Plugin?> GetByIdAsync(Guid pluginId, CancellationToken cancellationToken = default)
     {
         lock (_lockObject)
@@ -85,9 +77,7 @@ public sealed class PluginRepository : IPluginRepository
         }
     }
 
-    /// <summary>
-    /// Gets a plugin by name.
-    /// </summary>
+    /// <inheritdoc/>
     public Task<Plugin?> GetByNameAsync(string name, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(name))
@@ -100,9 +90,7 @@ public sealed class PluginRepository : IPluginRepository
         }
     }
 
-    /// <summary>
-    /// Gets all plugins.
-    /// </summary>
+    /// <inheritdoc/>
     public Task<IEnumerable<Plugin>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         lock (_lockObject)
@@ -111,9 +99,7 @@ public sealed class PluginRepository : IPluginRepository
         }
     }
 
-    /// <summary>
-    /// Gets plugins by status.
-    /// </summary>
+    /// <inheritdoc/>
     public Task<IEnumerable<Plugin>> GetByStatusAsync(PluginStatus status, CancellationToken cancellationToken = default)
     {
         lock (_lockObject)
@@ -123,9 +109,7 @@ public sealed class PluginRepository : IPluginRepository
         }
     }
 
-    /// <summary>
-    /// Checks if a plugin exists.
-    /// </summary>
+    /// <inheritdoc/>
     public Task<bool> ExistsAsync(Guid pluginId, CancellationToken cancellationToken = default)
     {
         lock (_lockObject)
@@ -134,9 +118,7 @@ public sealed class PluginRepository : IPluginRepository
         }
     }
 
-    /// <summary>
-    /// Gets the count of all plugins.
-    /// </summary>
+    /// <inheritdoc/>
     public Task<int> CountAsync(CancellationToken cancellationToken = default)
     {
         lock (_lockObject)
@@ -145,9 +127,7 @@ public sealed class PluginRepository : IPluginRepository
         }
     }
 
-    /// <summary>
-    /// Searches for plugins based on criteria.
-    /// </summary>
+    /// <inheritdoc/>
     public Task<IEnumerable<Plugin>> SearchAsync(string searchTerm, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(searchTerm))
@@ -165,9 +145,7 @@ public sealed class PluginRepository : IPluginRepository
         }
     }
 
-    /// <summary>
-    /// Adds a dependency to a plugin.
-    /// </summary>
+    /// <inheritdoc/>
     public Task<bool> AddDependencyAsync(Guid pluginId, PluginDependency dependency, CancellationToken cancellationToken = default)
     {
         if (dependency is null)
@@ -183,9 +161,7 @@ public sealed class PluginRepository : IPluginRepository
         }
     }
 
-    /// <summary>
-    /// Removes a dependency from a plugin.
-    /// </summary>
+    /// <inheritdoc/>
     public Task<bool> RemoveDependencyAsync(Guid pluginId, Guid dependencyId, CancellationToken cancellationToken = default)
     {
         lock (_lockObject)
@@ -202,9 +178,7 @@ public sealed class PluginRepository : IPluginRepository
         }
     }
 
-    /// <summary>
-    /// Gets all dependencies for a plugin.
-    /// </summary>
+    /// <inheritdoc/>
     public Task<IEnumerable<PluginDependency>> GetDependenciesAsync(Guid pluginId, CancellationToken cancellationToken = default)
     {
         lock (_lockObject)
@@ -216,9 +190,7 @@ public sealed class PluginRepository : IPluginRepository
         }
     }
 
-    /// <summary>
-    /// Adds a capability to a plugin.
-    /// </summary>
+    /// <inheritdoc/>
     public Task<bool> AddCapabilityAsync(Guid pluginId, PluginCapability capability, CancellationToken cancellationToken = default)
     {
         if (capability is null)
@@ -234,9 +206,7 @@ public sealed class PluginRepository : IPluginRepository
         }
     }
 
-    /// <summary>
-    /// Gets all capabilities for a plugin.
-    /// </summary>
+    /// <inheritdoc/>
     public Task<IEnumerable<PluginCapability>> GetCapabilitiesAsync(Guid pluginId, CancellationToken cancellationToken = default)
     {
         lock (_lockObject)
