@@ -149,6 +149,15 @@ public sealed class PluginMetadata
     }
 
     /// <summary>
+    /// Returns a summary of the plugin metadata.
+    /// </summary>
+    /// <returns>A summary of the plugin metadata.</returns>
+    public override string ToString()
+    {
+        return GetSummary();
+    }
+
+    /// <summary>
     /// Validates the metadata.
     /// </summary>
     public bool IsValid()
