@@ -13,6 +13,26 @@ namespace PluginEngine.Configuration;
 public sealed class WebhookConfiguration
 {
     /// <summary>
+    /// Default maximum payload size in bytes (1MB).
+    /// </summary>
+    public const int DefaultMaxPayloadSizeBytes = 1048576;
+
+    /// <summary>
+    /// Default endpoint path for webhooks.
+    /// </summary>
+    public const string DefaultEndpointPath = "/webhooks/plugins";
+
+    /// <summary>
+    /// Default processing timeout in milliseconds (30 seconds).
+    /// </summary>
+    public const int DefaultProcessingTimeoutMs = 30000;
+
+    /// <summary>
+    /// Minimum allowed payload size in bytes (1KB).
+    /// </summary>
+    public const int MinPayloadSizeBytes = 1024;
+
+    /// <summary>
     /// Enables webhook support.
     /// </summary>
     public bool Enabled { get; set; } = false;
@@ -25,17 +45,17 @@ public sealed class WebhookConfiguration
     /// <summary>
     /// Maximum allowed payload size in bytes.
     /// </summary>
-    public int MaxPayloadSizeBytes { get; set; } = 1048576; // 1MB
+    public int MaxPayloadSizeBytes { get; set; } = DefaultMaxPayloadSizeBytes;
 
     /// <summary>
     /// HTTP endpoint path for receiving webhooks.
     /// </summary>
-    public string EndpointPath { get; set; } = "/webhooks/plugins";
+    public string EndpointPath { get; set; } = DefaultEndpointPath;
 
     /// <summary>
     /// Timeout for webhook processing in milliseconds.
     /// </summary>
-    public int ProcessingTimeoutMs { get; set; } = 30000; // 30 seconds
+    public int ProcessingTimeoutMs { get; set; } = DefaultProcessingTimeoutMs;
 
     /// <summary>
     /// Retry policy for failed webhook processing.
@@ -65,7 +85,7 @@ public sealed class WebhookConfiguration
             throw new InvalidOperationException("Webhook secret is required when webhooks are enabled");
         }
 
-        if (MaxPayloadSizeBytes < 1024)
+        if (MaxPayloadSizeBytes < MinPayloadSizeBytes)
         {
             throw new InvalidOperationException("MaxPayloadSizeBytes must be at least 1KB");
         }
@@ -80,24 +100,59 @@ public sealed class WebhookConfiguration
 public sealed class WebhookRetryPolicy
 {
     /// <summary>
+    /// Default maximum number of retry attempts.
+    /// </summary>
+    public const int DefaultMaxRetries = 3;
+
+    /// <summary>
+    /// Default initial delay in milliseconds before first retry.
+    /// </summary>
+    public const int DefaultInitialDelayMs = 1000;
+
+    /// <summary>
+    /// Default multiplier for exponential backoff.
+    /// </summary>
+    public const double DefaultBackoffMultiplier = 2.0;
+
+    /// <summary>
+    /// Default maximum delay in milliseconds between retries.
+    /// </summary>
+    public const int DefaultMaxDelayMs = 60000;
+
+    /// <summary>
+    /// Aggressive retry policy maximum number of retry attempts.
+    /// </summary>
+    public const int AggressiveMaxRetries = 5;
+
+    /// <summary>
+    /// Aggressive retry policy initial delay in milliseconds before first retry.
+    /// </summary>
+    public const int AggressiveInitialDelayMs = 500;
+
+    /// <summary>
+    /// Aggressive retry policy multiplier for exponential backoff.
+    /// </summary>
+    public const double AggressiveBackoffMultiplier = 1.5;
+
+    /// <summary>
     /// Maximum number of retry attempts.
     /// </summary>
-    public int MaxRetries { get; set; } = 3;
+    public int MaxRetries { get; set; } = DefaultMaxRetries;
 
     /// <summary>
     /// Initial delay in milliseconds before first retry.
     /// </summary>
-    public int InitialDelayMs { get; set; } = 1000;
+    public int InitialDelayMs { get; set; } = DefaultInitialDelayMs;
 
     /// <summary>
     /// Multiplier for exponential backoff.
     /// </summary>
-    public double BackoffMultiplier { get; set; } = 2.0;
+    public double BackoffMultiplier { get; set; } = DefaultBackoffMultiplier;
 
     /// <summary>
     /// Maximum delay in milliseconds between retries.
     /// </summary>
-    public int MaxDelayMs { get; set; } = 60000;
+    public int MaxDelayMs { get; set; } = DefaultMaxDelayMs;
 
     /// <summary>
     /// Calculates delay for the specified retry attempt.
@@ -161,9 +216,9 @@ public static class WebhookConfigurationExtensions
     /// </summary>
     public static WebhookConfiguration WithAggressiveRetry(this WebhookConfiguration config)
     {
-        config.RetryPolicy.MaxRetries = 5;
-        config.RetryPolicy.InitialDelayMs = 500;
-        config.RetryPolicy.BackoffMultiplier = 1.5;
+        config.RetryPolicy.MaxRetries = WebhookRetryPolicy.AggressiveMaxRetries;
+        config.RetryPolicy.InitialDelayMs = WebhookRetryPolicy.AggressiveInitialDelayMs;
+        config.RetryPolicy.BackoffMultiplier = WebhookRetryPolicy.AggressiveBackoffMultiplier;
         return config;
     }
 }
