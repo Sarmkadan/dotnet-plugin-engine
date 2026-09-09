@@ -18,6 +18,14 @@ public sealed class PluginHealthCheckService : BackgroundService
     private readonly ILogger<PluginHealthCheckService> _logger;
     private readonly PluginEngineOptions _options;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PluginHealthCheckService"/> class.
+    /// </summary>
+    /// <param name="pluginManager">The plugin manager service.</param>
+    /// <param name="dependencyResolver">The dependency resolution service.</param>
+    /// <param name="eventPublisher">The plugin event publisher.</param>
+    /// <param name="logger">The logger.</param>
+    /// <param name="options">The plugin engine options.</param>
     public PluginHealthCheckService(
         IPluginManagerService pluginManager,
         IDependencyResolutionService dependencyResolver,
@@ -32,6 +40,11 @@ public sealed class PluginHealthCheckService : BackgroundService
         _options = options.Value;
     }
 
+    /// <summary>
+    /// Executes the background service logic.
+    /// </summary>
+    /// <param name="stoppingToken">The cancellation token indicating when the service should stop.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _logger.LogInformation("Plugin health check service starting");
@@ -138,6 +151,11 @@ public sealed class PluginHealthCheckService : BackgroundService
         }
     }
 
+    /// <summary>
+    /// Stops the background service.
+    /// </summary>
+    /// <param name="cancellationToken">The cancellation token indicating when the service should stop.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Plugin health check service stopping");
