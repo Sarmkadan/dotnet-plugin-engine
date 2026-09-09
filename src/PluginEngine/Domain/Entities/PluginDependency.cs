@@ -94,6 +94,15 @@ public sealed class PluginDependency
     }
 
     /// <summary>
+    /// Returns a string that represents the plugin dependency.
+    /// </summary>
+    /// <returns>A string containing the dependency plugin ID, version constraint, and optional status.</returns>
+    public override string ToString()
+    {
+        return $"{DependencyPluginId} {GetVersionConstraint()}{(IsOptional ? " (optional)" : string.Empty)}";
+    }
+
+    /// <summary>
     /// Validates the dependency.
     /// </summary>
     public bool IsValid()
