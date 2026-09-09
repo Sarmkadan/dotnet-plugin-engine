@@ -15,6 +15,16 @@ namespace PluginEngine.Services.Implementations;
 /// </summary>
 public sealed class HotReloadService : IHotReloadService
 {
+    /// <summary>
+    /// The maximum number of recent hot reload events to retain.
+    /// </summary>
+    private const int MaxRecentEvents = 100;
+
+    /// <summary>
+    /// The number of recent hot reload events to include in statistics.
+    /// </summary>
+    private const int RecentEventsInStatistics = 10;
+
     private readonly IPluginLoaderService _pluginLoaderService;
     private readonly Dictionary<Guid, Func<Plugin, Task>> _hotReloadCallbacks = new();
     private readonly ConcurrentDictionary<Guid, HotReloadStatus> _hotReloadStatusMap = new();
@@ -142,7 +152,7 @@ public sealed class HotReloadService : IHotReloadService
             SuccessfulReloads = _recentEvents.Count(e => e.Success),
             FailedReloads = _recentEvents.Count(e => !e.Success),
             LastReloadTime = _recentEvents.LastOrDefault()?.Timestamp,
-            RecentEvents = new List<HotReloadEvent>(_recentEvents.TakeLast(10))
+            RecentEvents = new List<HotReloadEvent>(_recentEvents.TakeLast(RecentEventsInStatistics))
         };
 
         if (_recentEvents.Count > 0)
@@ -200,7 +210,7 @@ public sealed class HotReloadService : IHotReloadService
     private void RecordHotReloadEvent(HotReloadEvent @event)
     {
         _recentEvents.Add(@event);
-        if (_recentEvents.Count > 100)
+        if (_recentEvents.Count > MaxRecentEvents)
             _recentEvents.RemoveAt(0);
     }
 
