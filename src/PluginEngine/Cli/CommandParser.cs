@@ -30,6 +30,8 @@ public sealed class CommandParser
     /// Parses command-line arguments into command type and argument dictionary.
     /// Validates argument format and provides detailed error messages.
     /// </summary>
+    /// <param name="args">The command-line arguments to parse.</param>
+    /// <returns>A tuple containing the parsed CommandType and a dictionary of arguments.</returns>
     public (CommandType, Dictionary<string, string>) Parse(string[] args)
     {
         if (args.Length == 0)
@@ -70,6 +72,9 @@ public sealed class CommandParser
     /// Validates that all required arguments for a command are present.
     /// Throws ArgumentException if validation fails.
     /// </summary>
+    /// <param name="commandType">The type of command to validate arguments for.</param>
+    /// <param name="args">The dictionary of arguments to validate.</param>
+    /// <exception cref="ArgumentException">Thrown when a required argument is missing.</exception>
     public void ValidateArguments(CommandType commandType, Dictionary<string, string> args)
     {
         var required = GetRequiredArguments(commandType);
@@ -100,13 +105,40 @@ public sealed class CommandParser
 /// </summary>
 public enum CommandType
 {
+    /// <summary>
+    /// Represents an unknown or invalid command.
+    /// </summary>
     Unknown,
+    /// <summary>
+    /// Represents the load command.
+    /// </summary>
     Load,
+    /// <summary>
+    /// Represents the unload command.
+    /// </summary>
     Unload,
+    /// <summary>
+    /// Represents the list command.
+    /// </summary>
     List,
+    /// <summary>
+    /// Represents the status command.
+    /// </summary>
     Status,
+    /// <summary>
+    /// Represents the version command.
+    /// </summary>
     Version,
+    /// <summary>
+    /// Represents the marketplace command.
+    /// </summary>
     Marketplace,
+    /// <summary>
+    /// Represents the hot swap command.
+    /// </summary>
     HotSwap,
+    /// <summary>
+    /// Represents the resolve command.
+    /// </summary>
     Resolve,
 }
