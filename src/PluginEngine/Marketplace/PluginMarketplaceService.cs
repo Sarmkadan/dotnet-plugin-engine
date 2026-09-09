@@ -66,6 +66,13 @@ public interface IPluginMarketplaceService
 /// </summary>
 public sealed class PluginMarketplaceService : IPluginMarketplaceService
 {
+    private const int MaxAgeDaysForCompatible = 365;
+    private const int MaxAgeDaysForDeprecated = 730;
+    private const int MinEngineMajorForAgingCompatibility = 9;
+    private const int MinEngineMajorForCurrent = 10;
+    private const int NotFoundErrorCode = 404;
+    private const int BadGatewayErrorCode = 502;
+
     private readonly IRemotePluginRegistry _registry;
     private readonly IMemoryCache _cache;
     private readonly ILogger<PluginMarketplaceService> _logger;
@@ -113,7 +120,8 @@ public sealed class PluginMarketplaceService : IPluginMarketplaceService
         {
             var info = await _registry.GetPluginAsync(pluginId);
             if (info is null)
-                return PluginOperationResult<MarketplaceEntry>.CreateFailure("Plugin not found in the marketplace.", 404);
+                return PluginOperationResult<MarketplaceEntry>.CreateFailure(
+                    "Plugin not found in the marketplace.", NotFoundErrorCode);
 
             var versions = await _registry.GetVersionsAsync(pluginId);
             var entry = ToMarketplaceEntry(info);
@@ -197,7 +205,8 @@ public sealed class PluginMarketplaceService : IPluginMarketplaceService
 
             var filePath = await _registry.DownloadPluginAsync(pluginId, version, targetDirectory);
             if (filePath is null)
-                return PluginOperationResult.CreateFailure("Download failed: the registry returned no file.", 502);
+                return PluginOperationResult.CreateFailure(
+                    "Download failed: the registry returned no file.", BadGatewayErrorCode);
 
             _logger.LogInformation("Installed plugin {PluginId} v{Version} -> {Directory}", pluginId, version, targetDirectory);
             return PluginOperationResult.CreateSuccess($"Plugin installed successfully at: {filePath}");
@@ -229,7 +238,9 @@ public sealed class PluginMarketplaceService : IPluginMarketplaceService
             return CompatibilityStatus.Unknown;
 
         if (ver.IsPrerelease)
-            return engine.Major >= 10 ? CompatibilityStatus.Compatible : CompatibilityStatus.Unknown;
+            return engine.Major >= MinEngineMajorForCurrent
+                ? CompatibilityStatus.Compatible
+                : CompatibilityStatus.Unknown;
 
         if (!ver.IsStable)
             return CompatibilityStatus.Unknown;
@@ -238,9 +249,13 @@ public sealed class PluginMarketplaceService : IPluginMarketplaceService
 
         return ageDays switch
         {
-            <= 365  => CompatibilityStatus.Compatible,
-            <= 730  => engine.Major >= 9  ? CompatibilityStatus.Compatible : CompatibilityStatus.Deprecated,
-            _       => engine.Major >= 10 ? CompatibilityStatus.Deprecated  : CompatibilityStatus.Incompatible
+            <= MaxAgeDaysForCompatible => CompatibilityStatus.Compatible,
+            <= MaxAgeDaysForDeprecated => engine.Major >= MinEngineMajorForAgingCompatibility
+                ? CompatibilityStatus.Compatible
+                : CompatibilityStatus.Deprecated,
+            _ => engine.Major >= MinEngineMajorForCurrent
+                ? CompatibilityStatus.Deprecated
+                : CompatibilityStatus.Incompatible
         };
     }
 }
