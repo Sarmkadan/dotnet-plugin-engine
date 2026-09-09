@@ -136,6 +136,12 @@ public sealed class AssemblyLoadContextInfo : IEquatable<AssemblyLoadContextInfo
         return $"{Name} ({status}) - {GetAssemblyCount()} assemblies, {LoadedTypeCount} types, {MemoryUsageBytes} bytes";
     }
 
+    /// <summary>
+    /// Determines whether the specified AssemblyLoadContextInfo is equal to the current AssemblyLoadContextInfo.
+    /// The following properties are used for equality: Id, ContextId, PluginId, Name, CreatedAt, LastActivityAt, IsActive, MemoryUsageBytes.
+    /// </summary>
+    /// <param name="other">The AssemblyLoadContextInfo to compare with the current AssemblyLoadContextInfo.</param>
+    /// <returns>true if the specified AssemblyLoadContextInfo is equal to the current AssemblyLoadContextInfo; otherwise, false.</returns>
     public bool Equals(AssemblyLoadContextInfo? other)
     {
         return other != null &&
@@ -149,19 +155,43 @@ public sealed class AssemblyLoadContextInfo : IEquatable<AssemblyLoadContextInfo
                MemoryUsageBytes == other.MemoryUsageBytes;
     }
 
-    public override bool Equals(object? obj) => Equals(obj as AssemblyLoadContextInfo);
+    /// <summary>
+/// Determines whether the specified object is equal to the current AssemblyLoadContextInfo.
+/// </summary>
+/// <param name="obj">The object to compare with the current AssemblyLoadContextInfo.</param>
+/// <returns>true if the specified object is equal to the current AssemblyLoadContextInfo; otherwise, false.</returns>
+public override bool Equals(object? obj) => Equals(obj as AssemblyLoadContextInfo);
 
-    public override int GetHashCode()
+    /// <summary>
+/// Returns a hash code for this AssemblyLoadContextInfo.
+/// The hash code is computed from the following properties: Id, ContextId, PluginId, Name, CreatedAt, LastActivityAt, IsActive, MemoryUsageBytes.
+/// </summary>
+/// <returns>A hash code for the current AssemblyLoadContextInfo.</returns>
+public override int GetHashCode()
     {
         return HashCode.Combine(Id, ContextId, PluginId, Name, CreatedAt, LastActivityAt, IsActive, MemoryUsageBytes);
     }
 
-    public static bool operator ==(AssemblyLoadContextInfo? left, AssemblyLoadContextInfo? right)
+    /// <summary>
+/// Determines whether two AssemblyLoadContextInfo objects are equal.
+/// The following properties are used for equality: Id, ContextId, PluginId, Name, CreatedAt, LastActivityAt, IsActive, MemoryUsageBytes.
+/// </summary>
+/// <param name="left">The first AssemblyLoadContextInfo to compare, or null.</param>
+/// <param name="right">The second AssemblyLoadContextInfo to compare, or null.</param>
+/// <returns>true if the values of left and right are equal; otherwise, false.</returns>
+public static bool operator ==(AssemblyLoadContextInfo? left, AssemblyLoadContextInfo? right)
     {
         return left?.Equals(right) ?? ReferenceEquals(right, null);
     }
 
-    public static bool operator !=(AssemblyLoadContextInfo? left, AssemblyLoadContextInfo? right)
+    /// <summary>
+/// Determines whether two AssemblyLoadContextInfo objects are not equal.
+/// The following properties are used for equality: Id, ContextId, PluginId, Name, CreatedAt, LastActivityAt, IsActive, MemoryUsageBytes.
+/// </summary>
+/// <param name="left">The first AssemblyLoadContextInfo to compare, or null.</param>
+/// <param name="right">The second AssemblyLoadContextInfo to compare, or null.</param>
+/// <returns>true if the values of left and right are not equal; otherwise, false.</returns>
+public static bool operator !=(AssemblyLoadContextInfo? left, AssemblyLoadContextInfo? right)
     {
         return !(left == right);
     }
