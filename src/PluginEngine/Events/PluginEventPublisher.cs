@@ -22,8 +22,15 @@ public sealed class PluginEventPublisher : IPluginEventPublisher
     private readonly object _publishingEventTypesLock = new();
     private long _eventsPublished;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PluginEventPublisher"/> class.
+    /// </summary>
+    /// <param name="logger">The logger used to record event publishing activity.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="logger"/> is <see langword="null"/>.</exception>
     public PluginEventPublisher(ILogger<PluginEventPublisher> logger)
     {
+        ArgumentNullException.ThrowIfNull(logger);
+
         _logger = logger;
     }
 
