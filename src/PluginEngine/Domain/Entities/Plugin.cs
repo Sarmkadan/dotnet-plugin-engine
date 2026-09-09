@@ -151,6 +151,15 @@ public class Plugin
 
         return string.Empty;
     }
+
+    /// <summary>
+    /// Returns a compact string representation of the plugin.
+    /// </summary>
+    /// <returns>The plugin name, version, and status.</returns>
+    public override string ToString()
+    {
+        return $"{Name} v{Version} [{Status}]";
+    }
 }
 
 /// <summary>
