@@ -92,6 +92,17 @@ public sealed class MarketplaceEntry
 
     /// <summary>Gets or sets the full version history fetched from the registry.</summary>
     public List<PluginVersionInfo> AvailableVersions { get; set; } = [];
+
+    /// <summary>
+    /// Returns a string representation of the marketplace entry.
+    /// </summary>
+    /// <returns>
+    /// A string in the format "{Name} v{LatestVersion} by {Author} ({Downloads} downloads, {Rating:F1} rating)".
+    /// </returns>
+    public override string ToString()
+    {
+        return $"{Name} v{LatestVersion} by {Author} ({Downloads} downloads, {Rating:F1} rating)";
+    }
 }
 
 /// <summary>
