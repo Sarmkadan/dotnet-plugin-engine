@@ -43,14 +43,49 @@ public interface IPluginFormatter
 /// </summary>
 public sealed class PluginHealthInfo
 {
+    /// <summary>
+    /// Gets or sets the unique identifier of the plugin.
+    /// </summary>
     public required Guid PluginId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the name of the plugin.
+    /// </summary>
     public required string PluginName { get; set; }
+
+    /// <summary>
+    /// Gets or sets the status of the plugin.
+    /// </summary>
     public required string Status { get; set; }
+
+    /// <summary>
+    /// Gets or sets the number of dependencies.
+    /// </summary>
     public required int DependencyCount { get; set; }
+
+    /// <summary>
+    /// Gets or sets the number of capabilities.
+    /// </summary>
     public required int CapabilityCount { get; set; }
+
+    /// <summary>
+    /// Gets or sets the load time in milliseconds.
+    /// </summary>
     public long LoadTimeMs { get; set; }
+
+    /// <summary>
+    /// Gets or sets the last accessed time in UTC.
+    /// </summary>
     public DateTime LastAccessedUtc { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the plugin is healthy.
+    /// </summary>
     public bool IsHealthy { get; set; }
+
+    /// <summary>
+    /// Gets or sets the list of issues.
+    /// </summary>
     public List<string> Issues { get; set; } = [];
 }
 
@@ -61,6 +96,12 @@ public sealed class FormatterFactory
 {
     private readonly Dictionary<string, Func<IPluginFormatter>> _formatters;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FormatterFactory"/> class.
+    /// </summary>
+    /// <param name="json">The JSON formatter.</param>
+    /// <param name="csv">The CSV formatter.</param>
+    /// <param name="xml">The XML formatter.</param>
     public FormatterFactory(
         JsonPluginFormatter json,
         CsvPluginFormatter csv,
