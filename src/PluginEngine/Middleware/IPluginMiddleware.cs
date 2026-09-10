@@ -24,12 +24,39 @@ public interface IPluginMiddleware
 /// </summary>
 public sealed class PluginOperationContext
 {
+    /// <summary>
+    /// Gets or sets the type of the plugin operation.
+    /// </summary>
     public required string OperationType { get; set; }
+
+    /// <summary>
+    /// Gets or sets the plugin associated with the operation.
+    /// </summary>
     public required Plugin Plugin { get; set; }
+
+    /// <summary>
+    /// Gets or sets the metadata dictionary for the operation.
+    /// </summary>
     public Dictionary<string, object> Metadata { get; set; } = [];
+
+    /// <summary>
+    /// Gets or sets the start time of the operation in milliseconds.
+    /// </summary>
     public long StartTimeMs { get; set; }
+
+    /// <summary>
+    /// Gets or sets the end time of the operation in milliseconds.
+    /// </summary>
     public long? EndTimeMs { get; set; }
+
+    /// <summary>
+    /// Gets or sets the exception that occurred during the operation, if any.
+    /// </summary>
     public Exception? Exception { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the operation was successful.
+    /// </summary>
     public bool IsSuccessful { get; set; }
 }
 
@@ -48,6 +75,8 @@ public sealed class PluginMiddlewarePipeline
     /// <summary>
     /// Adds middleware to the pipeline.
     /// </summary>
+    /// <param name="middleware">The middleware function to add to the pipeline.</param>
+    /// <returns>The pipeline instance for chaining.</returns>
     public PluginMiddlewarePipeline Use(Func<PluginOperationDelegate, PluginOperationDelegate> middleware)
     {
         _pipeline.Add(middleware);
@@ -57,6 +86,7 @@ public sealed class PluginMiddlewarePipeline
     /// <summary>
     /// Builds the complete middleware pipeline.
     /// </summary>
+    /// <returns>A delegate representing the composed middleware pipeline.</returns>
     public PluginOperationDelegate Build()
     {
         PluginOperationDelegate pipeline = _ => Task.CompletedTask;
