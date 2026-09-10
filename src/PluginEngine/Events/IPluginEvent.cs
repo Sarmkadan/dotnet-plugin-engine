@@ -86,8 +86,17 @@ public interface IPluginEventSubscriber
 /// </summary>
 public abstract class PluginEventBase : IPluginEvent
 {
+    /// <summary>
+    /// Gets the event ID for tracking.
+    /// </summary>
     public Guid EventId { get; } = Guid.NewGuid();
+    /// <summary>
+    /// Gets the time the event occurred.
+    /// </summary>
     public DateTime OccurredAtUtc { get; } = DateTime.UtcNow;
+    /// <summary>
+    /// Gets the plugin associated with the event.
+    /// </summary>
     public required Guid PluginId { get; set; }
     public abstract string EventType { get; }
 }
@@ -97,9 +106,21 @@ public abstract class PluginEventBase : IPluginEvent
 /// </summary>
 public sealed class PluginLoadedEvent : PluginEventBase
 {
+    /// <summary>
+    /// Gets the event type name.
+    /// </summary>
     public override string EventType => "PluginLoaded";
+    /// <summary>
+    /// Gets or sets the name of the plugin.
+    /// </summary>
     public required string PluginName { get; set; }
+    /// <summary>
+    /// Gets or sets the version of the plugin.
+    /// </summary>
     public required string Version { get; set; }
+    /// <summary>
+    /// Gets or sets the load time in milliseconds.
+    /// </summary>
     public long LoadTimeMs { get; set; }
 }
 
@@ -108,8 +129,17 @@ public sealed class PluginLoadedEvent : PluginEventBase
 /// </summary>
 public sealed class PluginUnloadedEvent : PluginEventBase
 {
+    /// <summary>
+    /// Gets the event type name.
+    /// </summary>
     public override string EventType => "PluginUnloaded";
+    /// <summary>
+    /// Gets or sets the name of the plugin.
+    /// </summary>
     public required string PluginName { get; set; }
+    /// <summary>
+    /// Gets or sets the reason for unloading the plugin.
+    /// </summary>
     public string? Reason { get; set; }
 }
 
@@ -118,9 +148,21 @@ public sealed class PluginUnloadedEvent : PluginEventBase
 /// </summary>
 public sealed class PluginUpdatedEvent : PluginEventBase
 {
+    /// <summary>
+    /// Gets the event type name.
+    /// </summary>
     public override string EventType => "PluginUpdated";
+    /// <summary>
+    /// Gets or sets the previous version of the plugin.
+    /// </summary>
     public required string PreviousVersion { get; set; }
+    /// <summary>
+    /// Gets or sets the new version of the plugin.
+    /// </summary>
     public required string NewVersion { get; set; }
+    /// <summary>
+    /// Gets or sets a summary of the changes made.
+    /// </summary>
     public required string ChangesSummary { get; set; }
 }
 
@@ -129,9 +171,21 @@ public sealed class PluginUpdatedEvent : PluginEventBase
 /// </summary>
 public sealed class PluginErrorEvent : PluginEventBase
 {
+    /// <summary>
+    /// Gets the event type name.
+    /// </summary>
     public override string EventType => "PluginError";
+    /// <summary>
+    /// Gets or sets the error message.
+    /// </summary>
     public required string ErrorMessage { get; set; }
+    /// <summary>
+    /// Gets or sets additional error details.
+    /// </summary>
     public string? ErrorDetails { get; set; }
+    /// <summary>
+    /// Gets or sets the error code.
+    /// </summary>
     public int ErrorCode { get; set; }
 }
 
@@ -140,7 +194,16 @@ public sealed class PluginErrorEvent : PluginEventBase
 /// </summary>
 public sealed class DependenciesResolvedEvent : PluginEventBase
 {
+    /// <summary>
+    /// Gets the event type name.
+    /// </summary>
     public override string EventType => "DependenciesResolved";
+    /// <summary>
+    /// Gets or sets the list of resolved dependency IDs.
+    /// </summary>
     public List<Guid> ResolvedDependencies { get; set; } = [];
+    /// <summary>
+    /// Gets or sets the resolution time in milliseconds.
+    /// </summary>
     public long ResolutionTimeMs { get; set; }
 }
