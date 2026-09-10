@@ -16,6 +16,12 @@ public sealed class PluginDiscoveryService
     private readonly VersionHelper _versionHelper;
     private readonly ILogger<PluginDiscoveryService> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PluginDiscoveryService"/> class.
+    /// </summary>
+    /// <param name="fileSystemHelper">The file system helper used for discovering plugin files.</param>
+    /// <param name="versionHelper">The version helper used for comparing plugin versions.</param>
+    /// <param name="logger">The logger for recording discovery events.</param>
     public PluginDiscoveryService(
         FileSystemHelper fileSystemHelper,
         VersionHelper versionHelper,
@@ -210,18 +216,54 @@ public sealed class PluginDiscoveryService
 /// </summary>
 public sealed class PluginCandidateInfo
 {
+    /// <summary>
+    /// Gets or sets the full path to the plugin file.
+    /// </summary>
     public required string FilePath { get; set; }
+    /// <summary>
+    /// Gets or sets the name of the plugin file.
+    /// </summary>
     public required string FileName { get; set; }
+    /// <summary>
+    /// Gets or sets the name of the assembly.
+    /// </summary>
     public required string AssemblyName { get; set; }
+    /// <summary>
+    /// Gets or sets the size of the plugin file in bytes.
+    /// </summary>
     public required long FileSize { get; set; }
+    /// <summary>
+    /// Gets or sets the last modified date and time of the plugin file in UTC.
+    /// </summary>
     public required DateTime ModifiedAtUtc { get; set; }
+    /// <summary>
+    /// Gets or sets a value indicating whether the plugin is valid.
+    /// </summary>
     public required bool IsValid { get; set; }
+    /// <summary>
+    /// Gets or sets the date and time the plugin was discovered in UTC.
+    /// </summary>
     public required DateTime DiscoveredAtUtc { get; set; }
 
+    /// <summary>
+    /// Gets or sets the version of the plugin.
+    /// </summary>
     public string? Version { get; set; }
+    /// <summary>
+    /// Gets or sets the product name of the plugin.
+    /// </summary>
     public string? ProductName { get; set; }
+    /// <summary>
+    /// Gets or sets the company that produced the plugin.
+    /// </summary>
     public string? Company { get; set; }
+    /// <summary>
+    /// Gets or sets the description of the plugin.
+    /// </summary>
     public string? Description { get; set; }
+    /// <summary>
+    /// Gets the list of custom attributes found in the plugin assembly.
+    /// </summary>
     public List<string> CustomAttributes { get; } = [];
 }
 
@@ -230,9 +272,21 @@ public sealed class PluginCandidateInfo
 /// </summary>
 public sealed class PluginDiscoveryFilter
 {
+    /// <summary>
+    /// Gets or sets a value indicating whether to filter only valid plugins.
+    /// </summary>
     public bool ValidOnly { get; set; } = true;
+    /// <summary>
+    /// Gets or sets the minimum version string to filter plugins by.
+    /// </summary>
     public string? MinimumVersionInfo { get; set; }
+    /// <summary>
+    /// Gets or sets the regular expression pattern to filter plugins by name.
+    /// </summary>
     public string? NamePattern { get; set; }
+    /// <summary>
+    /// Gets or sets the maximum allowed file size in bytes for a plugin.
+    /// </summary>
     public long? MaxFileSizeBytes { get; set; }
 }
 
@@ -241,12 +295,30 @@ public sealed class PluginDiscoveryFilter
 /// </summary>
 public sealed class DiscoveryStatistics
 {
+    /// <summary>
+    /// Gets or sets the total number of plugin candidates discovered.
+    /// </summary>
     public int TotalCandidates { get; set; }
+    /// <summary>
+    /// Gets or sets the number of valid plugins discovered.
+    /// </summary>
     public int ValidPlugins { get; set; }
+    /// <summary>
+    /// Gets or sets the number of invalid plugins discovered.
+    /// </summary>
     public int InvalidPlugins { get; set; }
+    /// <summary>
+    /// Gets or sets the total size of all discovered plugins in bytes.
+    /// </summary>
     public long TotalSizeBytes { get; set; }
+    /// <summary>
+    /// Gets or sets the date and time the statistics were generated in UTC.
+    /// </summary>
     public DateTime DiscoveredAtUtc { get; set; }
 
+    /// <summary>
+    /// Gets the percentage of valid plugins out of the total candidates.
+    /// </summary>
     public double ValidPercentage => TotalCandidates > 0
         ? (ValidPlugins / (double)TotalCandidates) * 100
         : 0;
