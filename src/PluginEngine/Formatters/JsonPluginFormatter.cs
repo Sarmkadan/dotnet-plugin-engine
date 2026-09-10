@@ -12,8 +12,16 @@ namespace PluginEngine.Formatters;
 /// </summary>
 public sealed class JsonPluginFormatter : IPluginFormatter
 {
+    /// <summary>
+    /// Gets the formatter type.
+    /// </summary>
     public string FormatType => "json";
 
+    /// <summary>
+    /// Formats the specified plugin as a JSON string.
+    /// </summary>
+    /// <param name="plugin">The plugin to format.</param>
+    /// <returns>A JSON string representing the plugin.</returns>
     public Task<string> FormatPluginAsync(Plugin plugin)
     {
         var output = new
@@ -33,6 +41,11 @@ public sealed class JsonPluginFormatter : IPluginFormatter
         }));
     }
 
+    /// <summary>
+    /// Formats the specified plugins as a JSON string.
+    /// </summary>
+    /// <param name="plugins">The plugins to format.</param>
+    /// <returns>A JSON string representing the plugins.</returns>
     public Task<string> FormatPluginsAsync(IEnumerable<Plugin> plugins)
     {
         var items = plugins.Select(p => new
@@ -57,6 +70,11 @@ public sealed class JsonPluginFormatter : IPluginFormatter
         }));
     }
 
+    /// <summary>
+    /// Formats the specified plugin's detailed report as a JSON string.
+    /// </summary>
+    /// <param name="plugin">The plugin to format.</param>
+    /// <returns>A JSON string representing the plugin's detailed report.</returns>
     public Task<string> FormatDetailedReportAsync(Plugin plugin)
     {
         var output = new
@@ -95,6 +113,11 @@ public sealed class JsonPluginFormatter : IPluginFormatter
         }));
     }
 
+    /// <summary>
+    /// Formats the specified plugin health report as a JSON string.
+    /// </summary>
+    /// <param name="health">The plugin health information to format.</param>
+    /// <returns>A JSON string representing the plugin health report.</returns>
     public Task<string> FormatHealthReportAsync(PluginHealthInfo health)
     {
         var output = new
