@@ -73,8 +73,17 @@ public interface IDependencyResolutionService
 /// </summary>
 public sealed class DependencyGraph
 {
+    /// <summary>
+    /// Gets or sets the unique identifier of the root plugin.
+    /// </summary>
     public Guid RootPluginId { get; set; }
+    /// <summary>
+    /// Gets or sets the list of nodes in the dependency graph.
+    /// </summary>
     public List<DependencyNode> Nodes { get; set; } = new();
+    /// <summary>
+    /// Gets or sets the list of edges in the dependency graph.
+    /// </summary>
     public List<DependencyEdge> Edges { get; set; } = new();
 }
 
@@ -83,9 +92,21 @@ public sealed class DependencyGraph
 /// </summary>
 public sealed class DependencyNode
 {
+    /// <summary>
+    /// Gets or sets the unique identifier of the plugin.
+    /// </summary>
     public Guid PluginId { get; set; }
+    /// <summary>
+    /// Gets or sets the name of the plugin.
+    /// </summary>
     public string PluginName { get; set; } = string.Empty;
+    /// <summary>
+    /// Gets or sets the version of the plugin.
+    /// </summary>
     public string Version { get; set; } = string.Empty;
+    /// <summary>
+    /// Gets or sets the level of the node in the dependency graph.
+    /// </summary>
     public int Level { get; set; }
 }
 
@@ -94,8 +115,20 @@ public sealed class DependencyNode
 /// </summary>
 public sealed class DependencyEdge
 {
+    /// <summary>
+    /// Gets or sets the unique identifier of the source plugin.
+    /// </summary>
     public Guid FromPluginId { get; set; }
+    /// <summary>
+    /// Gets or sets the unique identifier of the target plugin.
+    /// </summary>
     public Guid ToPluginId { get; set; }
+    /// <summary>
+    /// Gets or sets the version constraint for the dependency.
+    /// </summary>
     public string VersionConstraint { get; set; } = string.Empty;
+    /// <summary>
+    /// Gets or sets a value indicating whether the dependency is optional.
+    /// </summary>
     public bool IsOptional { get; set; }
 }
