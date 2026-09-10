@@ -12,8 +12,10 @@ namespace PluginEngine.Formatters;
 /// </summary>
 public sealed class XmlPluginFormatter : IPluginFormatter
 {
+    /// <inheritdoc/>
     public string FormatType => "xml";
 
+    /// <inheritdoc/>
     public Task<string> FormatPluginAsync(Plugin plugin)
     {
         using var stringWriter = new StringWriter();
@@ -28,6 +30,7 @@ public sealed class XmlPluginFormatter : IPluginFormatter
         return Task.FromResult(stringWriter.ToString());
     }
 
+    /// <inheritdoc/>
     public Task<string> FormatPluginsAsync(IEnumerable<Plugin> plugins)
     {
         using var stringWriter = new StringWriter();
@@ -49,6 +52,7 @@ public sealed class XmlPluginFormatter : IPluginFormatter
         return Task.FromResult(stringWriter.ToString());
     }
 
+    /// <inheritdoc/>
     public Task<string> FormatDetailedReportAsync(Plugin plugin)
     {
         using var stringWriter = new StringWriter();
@@ -108,6 +112,7 @@ public sealed class XmlPluginFormatter : IPluginFormatter
         return Task.FromResult(stringWriter.ToString());
     }
 
+    /// <inheritdoc/>
     public Task<string> FormatHealthReportAsync(PluginHealthInfo health)
     {
         using var stringWriter = new StringWriter();
@@ -146,6 +151,9 @@ public sealed class XmlPluginFormatter : IPluginFormatter
         return Task.FromResult(stringWriter.ToString());
     }
 
+    /// <summary>
+    /// Writes the plugin element to the XML writer.
+    /// </summary>
     private static void WritePluginElement(XmlTextWriter xmlWriter, Plugin plugin)
     {
         xmlWriter.WriteElementString("Id", plugin.Id.ToString());
