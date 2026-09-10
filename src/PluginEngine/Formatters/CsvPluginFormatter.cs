@@ -12,8 +12,16 @@ namespace PluginEngine.Formatters;
 /// </summary>
 public sealed class CsvPluginFormatter : IPluginFormatter
 {
+    /// <summary>
+    /// Gets the formatter type.
+    /// </summary>
     public string FormatType => "csv";
 
+    /// <summary>
+    /// Formats the specified plugin as a CSV string.
+    /// </summary>
+    /// <param name="plugin">The plugin to format.</param>
+    /// <returns>A CSV string representing the plugin.</returns>
     public Task<string> FormatPluginAsync(Plugin plugin)
     {
         var sb = new StringBuilder();
@@ -22,6 +30,11 @@ public sealed class CsvPluginFormatter : IPluginFormatter
         return Task.FromResult(sb.ToString());
     }
 
+    /// <summary>
+    /// Formats the specified plugins as a CSV string.
+    /// </summary>
+    /// <param name="plugins">The plugins to format.</param>
+    /// <returns>A CSV string representing the plugins.</returns>
     public Task<string> FormatPluginsAsync(IEnumerable<Plugin> plugins)
     {
         var sb = new StringBuilder();
@@ -35,6 +48,11 @@ public sealed class CsvPluginFormatter : IPluginFormatter
         return Task.FromResult(sb.ToString());
     }
 
+    /// <summary>
+    /// Formats the specified plugin's detailed report as a CSV string.
+    /// </summary>
+    /// <param name="plugin">The plugin to format.</param>
+    /// <returns>A CSV string representing the plugin's detailed report.</returns>
     public Task<string> FormatDetailedReportAsync(Plugin plugin)
     {
         var sb = new StringBuilder();
@@ -67,6 +85,11 @@ public sealed class CsvPluginFormatter : IPluginFormatter
         return Task.FromResult(sb.ToString());
     }
 
+    /// <summary>
+    /// Formats the specified plugin health report as a CSV string.
+    /// </summary>
+    /// <param name="health">The plugin health information to format.</param>
+    /// <returns>A CSV string representing the plugin health report.</returns>
     public Task<string> FormatHealthReportAsync(PluginHealthInfo health)
     {
         var sb = new StringBuilder();
@@ -84,11 +107,20 @@ public sealed class CsvPluginFormatter : IPluginFormatter
         return Task.FromResult(sb.ToString());
     }
 
+    /// <summary>
+    /// Writes the CSV headers to the specified string builder.
+    /// </summary>
+    /// <param name="sb">The string builder to write headers to.</param>
     private static void WriteHeaders(StringBuilder sb)
     {
         sb.AppendLine("ID,Name,Version,Status,LoadedAtUtc,Dependencies,Capabilities");
     }
 
+    /// <summary>
+    /// Writes the specified plugin to the CSV string builder.
+    /// </summary>
+    /// <param name="sb">The string builder to write the plugin to.</param>
+    /// <param name="plugin">The plugin to write.</param>
     private static void WritePlugin(StringBuilder sb, Plugin plugin)
     {
         sb.AppendLine(
@@ -101,6 +133,11 @@ public sealed class CsvPluginFormatter : IPluginFormatter
             $"{plugin.Capabilities.Count}");
     }
 
+    /// <summary>
+    /// Escapes a string for CSV output by doubling quotes and wrapping in quotes if necessary.
+    /// </summary>
+    /// <param name="value">The string to escape.</param>
+    /// <returns>The escaped string suitable for CSV.</returns>
     private static string EscapeCsv(string value)
     {
         if (value.Contains('"') || value.Contains(',') || value.Contains('\n'))
