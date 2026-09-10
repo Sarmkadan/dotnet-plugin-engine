@@ -59,12 +59,31 @@ public interface IVersioningService
 /// </summary>
 public sealed class SemanticVersion
 {
+    /// <summary>
+    /// Gets or sets the major version number.
+    /// </summary>
     public int Major { get; set; }
+    /// <summary>
+    /// Gets or sets the minor version number.
+    /// </summary>
     public int Minor { get; set; }
+    /// <summary>
+    /// Gets or sets the patch version number.
+    /// </summary>
     public int Patch { get; set; }
+    /// <summary>
+    /// Gets or sets the prerelease label.
+    /// </summary>
     public string Prerelease { get; set; } = string.Empty;
+    /// <summary>
+    /// Gets or sets the build metadata.
+    /// </summary>
     public string Metadata { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Returns a string representation of the semantic version.
+    /// </summary>
+    /// <returns>A string in the format Major.Minor.Patch[-Prerelease][+Metadata].</returns>
     public override string ToString()
     {
         var version = $"{Major}.{Minor}.{Patch}";
@@ -81,7 +100,16 @@ public sealed class SemanticVersion
 /// </summary>
 public enum VersionPart
 {
+    /// <summary>
+    /// Increment the major version.
+    /// </summary>
     Major = 0,
+    /// <summary>
+    /// Increment the minor version.
+    /// </summary>
     Minor = 1,
+    /// <summary>
+    /// Increment the patch version.
+    /// </summary>
     Patch = 2
 }
