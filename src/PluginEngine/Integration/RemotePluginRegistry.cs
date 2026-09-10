@@ -268,11 +268,29 @@ public sealed class RemotePluginRegistry : IRemotePluginRegistry
 /// </summary>
 public sealed class PluginVersionInfo
 {
+    /// <summary>
+    /// The version of the plugin.
+    /// </summary>
     public required string Version { get; set; }
+    /// <summary>
+    /// The date and time when the plugin was published (in UTC).
+    /// </summary>
     public required DateTime PublishedAtUtc { get; set; }
+    /// <summary>
+    /// The URL from which the plugin can be downloaded.
+    /// </summary>
     public required string DownloadUrl { get; set; }
+    /// <summary>
+    /// Indicates whether the plugin version is stable.
+    /// </summary>
     public bool IsStable { get; set; }
+    /// <summary>
+    /// Indicates whether the plugin version is a pre-release.
+    /// </summary>
     public bool IsPrerelease { get; set; }
+    /// <summary>
+    /// The release notes for the plugin version.
+    /// </summary>
     public string? ReleaseNotes { get; set; }
 }
 
@@ -281,11 +299,32 @@ public sealed class PluginVersionInfo
 /// </summary>
 public sealed class PluginPublishMetadata
 {
+    /// <summary>
+    /// The name of the plugin.
+    /// </summary>
     public required string PluginName { get; set; }
+    /// <summary>
+    /// The version of the plugin.
+    /// </summary>
     public required string Version { get; set; }
+    /// <summary>
+    /// The description of the plugin.
+    /// </summary>
     public required string Description { get; set; }
+    /// <summary>
+    /// The author of the plugin.
+    /// </summary>
     public required string Author { get; set; }
+    /// <summary>
+    /// The company that created the plugin (optional).
+    /// </summary>
     public string? Company { get; set; }
+    /// <summary>
+    /// The tags associated with the plugin.
+    /// </summary>
     public List<string> Tags { get; set; } = [];
+    /// <summary>
+    /// The license type of the plugin (optional).
+    /// </summary>
     public string? LicenseType { get; set; }
 }
