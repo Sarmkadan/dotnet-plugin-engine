@@ -47,6 +47,9 @@ public sealed class HttpPluginClient : IIntegrationClient
     public bool IsSecurityUpdate { get; set; }
     public string? ReleaseNotes { get; set; }
 
+    /// <summary>
+    /// Gets the name of the plugin provider.
+    /// </summary>
     public string ProviderName => "HttpRegistry";
 
     /// <summary>
@@ -428,10 +431,33 @@ public sealed class HttpPluginClient : IIntegrationClient
 /// </summary>
 public sealed class PluginUpdateInfo
 {
+    /// <summary>
+    /// Gets or sets the unique identifier of the plugin.
+    /// </summary>
     public required Guid PluginId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the currently installed version of the plugin.
+    /// </summary>
     public required string CurrentVersion { get; set; }
+
+    /// <summary>
+    /// Gets or sets the available version of the plugin from the registry.
+    /// </summary>
     public required string AvailableVersion { get; set; }
+
+    /// <summary>
+    /// Gets or sets the download URL for the plugin update.
+    /// </summary>
     public required string DownloadUrl { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the update is a security update.
+    /// </summary>
     public bool IsSecurityUpdate { get; set; }
+
+    /// <summary>
+    /// Gets or sets the release notes for the plugin update.
+    /// </summary>
     public string? ReleaseNotes { get; set; }
 }
