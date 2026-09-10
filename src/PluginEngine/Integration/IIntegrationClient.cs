@@ -38,10 +38,29 @@ public interface IIntegrationClient
 /// </summary>
 public sealed class PluginNotification
 {
+    /// <summary>
+    /// Gets or sets the unique identifier of the plugin.
+    /// </summary>
     public required Guid PluginId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the name of the plugin.
+    /// </summary>
     public required string PluginName { get; set; }
+
+    /// <summary>
+    /// Gets or sets the type of the event that triggered the notification.
+    /// </summary>
     public required string EventType { get; set; }
+
+    /// <summary>
+    /// Gets or sets the date and time (in UTC) when the event occurred.
+    /// </summary>
     public required DateTime OccurredAtUtc { get; set; }
+
+    /// <summary>
+    /// Gets or sets additional metadata associated with the notification.
+    /// </summary>
     public Dictionary<string, object> Metadata { get; set; } = [];
 }
 
@@ -50,10 +69,33 @@ public sealed class PluginNotification
 /// </summary>
 public sealed class PluginInfo
 {
+    /// <summary>
+    /// Gets or sets the unique identifier of the plugin.
+    /// </summary>
     public required Guid Id { get; set; }
+
+    /// <summary>
+    /// Gets or sets the name of the plugin.
+    /// </summary>
     public required string Name { get; set; }
+
+    /// <summary>
+    /// Gets or sets the version of the plugin.
+    /// </summary>
     public required string Version { get; set; }
+
+    /// <summary>
+    /// Gets or sets the description of the plugin.
+    /// </summary>
     public string? Description { get; set; }
+
+    /// <summary>
+    /// Gets or sets the author of the plugin.
+    /// </summary>
     public string? Author { get; set; }
+
+    /// <summary>
+    /// Gets or sets the download URL for the plugin.
+    /// </summary>
     public string? DownloadUrl { get; set; }
 }
