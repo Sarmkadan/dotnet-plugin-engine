@@ -96,12 +96,39 @@ public interface IPluginManagerService
 /// </summary>
 public sealed class PluginManagerStatus
 {
+    /// <summary>
+    /// Gets or sets a value indicating whether the plugin manager is initialized.
+    /// </summary>
     public bool IsInitialized { get; set; }
+
+    /// <summary>
+    /// Gets or sets the date and time when the plugin manager was initialized.
+    /// </summary>
     public DateTime InitializedAt { get; set; }
+
+    /// <summary>
+    /// Gets or sets the total number of plugins discovered.
+    /// </summary>
     public int TotalPlugins { get; set; }
+
+    /// <summary>
+    /// Gets or sets the number of plugins that have been successfully loaded.
+    /// </summary>
     public int LoadedPlugins { get; set; }
+
+    /// <summary>
+    /// Gets or sets the number of plugins that are currently active.
+    /// </summary>
     public int ActivePlugins { get; set; }
+
+    /// <summary>
+    /// Gets or sets the number of plugins that have failed to load or initialize.
+    /// </summary>
     public int FailedPlugins { get; set; }
+
+    /// <summary>
+    /// Gets or sets the last error message encountered by the plugin manager, if any.
+    /// </summary>
     public string? LastError { get; set; }
 }
 
@@ -110,10 +137,29 @@ public sealed class PluginManagerStatus
 /// </summary>
 public sealed class PluginDetails
 {
+    /// <summary>
+    /// Gets or sets the plugin entity.
+    /// </summary>
     public Plugin Plugin { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the metadata associated with the plugin.
+    /// </summary>
     public PluginMetadata? Metadata { get; set; }
+
+    /// <summary>
+    /// Gets or sets the collection of assemblies that comprise the plugin.
+    /// </summary>
     public IEnumerable<PluginAssembly> Assemblies { get; set; } = Enumerable.Empty<PluginAssembly>();
+
+    /// <summary>
+    /// Gets or sets the collection of dependencies declared by the plugin.
+    /// </summary>
     public IEnumerable<PluginDependency> Dependencies { get; set; } = Enumerable.Empty<PluginDependency>();
+
+    /// <summary>
+    /// Gets or sets the collection of capabilities declared by the plugin.
+    /// </summary>
     public IEnumerable<PluginCapability> Capabilities { get; set; } = Enumerable.Empty<PluginCapability>();
 }
 
@@ -122,12 +168,39 @@ public sealed class PluginDetails
 /// </summary>
 public sealed class PluginSearchCriteria
 {
+    /// <summary>
+    /// Gets or sets the name filter for plugin search.
+    /// </summary>
     public string? Name { get; set; }
+
+    /// <summary>
+    /// Gets or sets the author filter for plugin search.
+    /// </summary>
     public string? Author { get; set; }
+
+    /// <summary>
+    /// Gets or sets the status filter for plugin search.
+    /// </summary>
     public PluginStatus? Status { get; set; }
+
+    /// <summary>
+    /// Gets or sets the version filter for plugin search.
+    /// </summary>
     public string? Version { get; set; }
+
+    /// <summary>
+    /// Gets or sets the tags filter for plugin search.
+    /// </summary>
     public List<string> Tags { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the page number for paginated results.
+    /// </summary>
     public int PageNumber { get; set; } = 1;
+
+    /// <summary>
+    /// Gets or sets the page size for paginated results.
+    /// </summary>
     public int PageSize { get; set; } = 10;
 }
 
@@ -136,12 +209,43 @@ public sealed class PluginSearchCriteria
 /// </summary>
 public sealed class PluginManagerStatistics
 {
+    /// <summary>
+    /// Gets or sets the total number of plugins discovered.
+    /// </summary>
     public int TotalPlugins { get; set; }
+
+    /// <summary>
+    /// Gets or sets the number of plugins that have been successfully loaded.
+    /// </summary>
     public int LoadedPlugins { get; set; }
+
+    /// <summary>
+    /// Gets or sets the number of plugins that are currently active.
+    /// </summary>
     public int ActivePlugins { get; set; }
+
+    /// <summary>
+    /// Gets or sets the number of plugins that have failed to load or initialize.
+    /// </summary>
     public int FailedPlugins { get; set; }
+
+    /// <summary>
+    /// Gets or sets the total memory usage in bytes by all loaded plugins.
+    /// </summary>
     public long TotalMemoryUsageBytes { get; set; }
+
+    /// <summary>
+    /// Gets or sets the total number of assembly load contexts created for plugins.
+    /// </summary>
     public int TotalLoadContexts { get; set; }
+
+    /// <summary>
+    /// Gets or sets the timestamp of the last operation performed by the plugin manager.
+    /// </summary>
     public DateTime? LastOperationTime { get; set; }
+
+    /// <summary>
+    /// Gets or sets the average load time in milliseconds for plugins.
+    /// </summary>
     public double AverageLoadTimeMs { get; set; }
 }
