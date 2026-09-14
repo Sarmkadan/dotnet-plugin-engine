@@ -7,9 +7,13 @@ using PluginEngine.Formatters;
 using PluginEngine.Domain.Entities;
 using PluginEngine.Services.Abstractions;
 
+/// <summary>
+/// Tests for the XmlPluginFormatter class.
+/// </summary>
 public class XmlPluginFormatterTests
 {
     [Fact]
+    /// <summary>Verifies that FormatPluginAsync returns a valid XML string.</summary>
     public async Task FormatPluginAsync_ReturnsXmlString()
     {
         // Arrange
@@ -27,6 +31,7 @@ public class XmlPluginFormatterTests
     }
 
     [Fact]
+    /// <summary>Verifies that FormatPluginsAsync returns a valid XML string for multiple plugins.</summary>
     public async Task FormatPluginsAsync_ReturnsXmlString()
     {
         // Arrange
@@ -48,6 +53,7 @@ public class XmlPluginFormatterTests
     }
 
     [Fact]
+    /// <summary>Verifies that FormatDetailedReportAsync returns a valid XML string with plugin details.</summary>
     public async Task FormatDetailedReportAsync_ReturnsXmlString()
     {
         // Arrange
@@ -78,6 +84,7 @@ public class XmlPluginFormatterTests
     }
 
     [Fact]
+    /// <summary>Verifies that FormatHealthReportAsync returns a valid XML string.</summary>
     public async Task FormatHealthReportAsync_ReturnsXmlString()
     {
         // Arrange
@@ -95,6 +102,7 @@ public class XmlPluginFormatterTests
     }
 
     [Fact]
+    /// <summary>Verifies that FormatPluginAsync throws ArgumentNullException when plugin is null.</summary>
     public async Task FormatPluginAsync_ThrowsArgumentNullException_WhenPluginIsNull()
     {
         // Act and Assert
@@ -102,6 +110,7 @@ public class XmlPluginFormatterTests
     }
 
     [Fact]
+    /// <summary>Verifies that FormatPluginsAsync throws ArgumentNullException when plugins is null.</summary>
     public async Task FormatPluginsAsync_ThrowsArgumentNullException_WhenPluginsIsNull()
     {
         // Act and Assert
@@ -109,6 +118,7 @@ public class XmlPluginFormatterTests
     }
 
     [Fact]
+    /// <summary>Verifies that FormatDetailedReportAsync throws ArgumentNullException when plugin is null.</summary>
     public async Task FormatDetailedReportAsync_ThrowsArgumentNullException_WhenPluginIsNull()
     {
         // Act and Assert
