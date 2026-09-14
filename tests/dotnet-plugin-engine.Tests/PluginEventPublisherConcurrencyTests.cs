@@ -5,11 +5,15 @@ using Moq;
 using PluginEngine.Events;
 using Xunit;
 
+/// <summary>
+/// Tests for concurrency and re-entrancy guarantees of PluginEventPublisher.
+/// </summary>
 public sealed class PluginEventPublisherConcurrencyTests
 {
     private readonly PluginEventPublisher _sut =
         new(new Mock<ILogger<PluginEventPublisher>>().Object);
 
+    /// <summary>Verifies that when multiple async handlers fail, all exceptions are collected and thrown.</summary>
     [Fact]
     public async Task PublishAsync_WithMultipleFailingAsyncHandlers_ThrowsAllHandlerExceptions()
     {
@@ -34,6 +38,7 @@ public sealed class PluginEventPublisherConcurrencyTests
             new Exception[] { firstException, secondException });
     }
 
+    /// <summary>Ensures that re-entrant publishing of the same event type is skipped to prevent infinite loops.</summary>
     [Fact]
     public async Task PublishAsync_WhenHandlerPublishesSameEventType_SkipsReentrantPublish()
     {
@@ -51,6 +56,7 @@ public sealed class PluginEventPublisherConcurrencyTests
         invocationCount.Should().Be(1);
     }
 
+    /// <summary>Confirms that concurrent subscription/unsubscription during publishing doesn't throw or corrupt internal state.</summary>
     [Fact]
     public async Task SubscribeAndUnsubscribe_WhilePublishingConcurrently_DoesNotThrowOrCorruptState()
     {
@@ -83,6 +89,7 @@ public sealed class PluginEventPublisherConcurrencyTests
         statistics.MonitoredEventTypes.Should().Be(1);
     }
 
+    /// <summary>Validates that both synchronous and asynchronous handler exceptions are collected.</summary>
     [Fact]
     public async Task PublishAsync_WithSynchronousAndAsyncFailures_CollectsBothExceptions()
     {
