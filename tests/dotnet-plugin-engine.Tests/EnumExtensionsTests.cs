@@ -7,9 +7,15 @@ using System.Text.Json;
 using Xunit;
 using PluginEngine.Utils.Extensions;
 
+/// <summary>
+/// Tests for the EnumExtensions class.
+/// </summary>
 public class EnumExtensionsTests
 {
     [Fact]
+    /// <summary>
+    /// Verifies that GetDescription returns the correct description for a valid enum value.
+    /// </summary>
     public void GetDescription_HappyPath_ReturnsDescription()
     {
         // Arrange
@@ -23,6 +29,9 @@ public class EnumExtensionsTests
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that GetDescription throws ArgumentNullException when input is null.
+    /// </summary>
     public void GetDescription_NullInput_ThrowsArgumentNullException()
     {
         // Act and Assert
@@ -30,6 +39,9 @@ public class EnumExtensionsTests
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that GetDisplayName returns the correct display name for a valid enum value.
+    /// </summary>
     public void GetDisplayName_HappyPath_ReturnsDisplayName()
     {
         // Arrange
@@ -43,6 +55,9 @@ public class EnumExtensionsTests
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that GetDisplayName throws ArgumentNullException when input is null.
+    /// </summary>
     public void GetDisplayName_NullInput_ThrowsArgumentNullException()
     {
         // Act and Assert
@@ -50,6 +65,9 @@ public class EnumExtensionsTests
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that ToUserFriendlyString returns the correct user-friendly string for a valid enum value.
+    /// </summary>
     public void ToUserFriendlyString_HappyPath_ReturnsUserFriendlyString()
     {
         // Arrange
@@ -63,6 +81,9 @@ public class EnumExtensionsTests
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that ToUserFriendlyString throws ArgumentNullException when input is null.
+    /// </summary>
     public void ToUserFriendlyString_NullInput_ThrowsArgumentNullException()
     {
         // Act and Assert
@@ -70,6 +91,9 @@ public class EnumExtensionsTests
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that ToCssClass returns the correct CSS class for a valid enum value.
+    /// </summary>
     public void ToCssClass_HappyPath_ReturnsCssClass()
     {
         // Arrange
@@ -83,6 +107,9 @@ public class EnumExtensionsTests
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that ToCssClass throws ArgumentNullException when input is null.
+    /// </summary>
     public void ToCssClass_NullInput_ThrowsArgumentNullException()
     {
         // Act and Assert
@@ -90,6 +117,9 @@ public class EnumExtensionsTests
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that IsHealthy returns true for the Healthy enum value.
+    /// </summary>
     public void IsHealthy_HappyPath_ReturnsTrue()
     {
         // Arrange
@@ -103,6 +133,9 @@ public class EnumExtensionsTests
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that IsHealthy throws ArgumentNullException when input is null.
+    /// </summary>
     public void IsHealthy_NullInput_ThrowsArgumentNullException()
     {
         // Act and Assert
@@ -110,6 +143,9 @@ public class EnumExtensionsTests
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that IsTransient returns true for the Transient enum value.
+    /// </summary>
     public void IsTransient_HappyPath_ReturnsTrue()
     {
         // Arrange
@@ -123,6 +159,9 @@ public class EnumExtensionsTests
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that IsTransient throws ArgumentNullException when input is null.
+    /// </summary>
     public void IsTransient_NullInput_ThrowsArgumentNullException()
     {
         // Act and Assert
@@ -130,6 +169,9 @@ public class EnumExtensionsTests
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that GetAllValues returns all enum values.
+    /// </summary>
     public void GetAllValues_HappyPath_ReturnsAllValues()
     {
         // Arrange
@@ -143,6 +185,9 @@ public class EnumExtensionsTests
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that TryParse returns the parsed enum value for a valid string.
+    /// </summary>
     public void TryParse_HappyPath_ReturnsParsedValue()
     {
         // Arrange
@@ -157,6 +202,9 @@ public class EnumExtensionsTests
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that TryParse returns null when input string is null.
+    /// </summary>
     public void TryParse_NullInput_ReturnsNull()
     {
         // Act and Assert
@@ -164,6 +212,9 @@ public class EnumExtensionsTests
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that TryParse returns null for an invalid enum string.
+    /// </summary>
     public void TryParse_InvalidInput_ReturnsNull()
     {
         // Act and Assert
@@ -171,6 +222,9 @@ public class EnumExtensionsTests
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that GetIntValue returns the correct integer value for a valid enum value.
+    /// </summary>
     public void GetIntValue_HappyPath_ReturnsIntValue()
     {
         // Arrange
@@ -184,6 +238,9 @@ public class EnumExtensionsTests
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that GetIntValue throws ArgumentNullException when input is null.
+    /// </summary>
     public void GetIntValue_NullInput_ThrowsArgumentNullException()
     {
         // Act and Assert
@@ -191,6 +248,9 @@ public class EnumExtensionsTests
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that GetValueDescriptions returns the correct descriptions for all enum values.
+    /// </summary>
     public void GetValueDescriptions_HappyPath_ReturnsValueDescriptions()
     {
         // Arrange
@@ -204,6 +264,9 @@ public class EnumExtensionsTests
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that ToColorHex returns the correct color hex for a valid enum value.
+    /// </summary>
     public void ToColorHex_HappyPath_ReturnsColorHex()
     {
         // Arrange
@@ -217,6 +280,9 @@ public class EnumExtensionsTests
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that ToColorHex throws ArgumentNullException when input is null.
+    /// </summary>
     public void ToColorHex_NullInput_ThrowsArgumentNullException()
     {
         // Act and Assert
@@ -224,6 +290,9 @@ public class EnumExtensionsTests
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that IsTerminal returns true for the Terminal enum value.
+    /// </summary>
     public void IsTerminal_HappyPath_ReturnsTrue()
     {
         // Arrange
@@ -237,6 +306,9 @@ public class EnumExtensionsTests
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that IsTerminal throws ArgumentNullException when input is null.
+    /// </summary>
     public void IsTerminal_NullInput_ThrowsArgumentNullException()
     {
         // Act and Assert
