@@ -9,9 +9,15 @@ using Moq;
 using PluginEngine.Utils.Helpers;
 using Xunit;
 
+/// <summary>
+/// Tests for the PluginDiscoveryService class.
+/// </summary>
 public class PluginDiscoveryServiceTests
 {
     [Fact]
+    /// <summary>
+    /// Tests that DiscoverPluginsAsync returns an empty list when the directory does not exist.
+    /// </summary>
     public async Task DiscoverPluginsAsync_ReturnsEmptyList_WhenDirectoryDoesNotExist()
     {
         // Arrange
@@ -29,6 +35,9 @@ public class PluginDiscoveryServiceTests
     }
 
     [Fact]
+    /// <summary>
+    /// Tests that DiscoverPluginsAsync returns plugins when the directory exists.
+    /// </summary>
     public async Task DiscoverPluginsAsync_ReturnsPlugins_WhenDirectoryExists()
     {
         // Arrange
@@ -48,6 +57,9 @@ public class PluginDiscoveryServiceTests
     }
 
     [Fact]
+    /// <summary>
+    /// Tests that InspectPluginAsync returns null when the file path is invalid.
+    /// </summary>
     public async Task InspectPluginAsync_ReturnsNull_WhenFilePathIsInvalid()
     {
         // Arrange
@@ -65,6 +77,9 @@ public class PluginDiscoveryServiceTests
     }
 
     [Fact]
+    /// <summary>
+    /// Tests that InspectPluginAsync returns plugin info when the file path is valid.
+    /// </summary>
     public async Task InspectPluginAsync_ReturnsPluginInfo_WhenFilePathIsValid()
     {
         // Arrange
@@ -84,6 +99,9 @@ public class PluginDiscoveryServiceTests
     }
 
     [Fact]
+    /// <summary>
+    /// Tests that FilterPlugins returns an empty list when the candidates list is empty.
+    /// </summary>
     public void FilterPlugins_ReturnsEmptyList_WhenCandidatesListIsEmpty()
     {
         // Arrange
@@ -97,6 +115,9 @@ public class PluginDiscoveryServiceTests
     }
 
     [Fact]
+    /// <summary>
+    /// Tests that FilterPlugins returns filtered plugins when the candidates list is not empty.
+    /// </summary>
     public void FilterPlugins_ReturnsFilteredPlugins_WhenCandidatesListIsNotEmpty()
     {
         // Arrange
