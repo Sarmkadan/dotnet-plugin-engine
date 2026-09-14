@@ -7,6 +7,9 @@ using PluginEngine.Formatters;
 using PluginEngine.Domain.Entities;
 using Xunit;
 
+/// <summary>
+/// Tests for the CsvPluginFormatter class.
+/// </summary>
 public class CsvPluginFormatterTests
 {
     private readonly CsvPluginFormatter _formatter = new();
@@ -82,6 +85,9 @@ public class CsvPluginFormatterTests
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that formatting a single plugin returns CSV with header and one data row.
+    /// </summary>
     public async Task FormatPluginAsync_ReturnsHeaderAndSingleRow()
     {
         // Arrange
@@ -100,6 +106,9 @@ public class CsvPluginFormatterTests
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that formatting an empty plugin collection returns only the CSV header.
+    /// </summary>
     public async Task FormatPluginsAsync_EmptyCollection_ReturnsOnlyHeader()
     {
         // Arrange
@@ -115,6 +124,9 @@ public class CsvPluginFormatterTests
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that the detailed report includes plugin information, dependencies, and capabilities sections.
+    /// </summary>
     public async Task FormatDetailedReportAsync_IncludesDependenciesAndCapabilitiesSections()
     {
         // Arrange
@@ -141,6 +153,9 @@ public class CsvPluginFormatterTests
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that the health report CSV line is correctly formatted with all fields.
+    /// </summary>
     public async Task FormatHealthReportAsync_ProducesCorrectCsvLine()
     {
         // Arrange
@@ -166,6 +181,9 @@ public class CsvPluginFormatterTests
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that passing a null plugin collection throws an ArgumentNullException.
+    /// </summary>
     public async Task FormatPluginsAsync_NullArgument_ThrowsArgumentNullException()
     {
         // Arrange
