@@ -41,6 +41,8 @@ public sealed class PluginEngineCliHost
     /// <summary>
     /// Entry point for CLI execution. Parses command-line arguments and routes to appropriate handler.
     /// </summary>
+    /// <param name="args">The command-line arguments.</param>
+    /// <returns>The exit code.</returns>
     public async Task<int> RunAsync(string[] args)
     {
         try
@@ -74,6 +76,11 @@ public sealed class PluginEngineCliHost
         }
     }
 
+    /// <summary>
+    /// Executes the load command to load a plugin from the specified path.
+    /// </summary>
+    /// <param name="args">The command arguments containing the plugin path.</param>
+    /// <returns>The exit code indicating success or failure.</returns>
     private async Task<int> ExecuteLoadCommand(Dictionary<string, string> args)
     {
         if (!args.TryGetValue("path", out var path))
@@ -95,6 +102,11 @@ public sealed class PluginEngineCliHost
         }
     }
 
+    /// <summary>
+    /// Executes the unload command to unload a plugin by its identifier.
+    /// </summary>
+    /// <param name="args">The command arguments containing the plugin ID.</param>
+    /// <returns>The exit code indicating success or failure.</returns>
     private async Task<int> ExecuteUnloadCommand(Dictionary<string, string> args)
     {
         if (!args.TryGetValue("id", out var pluginId))
@@ -116,6 +128,11 @@ public sealed class PluginEngineCliHost
         }
     }
 
+    /// <summary>
+    /// Executes the list command to display all loaded plugins.
+    /// </summary>
+    /// <param name="args">The command arguments (unused).</param>
+    /// <returns>The exit code indicating success or failure.</returns>
     private async Task<int> ExecuteListCommand(Dictionary<string, string> args)
     {
         try
@@ -148,6 +165,11 @@ public sealed class PluginEngineCliHost
         }
     }
 
+    /// <summary>
+    /// Executes the status command to display the plugin engine status.
+    /// </summary>
+    /// <param name="args">The command arguments (unused).</param>
+    /// <returns>The exit code indicating success or failure.</returns>
     private async Task<int> ExecuteStatusCommand(Dictionary<string, string> args)
     {
         try
@@ -165,12 +187,21 @@ public sealed class PluginEngineCliHost
         }
     }
 
+    /// <summary>
+    /// Executes the version command to display the version information.
+    /// </summary>
+    /// <returns>The exit code.</returns>
     private Task<int> ExecuteVersionCommand()
     {
         Console.WriteLine("Plugin Engine CLI v1.0.0");
         return Task.FromResult(0);
     }
 
+    /// <summary>
+    /// Executes the marketplace command to interact with the plugin marketplace.
+    /// </summary>
+    /// <param name="args">The command arguments containing action and parameters.</param>
+    /// <returns>The exit code indicating success or failure.</returns>
     private async Task<int> ExecuteMarketplaceCommand(Dictionary<string, string> args)
     {
         // Sub-commands: search, info, install, browse, trending, featured
@@ -232,6 +263,11 @@ public sealed class PluginEngineCliHost
         }
     }
 
+    /// <summary>
+    /// Executes the hot-swap command to replace a running plugin with a new assembly.
+    /// </summary>
+    /// <param name="args">The command arguments containing the plugin ID and new assembly path.</param>
+    /// <returns>The exit code indicating success or failure.</returns>
     private async Task<int> ExecuteHotSwapCommand(Dictionary<string, string> args)
     {
         if (!args.TryGetValue("id", out var idStr) || !Guid.TryParse(idStr, out var pluginId))
@@ -258,6 +294,11 @@ public sealed class PluginEngineCliHost
         }
     }
 
+    /// <summary>
+    /// Executes the resolve command to show the dependency resolution plan for a plugin.
+    /// </summary>
+    /// <param name="args">The command arguments containing the plugin ID.</param>
+    /// <returns>The exit code indicating success or failure.</returns>
     private async Task<int> ExecuteResolveCommand(Dictionary<string, string> args)
     {
         if (!args.TryGetValue("id", out var idStr) || !Guid.TryParse(idStr, out var pluginId))
@@ -300,6 +341,10 @@ public sealed class PluginEngineCliHost
         }
     }
 
+    /// <summary>
+    /// Prints a list of marketplace entries to the console in a formatted table.
+    /// </summary>
+    /// <param name="entries">The list of marketplace entries to print.</param>
     private static void PrintMarketplaceEntries(List<MarketplaceEntry> entries)
     {
         if (entries.Count == 0) { Console.WriteLine("No plugins found."); return; }
