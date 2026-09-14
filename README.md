@@ -240,3 +240,9 @@ finally
     await pluginEngine.ShutdownAsync();
 }
 ```
+
+## Contributing
+Fork the repository, create a branch for your feature or bug fix, make your changes, and ensure that `dotnet test` passes before submitting a pull request. Follow conventional commits for commit messages.
+
+## License
+This project is licensed under the MIT License - see the `src/PluginEngine/PluginEngine.csproj` file for the `PackageLicenseExpression` property.
