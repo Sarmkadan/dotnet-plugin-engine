@@ -22,6 +22,13 @@ public sealed class BackgroundPluginMonitor : BackgroundService
     private const int FileWriteSettleDelayMs = 1000;
     private const int HotReloadDebounceDelayMs = 500;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BackgroundPluginMonitor"/> class.
+    /// </summary>
+    /// <param name="pluginManager">The plugin manager service.</param>
+    /// <param name="hotReloadService">The hot reload service.</param>
+    /// <param name="logger">The logger.</param>
+    /// <param name="options">The plugin engine options.</param>
     public BackgroundPluginMonitor(
         IPluginManagerService pluginManager,
         IHotReloadService hotReloadService,
@@ -34,6 +41,11 @@ public sealed class BackgroundPluginMonitor : BackgroundService
         _options = options.Value;
     }
 
+    /// <summary>
+    /// Executes the background service logic.
+    /// </summary>
+    /// <param name="stoppingToken">The cancellation token indicating when the service should stop.</param>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         if (!_options.EnableHotReload)
@@ -68,6 +80,20 @@ public sealed class BackgroundPluginMonitor : BackgroundService
         }
     }
 
+    /// <summary>
+    /// Stops the background service.
+    /// </summary>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>A task that represents the asynchronous stop operation.</returns>
+    public override async Task StopAsync(CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Plugin monitor service stopping");
+        await base.StopAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// Initializes the file system watcher to monitor plugin directory changes.
+    /// </summary>
     private void InitializeFileSystemWatcher()
     {
         try
@@ -97,6 +123,11 @@ public sealed class BackgroundPluginMonitor : BackgroundService
         }
     }
 
+    /// <summary>
+    /// Handles the created event for a plugin file.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event arguments.</param>
     private void OnPluginFileCreated(object sender, FileSystemEventArgs e)
     {
         _logger.LogInformation("Plugin file created: {FileName}", e.Name);
@@ -116,6 +147,11 @@ public sealed class BackgroundPluginMonitor : BackgroundService
         });
     }
 
+    /// <summary>
+    /// Handles the changed event for a plugin file.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event arguments.</param>
     private void OnPluginFileChanged(object sender, FileSystemEventArgs e)
     {
         _logger.LogInformation("Plugin file changed: {FileName}", e.Name);
@@ -135,16 +171,15 @@ public sealed class BackgroundPluginMonitor : BackgroundService
         });
     }
 
+    /// <summary>
+    /// Handles the deleted event for a plugin file.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event arguments.</param>
     private void OnPluginFileDeleted(object sender, FileSystemEventArgs e)
     {
         _logger.LogInformation("Plugin file deleted: {FileName}", e.Name);
 
         // Could automatically unload the plugin if desired
-    }
-
-    public override async Task StopAsync(CancellationToken cancellationToken)
-    {
-        _logger.LogInformation("Plugin monitor service stopping");
-        await base.StopAsync(cancellationToken);
     }
 }
