@@ -5,10 +5,14 @@ using Xunit;
 
 namespace PluginEngine.Tests
 {
+    /// <summary>
+    /// Tests for the <see cref="DependencyResolutionException"/> class.
+    /// </summary>
     public class DependencyResolutionExceptionTests
     {
         #region Constructors
 
+        /// <summary>Tests the parameterless constructor creates exception with default values.</summary>
         [Fact]
         public void Constructor_Parameterless_CreatesExceptionWithDefaultValues()
         {
@@ -23,6 +27,7 @@ namespace PluginEngine.Tests
             Assert.Empty(exception.UnresolvedDependencies);
         }
 
+        /// <summary>Tests the constructor with message sets message and default values.</summary>
         [Fact]
         public void Constructor_WithMessage_SetsMessageAndDefaultValues()
         {
@@ -41,6 +46,7 @@ namespace PluginEngine.Tests
             Assert.Empty(exception.UnresolvedDependencies);
         }
 
+        /// <summary>Tests the constructor with message and reason sets properties correctly.</summary>
         [Fact]
         public void Constructor_WithMessageAndReason_SetsPropertiesCorrectly()
         {
@@ -60,6 +66,7 @@ namespace PluginEngine.Tests
             Assert.Empty(exception.UnresolvedDependencies);
         }
 
+        /// <summary>Tests the constructor with full details sets all properties.</summary>
         [Fact]
         public void Constructor_WithFullDetails_SetsAllProperties()
         {
@@ -81,6 +88,7 @@ namespace PluginEngine.Tests
             Assert.Empty(exception.UnresolvedDependencies);
         }
 
+        /// <summary>Tests the constructor with full details and null plugin ID sets properties correctly.</summary>
         [Fact]
         public void Constructor_WithFullDetails_NullPluginId_SetsPropertiesCorrectly()
         {
@@ -106,6 +114,7 @@ namespace PluginEngine.Tests
 
         #region AddUnresolvedDependency
 
+        /// <summary>Tests adding a valid unresolved dependency adds it to the collection.</summary>
         [Fact]
         public void AddUnresolvedDependency_AddsValidDependencyName()
         {
@@ -121,6 +130,7 @@ namespace PluginEngine.Tests
             Assert.Equal("Plugin.Core", exception.UnresolvedDependencies[0]);
         }
 
+        /// <summary>Tests adding multiple unresolved dependencies adds them all.</summary>
         [Fact]
         public void AddUnresolvedDependency_AddsMultipleDependencies()
         {
@@ -139,6 +149,7 @@ namespace PluginEngine.Tests
             Assert.Equal("Plugin.Data", exception.UnresolvedDependencies[2]);
         }
 
+        /// <summary>Tests adding whitespace-only dependency does not add and returns same instance.</summary>
         [Fact]
         public void AddUnresolvedDependency_WithWhitespaceOnly_ReturnsSameInstanceWithoutAdding()
         {
@@ -155,6 +166,7 @@ namespace PluginEngine.Tests
             Assert.Empty(exception.UnresolvedDependencies);
         }
 
+        /// <summary>Tests adding empty string dependency does not add and returns same instance.</summary>
         [Fact]
         public void AddUnresolvedDependency_WithEmptyString_ReturnsSameInstanceWithoutAdding()
         {
@@ -171,6 +183,7 @@ namespace PluginEngine.Tests
             Assert.Empty(exception.UnresolvedDependencies);
         }
 
+        /// <summary>Tests adding null dependency does not add and returns same instance.</summary>
         [Fact]
         public void AddUnresolvedDependency_WithNull_ReturnsSameInstanceWithoutAdding()
         {
@@ -191,6 +204,7 @@ namespace PluginEngine.Tests
 
         #region ToString
 
+        /// <summary>Tests ToString with no unresolved dependencies returns base ToString.</summary>
         [Fact]
         public void ToString_WithNoUnresolvedDependencies_ReturnsBaseToString()
         {
@@ -205,6 +219,7 @@ namespace PluginEngine.Tests
             Assert.DoesNotContain("Unresolved Dependencies", result);
         }
 
+        /// <summary>Tests ToString with single unresolved dependency returns formatted output.</summary>
         [Fact]
         public void ToString_WithSingleUnresolvedDependency_ReturnsFormattedOutput()
         {
@@ -221,6 +236,7 @@ namespace PluginEngine.Tests
             Assert.Contains("- Plugin.Core", result);
         }
 
+        /// <summary>Tests ToString with multiple unresolved dependencies returns all.</summary>
         [Fact]
         public void ToString_WithMultipleUnresolvedDependencies_ReturnsAllDependencies()
         {
@@ -241,6 +257,7 @@ namespace PluginEngine.Tests
             Assert.Contains("- Plugin.Data", result);
         }
 
+        /// <summary>Tests ToString with full details contains all properties.</summary>
         [Fact]
         public void ToString_WithFullDetails_ContainsAllProperties()
         {
@@ -270,6 +287,7 @@ namespace PluginEngine.Tests
 
         #region PropertyAccessors
 
+        /// <summary>Tests the DependencyPluginId property can be set and retrieved.</summary>
         [Fact]
         public void DependencyPluginId_CanBeSetAndGet()
         {
@@ -284,6 +302,7 @@ namespace PluginEngine.Tests
             Assert.Equal(pluginId, exception.DependencyPluginId);
         }
 
+        /// <summary>Tests the VersionConstraint property can be set and retrieved.</summary>
         [Fact]
         public void VersionConstraint_CanBeSetAndGet()
         {
@@ -298,6 +317,7 @@ namespace PluginEngine.Tests
             Assert.Equal(version, exception.VersionConstraint);
         }
 
+        /// <summary>Tests the Reason property can be set and retrieved.</summary>
         [Fact]
         public void Reason_CanBeSetAndGet()
         {
@@ -312,6 +332,7 @@ namespace PluginEngine.Tests
             Assert.Equal(reason, exception.Reason);
         }
 
+        /// <summary>Tests the UnresolvedDependencies list is initialized and can be modified.</summary>
         [Fact]
         public void UnresolvedDependencies_ListIsInitializedAndCanBeModified()
         {
@@ -330,6 +351,7 @@ namespace PluginEngine.Tests
 
         #region EdgeCases
 
+        /// <summary>Tests constructor with empty message sets empty message.</summary>
         [Fact]
         public void Constructor_WithEmptyMessage_SetsEmptyMessage()
         {
@@ -341,6 +363,7 @@ namespace PluginEngine.Tests
             Assert.Equal("DEPENDENCY_RESOLUTION_ERROR", exception.ErrorCode);
         }
 
+        /// <summary>Tests constructor with null message sets null message.</summary>
         [Fact]
         public void Constructor_WithNullMessage_SetsNullMessage()
         {
@@ -352,6 +375,7 @@ namespace PluginEngine.Tests
             Assert.Equal("DEPENDENCY_RESOLUTION_ERROR", exception.ErrorCode);
         }
 
+        /// <summary>Tests constructor with whitespace message sets whitespace message.</summary>
         [Fact]
         public void Constructor_WithWhitespaceMessage_SetsWhitespaceMessage()
         {
@@ -362,6 +386,7 @@ namespace PluginEngine.Tests
             Assert.Equal("   ", exception.Message);
         }
 
+        /// <summary>Tests constructor with all enum values sets correct reason.</summary>
         [Fact]
         public void Constructor_WithAllEnumValues_SetsCorrectReason()
         {
