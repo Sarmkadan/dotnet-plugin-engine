@@ -3,8 +3,12 @@ using System;
 using System.Collections.Generic;
 using PluginEngine.Exceptions;
 
+    /// <summary>
+    /// Tests for the <see cref="PluginException"/> class.
+    /// </summary>
 public class PluginExceptionTests
 {
+    /// <summary>Tests the constructor with no message, no error code, no entity ID, and no context.</summary>
     [Fact]
     public void Constructor_NoMessage_NoErrorCode_NoEntityId_NoContext()
     {
@@ -18,6 +22,7 @@ public class PluginExceptionTests
         Assert.Empty(exception.Context);
     }
 
+    /// <summary>Tests the constructor with a message but no error code, no entity ID, and no context.</summary>
     [Fact]
     public void Constructor_Message_NoErrorCode_NoEntityId_NoContext()
     {
@@ -31,6 +36,7 @@ public class PluginExceptionTests
         Assert.Empty(exception.Context);
     }
 
+    /// <summary>Tests the constructor with a message and error code but no entity ID and no context.</summary>
     [Fact]
     public void Constructor_Message_WithErrorCode_NoEntityId_NoContext()
     {
@@ -44,6 +50,7 @@ public class PluginExceptionTests
         Assert.Empty(exception.Context);
     }
 
+    /// <summary>Tests the constructor with a message and inner exception but no error code, no entity ID, and no context.</summary>
     [Fact]
     public void Constructor_Message_WithInnerException_NoErrorCode_NoEntityId_NoContext()
     {
@@ -59,6 +66,7 @@ public class PluginExceptionTests
         Assert.Same(innerException, exception.InnerException);
     }
 
+    /// <summary>Tests the ErrorCode getter property.</summary>
     [Fact]
     public void ErrorCode_Getter()
     {
@@ -72,6 +80,7 @@ public class PluginExceptionTests
         Assert.Equal("TEST_ERROR_CODE", errorCode);
     }
 
+    /// <summary>Tests the EntityId getter property.</summary>
     [Fact]
     public void EntityId_Getter()
     {
@@ -85,6 +94,7 @@ public class PluginExceptionTests
         Assert.NotNull(entityId);
     }
 
+    /// <summary>Tests the Context getter property.</summary>
     [Fact]
     public void Context_Getter()
     {
@@ -101,6 +111,7 @@ public class PluginExceptionTests
         Assert.Equal("value", context["key"]);
     }
 
+    /// <summary>Tests the ToString method with no entity ID and no context.</summary>
     [Fact]
     public void ToString_NoEntityId_NoContext()
     {
@@ -113,6 +124,7 @@ public class PluginExceptionTests
         Assert.Contains("Test message", toString);
     }
 
+    /// <summary>Tests the ToString method with an entity ID but no context.</summary>
     [Fact]
     public void ToString_WithEntityId_NoContext()
     {
@@ -126,6 +138,7 @@ public class PluginExceptionTests
         Assert.Contains("Entity: ", toString);
     }
 
+    /// <summary>Tests the ToString method with context but no entity ID.</summary>
     [Fact]
     public void ToString_WithContext_NoEntityId()
     {
@@ -140,6 +153,7 @@ public class PluginExceptionTests
         Assert.Contains("Context: key=value", toString);
     }
 
+    /// <summary>Tests the WithContext method adds context to the exception.</summary>
     [Fact]
     public void WithContext_AddsContext()
     {
@@ -155,6 +169,7 @@ public class PluginExceptionTests
         Assert.Equal("value", exception.Context["key"]);
     }
 
+    /// <summary>Tests the WithEntityId method sets the entity ID.</summary>
     [Fact]
     public void WithEntityId_SetsEntityId()
     {
@@ -168,6 +183,7 @@ public class PluginExceptionTests
         Assert.NotNull(exception.EntityId);
     }
 
+    /// <summary>Tests that the constructor throws ArgumentNullException when message is null.</summary>
     [Fact]
     public void Constructor_ThrowsArgumentNullException_WhenMessageIsNull()
     {
@@ -175,6 +191,7 @@ public class PluginExceptionTests
         Assert.Throws<ArgumentNullException>(() => new PluginException(null));
     }
 
+    /// <summary>Tests that the constructor throws ArgumentNullException when error code is null.</summary>
     [Fact]
     public void Constructor_ThrowsArgumentNullException_WhenErrorCodeIsNull()
     {
@@ -182,6 +199,7 @@ public class PluginExceptionTests
         Assert.Throws<ArgumentNullException>(() => new PluginException("Test message", null));
     }
 
+    /// <summary>Tests that WithContext throws ArgumentNullException when key is null.</summary>
     [Fact]
     public void WithContext_ThrowsArgumentNullException_WhenKeyIsNull()
     {
@@ -190,6 +208,7 @@ public class PluginExceptionTests
         Assert.Throws<ArgumentNullException>(() => exception.WithContext(null, "value"));
     }
 
+    /// <summary>Tests that WithContext throws ArgumentNullException when value is null.</summary>
     [Fact]
     public void WithContext_ThrowsArgumentNullException_WhenValueIsNull()
     {
