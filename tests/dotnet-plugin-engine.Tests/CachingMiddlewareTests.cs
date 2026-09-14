@@ -9,9 +9,13 @@ using System.Threading.Tasks;
 
 namespace PluginEngine.Tests
 {
+    /// <summary>
+    /// Tests for the CachingMiddleware class.
+    /// </summary>
     public class CachingMiddlewareTests
     {
         [Fact]
+        /// <summary>Verifies that the middleware works correctly for the GetMetadata operation.</summary>
         public async Task HappyPath_GetMetadata()
         {
             // Arrange
@@ -38,6 +42,7 @@ namespace PluginEngine.Tests
         }
 
         [Fact]
+        /// <summary>Verifies that the middleware works correctly for the ResolveDependencies operation.</summary>
         public async Task HappyPath_ResolveDependencies()
         {
             // Arrange
@@ -64,6 +69,7 @@ namespace PluginEngine.Tests
         }
 
         [Fact]
+        /// <summary>Verifies that the middleware works correctly for the ValidateVersion operation.</summary>
         public async Task HappyPath_ValidateVersion()
         {
             // Arrange
@@ -90,6 +96,7 @@ namespace PluginEngine.Tests
         }
 
         [Fact]
+        /// <summary>Verifies that the middleware throws an ArgumentNullException when the context is null.</summary>
         public async Task EdgeCase_NullContext()
         {
             // Arrange
@@ -101,6 +108,7 @@ namespace PluginEngine.Tests
         }
 
         [Fact]
+        /// <summary>Verifies that the middleware throws an ArgumentNullException when the next delegate is null.</summary>
         public async Task EdgeCase_NullNext()
         {
             // Arrange
@@ -120,6 +128,7 @@ namespace PluginEngine.Tests
         }
 
         [Fact]
+        /// <summary>Verifies that the middleware marks the context as unsuccessful when an invalid operation type is provided.</summary>
         public async Task ErrorPath_InvalidOperationType()
         {
             // Arrange
