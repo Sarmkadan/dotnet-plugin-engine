@@ -4,8 +4,12 @@ using Xunit;
 
 namespace PluginEngine.Tests
 {
+    /// <summary>
+    /// Tests for the PluginMetadata class.
+    /// </summary>
     public class PluginMetadataTests
     {
+        /// <summary>Constructor initializes with default values.</summary>
         [Fact]
         public void Constructor_InitializesWithDefaultValues()
         {
@@ -31,6 +35,7 @@ namespace PluginEngine.Tests
             Assert.NotNull(metadata.CustomProperties);
         }
 
+        /// <summary>SetCustomProperty adds or updates a value.</summary>
         [Fact]
         public void SetCustomProperty_AddsOrUpdatesValue()
         {
@@ -46,6 +51,7 @@ namespace PluginEngine.Tests
             Assert.Equal(string.Empty, metadata.GetCustomProperty("key2"));
         }
 
+        /// <summary>GetCustomProperty returns null for a missing key.</summary>
         [Fact]
         public void GetCustomProperty_ReturnsNullForMissingKey()
         {
@@ -53,6 +59,7 @@ namespace PluginEngine.Tests
             Assert.Null(metadata.GetCustomProperty("nonexistent"));
         }
 
+        /// <summary>RemoveCustomProperty removes an existing key.</summary>
         [Fact]
         public void RemoveCustomProperty_RemovesExistingKey()
         {
@@ -62,6 +69,7 @@ namespace PluginEngine.Tests
             Assert.Null(metadata.GetCustomProperty("key1"));
         }
 
+        /// <summary>RemoveCustomProperty returns false for a missing key.</summary>
         [Fact]
         public void RemoveCustomProperty_ReturnsFalseForMissingKey()
         {
@@ -69,6 +77,7 @@ namespace PluginEngine.Tests
             Assert.False(metadata.RemoveCustomProperty("nonexistent"));
         }
 
+        /// <summary>ClearCustomProperties removes all custom properties.</summary>
         [Fact]
         public void ClearCustomProperties_RemovesAll()
         {
@@ -80,6 +89,7 @@ namespace PluginEngine.Tests
             Assert.Empty(metadata.CustomProperties);
         }
 
+        /// <summary>GetSummary returns a formatted string.</summary>
         [Fact]
         public void GetSummary_ReturnsFormattedString()
         {
@@ -98,6 +108,7 @@ namespace PluginEngine.Tests
             Assert.Contains("A test plugin", summary);
         }
 
+        /// <summary>IsValid returns false when required fields are empty.</summary>
         [Fact]
         public void IsValid_ReturnsFalseWhenRequiredFieldsAreEmpty()
         {
@@ -113,6 +124,7 @@ namespace PluginEngine.Tests
             Assert.False(metadata.IsValid());
         }
 
+        /// <summary>IsValid returns true when required fields are set.</summary>
         [Fact]
         public void IsValid_ReturnsTrueWhenRequiredFieldsAreSet()
         {
