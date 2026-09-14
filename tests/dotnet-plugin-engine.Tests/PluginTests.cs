@@ -5,8 +5,10 @@ using Xunit;
 
 namespace dotnet_plugin_engine.Tests;
 
+/// <summary>Plugin entity defaults, validation, dependency/capability add-remove.</summary>
 public class PluginTests
 {
+    /// <summary>Tests that a new plugin has default values and is invalid.</summary>
     [Fact]
     public void NewPlugin_HasDefaultValues_AndIsInvalid()
     {
@@ -28,6 +30,7 @@ public class PluginTests
         Assert.Equal("Plugin name is required.", error);
     }
 
+    /// <summary>Tests that setting required properties makes the plugin valid.</summary>
     [Fact]
     public void SettingRequiredProperties_MakesPluginValid()
     {
@@ -43,6 +46,7 @@ public class PluginTests
         Assert.Equal(string.Empty, plugin.GetValidationError());
     }
 
+    /// <summary>Tests that adding a null dependency throws ArgumentNullException.</summary>
     [Fact]
     public void AddDependency_Null_ThrowsArgumentNullException()
     {
@@ -50,6 +54,7 @@ public class PluginTests
         Assert.Throws<ArgumentNullException>(() => plugin.AddDependency(null!));
     }
 
+    /// <summary>Tests that adding and removing a dependency works correctly.</summary>
     [Fact]
     public void AddAndRemoveDependency_WorksCorrectly()
     {
@@ -70,6 +75,7 @@ public class PluginTests
         Assert.Empty(plugin.Dependencies);
     }
 
+    /// <summary>Tests that removing a non-existing dependency returns false.</summary>
     [Fact]
     public void RemoveDependency_NonExisting_ReturnsFalse()
     {
@@ -78,6 +84,7 @@ public class PluginTests
         Assert.False(result);
     }
 
+    /// <summary>Tests that adding a null capability throws ArgumentNullException.</summary>
     [Fact]
     public void AddCapability_Null_ThrowsArgumentNullException()
     {
@@ -85,6 +92,7 @@ public class PluginTests
         Assert.Throws<ArgumentNullException>(() => plugin.AddCapability(null!));
     }
 
+    /// <summary>Tests that adding a duplicate capability is ignored.</summary>
     [Fact]
     public void AddCapability_Duplicate_IsIgnored()
     {
@@ -97,6 +105,7 @@ public class PluginTests
         Assert.Equal("FeatureX", plugin.Capabilities.First().Name);
     }
 
+    /// <summary>Tests that GetValidationError returns the first missing field.</summary>
     [Fact]
     public void GetValidationError_ReturnsFirstMissingField()
     {
