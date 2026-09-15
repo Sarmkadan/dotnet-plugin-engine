@@ -20,6 +20,9 @@ public class PluginEngineCoreBenchmarks
     private string _testPluginDirectory = string.Empty;
     private const int PluginCount = 20;
 
+    /// <summary>
+    /// Sets up the benchmark by creating a test plugin directory with sample plugins and initializing the PluginEngine.
+    /// </summary>
     [GlobalSetup]
     public async Task GlobalSetup()
     {
@@ -51,6 +54,9 @@ public class PluginEngineCoreBenchmarks
         await _pluginEngine.InitializeAsync();
     }
 
+    /// <summary>
+    /// Cleans up the benchmark by deleting the test plugin directory and shutting down the PluginEngine.
+    /// </summary>
     [GlobalCleanup]
     public async Task GlobalCleanup()
     {
