@@ -60,6 +60,17 @@ public sealed class DependencyConflict
 
     /// <summary>Gets or sets a human-readable description of why the conflict exists.</summary>
     public string Description { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Returns a string representation of the dependency conflict.
+    /// </summary>
+    /// <returns>
+    /// A string in the format: "{DependencyName} ({DependencyPluginId}) - {Description}; requirements: {ConflictingRequirements}"
+    /// </returns>
+    public override string ToString()
+    {
+        return $"{DependencyName} ({DependencyPluginId}) - {Description}; requirements: {string.Join(", ", ConflictingRequirements)}";
+    }
 }
 
 /// <summary>
@@ -75,6 +86,17 @@ public sealed class ConflictingRequirement
 
     /// <summary>Gets or sets the version constraint the requiring plugin declares.</summary>
     public string VersionConstraint { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Returns a string representation of the conflicting requirement.
+    /// </summary>
+    /// <returns>
+    /// A string in the format: "{RequiringPluginName} ({RequiringPluginId}): {VersionConstraint}"
+    /// </returns>
+    public override string ToString()
+    {
+        return $"{RequiringPluginName} ({RequiringPluginId}): {VersionConstraint}";
+    }
 }
 
 /// <summary>
@@ -96,6 +118,17 @@ public sealed class DependencyResolutionPlan
 
     /// <summary>Gets or sets when this plan was generated.</summary>
     public DateTime GeneratedAtUtc { get; set; } = DateTime.UtcNow;
+
+    /// <summary>
+    /// Returns a string representation of the dependency resolution plan.
+    /// </summary>
+    /// <returns>
+    /// A string in the format: "Resolution plan for plugin {RootPluginId} generated at {GeneratedAtUtc:O}: {Steps.Count} steps, {Conflicts.Count} conflicts"
+    /// </returns>
+    public override string ToString()
+    {
+        return $"Resolution plan for plugin {RootPluginId} generated at {GeneratedAtUtc:O}: {Steps.Count} steps, {Conflicts.Count} conflicts";
+    }
 }
 
 /// <summary>
