@@ -203,4 +203,10 @@ public sealed class PluginValidationResult
     public required List<string> Errors { get; set; }
 
     public string GetErrorSummary() => string.Join("\n  ", Errors);
+
+    /// <summary>
+    /// Returns a short human-readable summary of the validation outcome.
+    /// </summary>
+    public override string ToString() =>
+        IsValid ? "Valid" : $"Invalid: {Errors.Count} errors, 0 warnings";
 }
