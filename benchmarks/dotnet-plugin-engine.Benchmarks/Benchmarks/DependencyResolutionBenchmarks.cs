@@ -17,6 +17,9 @@ public class DependencyResolutionBenchmarks
     private IDependencyResolutionService _dependencyResolver = null!;
     private IServiceProvider _serviceProvider = null!;
 
+    /// <summary>
+    /// Sets up the benchmark by initializing the dependency injection container and resolving the dependency resolution service.
+    /// </summary>
     [GlobalSetup]
     public void GlobalSetup()
     {
