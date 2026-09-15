@@ -101,20 +101,20 @@ public sealed class MarketplaceBrowserService : IMarketplaceBrowserService
     private readonly ILogger<MarketplaceBrowserService> _logger;
 
     private static readonly TimeSpan CategoriesTtl = TimeSpan.FromHours(6);
-    private static readonly TimeSpan TrendingTtl   = TimeSpan.FromMinutes(15);
-    private static readonly TimeSpan FeaturedTtl   = TimeSpan.FromHours(1);
-    private static readonly TimeSpan HomePageTtl   = TimeSpan.FromMinutes(10);
+    private static readonly TimeSpan TrendingTtl = TimeSpan.FromMinutes(15);
+    private static readonly TimeSpan FeaturedTtl = TimeSpan.FromHours(1);
+    private static readonly TimeSpan HomePageTtl = TimeSpan.FromMinutes(10);
 
     private static readonly List<MarketplaceCategory> BuiltInCategories =
     [
-        new() { Id = "analytics",      Name = "Analytics",      Description = "Data analysis and reporting",       Icon = "📊" },
-        new() { Id = "authentication", Name = "Authentication", Description = "Identity and access management",    Icon = "🔐" },
-        new() { Id = "caching",        Name = "Caching",        Description = "Caching and memoization",           Icon = "⚡" },
-        new() { Id = "database",       Name = "Database",       Description = "Database connectivity and ORMs",    Icon = "🗄️" },
-        new() { Id = "logging",        Name = "Logging",        Description = "Logging and observability",         Icon = "📝" },
-        new() { Id = "messaging",      Name = "Messaging",      Description = "Event bus and message brokers",     Icon = "✉️" },
-        new() { Id = "security",       Name = "Security",       Description = "Encryption and security auditing",  Icon = "🛡️" },
-        new() { Id = "ui",             Name = "UI",             Description = "User interface components",         Icon = "🖥️" },
+        new() { Id = "analytics", Name = "Analytics", Description = "Data analysis and reporting", Icon = "📊" },
+        new() { Id = "authentication", Name = "Authentication", Description = "Identity and access management", Icon = "🔐" },
+        new() { Id = "caching", Name = "Caching", Description = "Caching and memoization", Icon = "⚡" },
+        new() { Id = "database", Name = "Database", Description = "Database connectivity and ORMs", Icon = "🗄️" },
+        new() { Id = "logging", Name = "Logging", Description = "Logging and observability", Icon = "📝" },
+        new() { Id = "messaging", Name = "Messaging", Description = "Event bus and message brokers", Icon = "✉️" },
+        new() { Id = "security", Name = "Security", Description = "Encryption and security auditing", Icon = "🛡️" },
+        new() { Id = "ui", Name = "UI", Description = "User interface components", Icon = "🖥️" },
     ];
 
     /// <summary>Initialises a new instance of <see cref="MarketplaceBrowserService"/>.</summary>
