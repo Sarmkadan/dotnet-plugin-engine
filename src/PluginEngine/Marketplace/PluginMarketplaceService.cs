@@ -72,6 +72,7 @@ public sealed class PluginMarketplaceService : IPluginMarketplaceService
     private const int MinEngineMajorForCurrent = 10;
     private const int NotFoundErrorCode = 404;
     private const int BadGatewayErrorCode = 502;
+    private const int DefaultFailureErrorCode = 500;
 
     private readonly IRemotePluginRegistry _registry;
     private readonly IMemoryCache _cache;
@@ -187,7 +188,7 @@ public sealed class PluginMarketplaceService : IPluginMarketplaceService
     {
         var matrixResult = await GetCompatibilityMatrixAsync(pluginId, cancellationToken);
         if (!matrixResult.Success)
-            return PluginOperationResult<CompatibilityStatus>.CreateFailure(matrixResult.Message, matrixResult.ErrorCode ?? 500);
+            return PluginOperationResult<CompatibilityStatus>.CreateFailure(matrixResult.Message, matrixResult.ErrorCode ?? DefaultFailureErrorCode);
 
         var status = matrixResult.Data!.GetStatus(pluginVersion, engineVersion);
         return PluginOperationResult<CompatibilityStatus>.CreateSuccess(status, $"Compatibility status: {status}.");
