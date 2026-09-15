@@ -20,6 +20,9 @@ public class PluginLoadingBenchmarks
     private string _testPluginDirectory = string.Empty;
     private const int PluginCount = 10;
 
+    /// <summary>
+    /// Sets up the benchmark environment by creating test plugin assemblies and initializing the plugin loader service.
+    /// </summary>
     [GlobalSetup]
     public async Task GlobalSetup()
     {
@@ -46,6 +49,9 @@ public class PluginLoadingBenchmarks
         _pluginLoaderService = serviceProvider.GetRequiredService<IPluginLoaderService>();
     }
 
+    /// <summary>
+    /// Cleans up the benchmark environment by removing test files and unloading plugins.
+    /// </summary>
     [GlobalCleanup]
     public async Task GlobalCleanup()
     {
