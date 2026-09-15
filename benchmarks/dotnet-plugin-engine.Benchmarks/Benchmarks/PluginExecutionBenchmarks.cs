@@ -21,6 +21,10 @@ public class PluginExecutionBenchmarks
     private Plugin _loadedPlugin = null!;
     private const int PluginCount = 15;
 
+    /// <summary>
+    /// Sets up the benchmark by creating a test plugin directory, generating test plugin assemblies,
+    /// initializing the plugin engine, and loading plugins.
+    /// </summary>
     [GlobalSetup]
     public async Task GlobalSetup()
     {
@@ -57,6 +61,9 @@ public class PluginExecutionBenchmarks
         _loadedPlugin = loadedPlugins.FirstOrDefault() ?? throw new InvalidOperationException("No plugins loaded");
     }
 
+    /// <summary>
+    /// Cleans up the benchmark by deleting the test plugin directory and shutting down the plugin engine.
+    /// </summary>
     [GlobalCleanup]
     public async Task GlobalCleanup()
     {
