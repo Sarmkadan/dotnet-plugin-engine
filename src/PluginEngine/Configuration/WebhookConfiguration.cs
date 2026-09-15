@@ -92,6 +92,15 @@ public sealed class WebhookConfiguration
 
         return true;
     }
+
+    /// <summary>
+    /// Returns a string representation of the webhook configuration.
+    /// </summary>
+    /// <returns>URL, enabled status, and event count.</returns>
+    public override string ToString()
+    {
+        return $"WebhookConfiguration: URL={EndpointPath}, Enabled={Enabled}, EventCount={EventFilters.Count}";
+    }
 }
 
 /// <summary>
@@ -161,6 +170,15 @@ public sealed class WebhookRetryPolicy
     {
         var delay = (int)(InitialDelayMs * Math.Pow(BackoffMultiplier, attemptNumber - 1));
         return Math.Min(delay, MaxDelayMs);
+    }
+
+    /// <summary>
+    /// Returns a string representation of the webhook retry policy.
+    /// </summary>
+    /// <returns>Max attempts, delay, and backoff multiplier.</returns>
+    public override string ToString()
+    {
+        return $"WebhookRetryPolicy: MaxAttempts={MaxRetries}, InitialDelayMs={InitialDelayMs}, BackoffMultiplier={BackoffMultiplier}";
     }
 }
 
