@@ -173,6 +173,18 @@ public sealed class VersionCompatibilityMatrix
             .Where(kvp => kvp.Value.TryGetValue(engineVersion, out var s) && s == CompatibilityStatus.Compatible)
             .Select(kvp => kvp.Key)
             .ToList();
+
+    /// <summary>
+    /// Returns a string representation of the compatibility matrix.
+    /// </summary>
+    /// <returns>
+    /// A string in the format "{PluginName} compatibility matrix ({count} recorded pairs)".
+    /// </returns>
+    public override string ToString()
+    {
+        int pairCount = _matrix.Sum(row => row.Value.Count);
+        return $"{PluginName} compatibility matrix ({pairCount} recorded pairs)";
+    }
 }
 
 /// <summary>
@@ -203,4 +215,16 @@ public sealed class MarketplaceSearchFilter
 
     /// <summary>Gets or sets the desired sort order for returned results.</summary>
     public MarketplaceSortOrder SortOrder { get; set; } = MarketplaceSortOrder.Relevance;
+
+    /// <summary>
+    /// Returns a string representation of the search filter.
+    /// </summary>
+    /// <returns>
+    /// A string in the format "MarketplaceSearchFilter: Query='{query}', Tags=[{tags}], Page={page}/{pageSize}, SortOrder={sortOrder}, OnlyVerified={onlyVerified}".
+    /// </returns>
+    public override string ToString()
+    {
+        string tags = Tags.Count > 0 ? string.Join(", ", Tags) : "<none>";
+        return $"MarketplaceSearchFilter: Query='{Query ?? "<null>"}', Tags=[{tags}], Page={Page}/{PageSize}, SortOrder={SortOrder}, OnlyVerified={OnlyVerified}";
+    }
 }
