@@ -93,6 +93,12 @@ public sealed class HotReloadStatistics
     /// Gets or sets the list of recent hot reload events.
     /// </summary>
     public List<HotReloadEvent> RecentEvents { get; set; } = new();
+
+    /// <summary>
+    /// Returns a string representation of the hot reload statistics.
+    /// </summary>
+    public override string ToString()
+        => $"HotReloadStatistics [Total={TotalReloads}, Successful={SuccessfulReloads}, Failed={FailedReloads}, Average={AverageReloadTime}, LastReload={LastReloadTime}]";
 }
 
 /// <summary>
@@ -124,6 +130,12 @@ public sealed class HotReloadEvent
     /// Gets or sets the duration of the reload operation.
     /// </summary>
     public TimeSpan Duration { get; set; }
+
+    /// <summary>
+    /// Returns a string representation of the hot reload event.
+    /// </summary>
+    public override string ToString()
+        => $"HotReloadEvent [PluginId={PluginId}, Timestamp={Timestamp}, Success={Success}, Duration={Duration}]" + (ErrorMessage != null ? $", Error='{ErrorMessage}'" : "");
 }
 
 /// <summary>
@@ -155,4 +167,10 @@ public sealed class HotReloadStatus
     /// Gets or sets the last error message encountered during reload.
     /// </summary>
     public string? LastError { get; set; }
+
+    /// <summary>
+    /// Returns a string representation of the hot reload status.
+    /// </summary>
+    public override string ToString()
+        => $"HotReloadStatus [PluginId={PluginId}, SupportsHotReload={SupportsHotReload}, LastReload={LastReloadTime}, ReloadCount={ReloadCount}]" + (LastError != null ? $", LastError='{LastError}'" : "");
 }
