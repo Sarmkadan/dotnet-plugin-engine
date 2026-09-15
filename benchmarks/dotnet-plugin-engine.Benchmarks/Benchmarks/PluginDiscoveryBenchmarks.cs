@@ -58,6 +58,9 @@ public class PluginDiscoveryBenchmarks
         }
     }
 
+    /// <summary>
+    /// Creates a minimal plugin assembly for benchmarking purposes.
+    /// </summary>
     private static async Task CreateTestPluginAssembly(string outputPath)
     {
         // Create a minimal plugin assembly for benchmarking
