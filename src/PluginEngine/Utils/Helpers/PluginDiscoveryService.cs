@@ -265,6 +265,15 @@ public sealed class PluginCandidateInfo
     /// Gets the list of custom attributes found in the plugin assembly.
     /// </summary>
     public List<string> CustomAttributes { get; } = [];
+
+    /// <summary>
+    /// Returns a string representation of the plugin candidate information.
+    /// </summary>
+    /// <returns>A string containing the file name, assembly name, version, and validity status.</returns>
+    public override string ToString()
+    {
+        return $"PluginCandidateInfo: FileName={FileName}, AssemblyName={AssemblyName}, Version={Version ?? "null"}, IsValid={IsValid}";
+    }
 }
 
 /// <summary>
@@ -288,6 +297,15 @@ public sealed class PluginDiscoveryFilter
     /// Gets or sets the maximum allowed file size in bytes for a plugin.
     /// </summary>
     public long? MaxFileSizeBytes { get; set; }
+
+    /// <summary>
+    /// Returns a string representation of the active filter criteria.
+    /// </summary>
+    /// <returns>A string containing the valid-only flag, minimum version, name pattern, and maximum file size.</returns>
+    public override string ToString()
+    {
+        return $"PluginDiscoveryFilter: ValidOnly={ValidOnly}, MinimumVersionInfo={MinimumVersionInfo ?? "null"}, NamePattern={NamePattern ?? "null"}, MaxFileSizeBytes={MaxFileSizeBytes?.ToString() ?? "null"}";
+    }
 }
 
 /// <summary>
@@ -322,4 +340,13 @@ public sealed class DiscoveryStatistics
     public double ValidPercentage => TotalCandidates > 0
         ? (ValidPlugins / (double)TotalCandidates) * 100
         : 0;
+
+    /// <summary>
+    /// Returns a string representation of the discovery statistics.
+    /// </summary>
+    /// <returns>A string containing the total, valid, and invalid plugin counts.</returns>
+    public override string ToString()
+    {
+        return $"DiscoveryStatistics: TotalCandidates={TotalCandidates}, ValidPlugins={ValidPlugins}, InvalidPlugins={InvalidPlugins}";
+    }
 }
