@@ -196,4 +196,14 @@ public sealed class DependencyAnalysisReport
         < ComplexComplexityThreshold => "Complex",
         _ => "Very Complex"
     };
+
+    /// <summary>
+    /// Returns a human-readable summary of the dependency analysis report,
+    /// including the plugin name, direct and total dependency counts,
+    /// the complexity score, and the derived complexity level.
+    /// </summary>
+    public override string ToString() =>
+        $"Plugin: {PluginName}, Direct Dependencies: {DirectDependencies}, " +
+        $"Total Dependencies: {TotalDependencies}, Complexity Score: {ComplexityScore} " +
+        $"({GetComplexityLevel()})";
 }
