@@ -126,6 +126,15 @@ public sealed class PluginEngineOptions
         return errors;
     }
 
+    /// <summary>
+    /// Returns a string representation of the PluginEngineOptions.
+    /// </summary>
+    /// <returns>A string containing the key settings.</returns>
+    public override string ToString()
+    {
+        return $"PluginEngineOptions: PluginDirectory={PluginDirectory}, EnableHotReload={EnableHotReload}, HotReloadCheckIntervalMs={HotReloadCheckIntervalMs}, OperationTimeoutMs={OperationTimeoutMs}, MaxConcurrentPluginLoads={MaxConcurrentPluginLoads}";
+    }
+
     private const int DefaultMaxConcurrentPluginLoads = 4;
 }
 
