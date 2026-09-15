@@ -20,6 +20,17 @@ public sealed class PluginEngineCliHost
     private readonly IHotSwapService _hotSwap;
     private readonly IPluginDependencyResolver _dependencyResolver;
 
+    private const int SeparatorWidth = 60;
+    private const string DefaultMarketplaceLimit = "20";
+    private const int MaxMarketplaceLimit = 100;
+    private const string HelpFlag = "help";
+    private const string HelpFlagLong = "--help";
+    private const string HelpFlagShort = "-h";
+    private const string ArgPath = "path";
+    private const string ArgAction = "action";
+    private const string ArgQuery = "query";
+    private const string ArgLimit = "limit";
+
     public PluginEngineCliHost(
         IPluginManagerService pluginManager,
         IPluginLoaderService pluginLoader,
@@ -47,7 +58,7 @@ public sealed class PluginEngineCliHost
     {
         try
         {
-            if (args.Length == 0 || args[0] == "help" || args[0] == "--help" || args[0] == "-h")
+            if (args.Length == 0 || args[0] == HelpFlag || args[0] == HelpFlagLong || args[0] == HelpFlagShort)
             {
                 DisplayHelp();
                 return 0;
@@ -83,7 +94,7 @@ public sealed class PluginEngineCliHost
     /// <returns>The exit code indicating success or failure.</returns>
     private async Task<int> ExecuteLoadCommand(Dictionary<string, string> args)
     {
-        if (!args.TryGetValue("path", out var path))
+        if (!args.TryGetValue(ArgPath, out var path))
         {
             Console.Error.WriteLine("Error: Missing required --path argument");
             return 1;
@@ -146,18 +157,17 @@ public sealed class PluginEngineCliHost
             }
 
             Console.WriteLine("\nLoaded Plugins:");
-            Console.WriteLine(new string('-', 60));
+            Console.WriteLine(new string('-', SeparatorWidth));
 
             foreach (var plugin in plugins)
             {
                 Console.WriteLine($"  Name:     {plugin.Name}");
                 Console.WriteLine($"  Version:  {plugin.Version}");
                 Console.WriteLine($"  Status:   {plugin.Status}");
-                Console.WriteLine(new string('-', 60));
+                Console.WriteLine(new string('-', SeparatorWidth));
             }
 
             return 0;
-        }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"✗ List failed: {ex.Message}");
@@ -205,8 +215,8 @@ public sealed class PluginEngineCliHost
     private async Task<int> ExecuteMarketplaceCommand(Dictionary<string, string> args)
     {
         // Sub-commands: search, info, install, browse, trending, featured
-        if (!args.TryGetValue("action", out var action))
-            action = args.ContainsKey("query") ? "search" : "trending";
+        if (!args.TryGetValue(ArgAction, out var action))
+            action = args.ContainsKey(ArgQuery) ? "search" : "trending";
 
         try
         {
@@ -214,12 +224,12 @@ public sealed class PluginEngineCliHost
             {
                 case "search":
                 {
-                    args.TryGetValue("query", out var query);
-                    int.TryParse(args.GetValueOrDefault("limit", "20"), out var limit);
+                    args.TryGetValue(ArgQuery, out var query);
+                    int.TryParse(args.GetValueOrDefault(ArgLimit, DefaultMarketplaceLimit), out var limit);
                     var result = await _marketplace.SearchAsync(new MarketplaceSearchFilter
                     {
                         Query    = query,
-                        PageSize = Math.Clamp(limit, 1, 100)
+                        PageSize = Math.Clamp(limit, 1, MaxMarketplaceLimit)
                     });
                     if (!result.Success) { Console.Error.WriteLine($"✗ {result.Message}"); return 1; }
                     PrintMarketplaceEntries(result.Data ?? []);
@@ -273,7 +283,7 @@ public sealed class PluginEngineCliHost
         if (!args.TryGetValue("id", out var idStr) || !Guid.TryParse(idStr, out var pluginId))
         { Console.Error.WriteLine("Error: --id <guid> is required"); return 1; }
 
-        if (!args.TryGetValue("path", out var newPath))
+        if (!args.TryGetValue(ArgPath, out var newPath))
         { Console.Error.WriteLine("Error: --path <assembly-path> is required"); return 1; }
 
         try
