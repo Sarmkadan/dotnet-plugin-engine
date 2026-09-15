@@ -130,6 +130,15 @@ public sealed class PluginManagerStatus
     /// Gets or sets the last error message encountered by the plugin manager, if any.
     /// </summary>
     public string? LastError { get; set; }
+
+    /// <summary>
+    /// Returns a string representation of the plugin manager status.
+    /// </summary>
+    /// <returns>A string containing the key status properties.</returns>
+    public override string ToString()
+    {
+        return $"IsInitialized: {IsInitialized}, InitializedAt: {InitializedAt}, TotalPlugins: {TotalPlugins}, LoadedPlugins: {LoadedPlugins}, ActivePlugins: {ActivePlugins}, FailedPlugins: {FailedPlugins}, LastError: {LastError ?? "None"}";
+    }
 }
 
 /// <summary>
@@ -161,6 +170,15 @@ public sealed class PluginDetails
     /// Gets or sets the collection of capabilities declared by the plugin.
     /// </summary>
     public IEnumerable<PluginCapability> Capabilities { get; set; } = Enumerable.Empty<PluginCapability>();
+
+    /// <summary>
+    /// Returns a string representation of the plugin details.
+    /// </summary>
+    /// <returns>A string containing the key detail properties.</returns>
+    public override string ToString()
+    {
+        return $"Plugin: {Plugin}, Metadata: {(Metadata is null ? "None" : "Present")}, Assemblies: {Assemblies.Count()}, Dependencies: {Dependencies.Count()}, Capabilities: {Capabilities.Count()}";
+    }
 }
 
 /// <summary>
@@ -202,6 +220,15 @@ public sealed class PluginSearchCriteria
     /// Gets or sets the page size for paginated results.
     /// </summary>
     public int PageSize { get; set; } = 10;
+
+    /// <summary>
+    /// Returns a string representation of the plugin search criteria.
+    /// </summary>
+    /// <returns>A string containing the key criteria properties.</returns>
+    public override string ToString()
+    {
+        return $"Name: {Name ?? "Any"}, Author: {Author ?? "Any"}, Status: {Status?.ToString() ?? "Any"}, Version: {Version ?? "Any"}, Tags: {string.Join(", ", Tags)}, PageNumber: {PageNumber}, PageSize: {PageSize}";
+    }
 }
 
 /// <summary>
@@ -248,4 +275,13 @@ public sealed class PluginManagerStatistics
     /// Gets or sets the average load time in milliseconds for plugins.
     /// </summary>
     public double AverageLoadTimeMs { get; set; }
+
+    /// <summary>
+    /// Returns a string representation of the plugin manager statistics.
+    /// </summary>
+    /// <returns>A string containing the key statistics properties.</returns>
+    public override string ToString()
+    {
+        return $"TotalPlugins: {TotalPlugins}, LoadedPlugins: {LoadedPlugins}, ActivePlugins: {ActivePlugins}, FailedPlugins: {FailedPlugins}, TotalMemoryUsageBytes: {TotalMemoryUsageBytes}, TotalLoadContexts: {TotalLoadContexts}, LastOperationTime: {LastOperationTime?.ToString() ?? "None"}, AverageLoadTimeMs: {AverageLoadTimeMs}";
+    }
 }
