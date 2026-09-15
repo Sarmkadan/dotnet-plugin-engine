@@ -1,0 +1,14 @@
+
+The delegate receives the event instance (`e`) and can access all its properties.  
+Unsubscribing is as simple as calling `Unsubscribe<PluginLoadedEvent>(handler)` with the same delegate reference.
+
+---
+
+## Summary
+
+- **Base class**: `PluginEventBase` provides common metadata for all events.  
+- **Concrete events**: `PluginLoadedEvent`, `PluginUnloadedEvent`, `PluginUpdatedEvent`, `PluginErrorEvent`, `DependenciesResolvedEvent`.  
+- **Enum**: `PluginEventType` maps event names to a strongly‑typed enumeration.  
+- **Handling**: `IPluginEventHandler<T>` for processing events, `IPluginEventSubscriber` for registering callbacks.  
+
+These components together enable a robust, type‑safe event system for the Plugin Engine.
