@@ -6,37 +6,37 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-test:
-    name: Build & Test (.NET ${{ matrix.dotnet-version }})
+    name: Build & Test (.NET 10.0)
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        dotnet-version: ['10.0.x']
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup .NET ${{ matrix.dotnet-version }}
+      - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: ${{ matrix.dotnet-version }}
+          dotnet-version: '10.0.x'
 
-      - name: Restore dependencies
-        run: dotnet restore
+      - name: Restore
+        run: dotnet restore dotnet-plugin-engine.sln
 
       - name: Build
-        run: dotnet build --no-restore -c Release
+        run: dotnet build dotnet-plugin-engine.sln --no-restore -c Release
 
       - name: Test
-        run: dotnet test --no-build -c Release --verbosity normal --logger "trx" --results-directory ./TestResults
+        run: dotnet test dotnet-plugin-engine.sln --no-build -c Release --logger trx
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: test-results-dotnet-${{ matrix.dotnet-version }}
-          path: ./TestResults/*.trx
+          name: test-results
+          path: '**/TestResults/*.trx'
           retention-days: 14
