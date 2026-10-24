@@ -78,7 +78,9 @@ public sealed class WebhookConfiguration
     public bool IsValid()
     {
         if (!Enabled)
+        {
             return true;
+        }
 
         if (string.IsNullOrWhiteSpace(Secret))
         {

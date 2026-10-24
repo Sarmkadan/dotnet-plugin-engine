@@ -23,6 +23,7 @@ public interface IPluginDependencyResolver
     /// circular dependency is detected.
     /// </summary>
     /// <param name="plugins">The full set of plugins to order.</param>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
     Task<PluginOperationResult<List<Plugin>>> GetInstallOrderAsync(
         IEnumerable<Plugin> plugins, CancellationToken cancellationToken = default);
 
@@ -31,6 +32,7 @@ public interface IPluginDependencyResolver
     /// declare incompatible version constraints on the same dependency.
     /// </summary>
     /// <param name="plugins">Plugins to analyse.</param>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
     Task<PluginOperationResult<List<DependencyConflict>>> FindConflictsAsync(
         IEnumerable<Plugin> plugins, CancellationToken cancellationToken = default);
 
@@ -40,6 +42,7 @@ public interface IPluginDependencyResolver
     /// and recommends actions.
     /// </summary>
     /// <param name="pluginId">Root plugin to resolve.</param>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
     Task<PluginOperationResult<DependencyResolutionPlan>> BuildResolutionPlanAsync(
         Guid pluginId, CancellationToken cancellationToken = default);
 }

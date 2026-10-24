@@ -38,7 +38,7 @@ public sealed class PluginEventPublisher : IPluginEventPublisher
     /// Publishes an event to all registered subscribers.
     /// </summary>
     /// <typeparam name="T">The type of event to publish.</typeparam>
-    /// <param name="@event">The event to publish.</param>
+    /// <param name="event">The event to publish.</param>
     /// <exception cref="AggregateException">
     /// Thrown when one or more event handlers fail. The <see cref="AggregateException.InnerExceptions"/>
     /// property contains all exceptions thrown by individual handlers.
@@ -285,8 +285,12 @@ public sealed class PluginEventPublisher : IPluginEventPublisher
 /// </summary>
 public sealed class EventPublisherStatistics
 {
+    /// <summary>Gets the total number of events published.</summary>
     public long EventsPublished { get; set; }
+    /// <summary>Gets the number of registered subscribers.</summary>
     public int RegisteredSubscribers { get; set; }
+    /// <summary>Gets the number of event types being monitored.</summary>
     public int MonitoredEventTypes { get; set; }
+    /// <summary>Gets the UTC time at which the statistics were captured.</summary>
     public DateTime Timestamp { get; set; }
 }

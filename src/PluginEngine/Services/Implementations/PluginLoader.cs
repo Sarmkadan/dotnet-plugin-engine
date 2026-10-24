@@ -54,7 +54,9 @@ public sealed class PluginLoader : IDisposable
 
         var fullPath = Path.GetFullPath(assemblyPath);
         if (!File.Exists(fullPath))
+        {
             throw new PluginLoadException($"Assembly not found: {fullPath}");
+        }
 
         _logger.LogInformation("Loading assembly for plugin {PluginId} from {Path}.", pluginId, fullPath);
 
@@ -139,7 +141,11 @@ public sealed class PluginLoader : IDisposable
     /// <inheritdoc />
     public void Dispose()
     {
-        if (_disposed) return;
+        if (_disposed)
+        {
+            return;
+        }
+
         _disposed = true;
 
         foreach (var (id, context) in _loadContexts)

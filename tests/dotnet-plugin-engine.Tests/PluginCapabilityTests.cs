@@ -50,7 +50,7 @@ public class PluginCapabilityTests
             Tags = "shouldBeCleared"
         };
 
-        capability.SetTags(null);
+        capability.SetTags(null!);
 
         Assert.Equal(string.Empty, capability.Tags);
         Assert.Empty(capability.GetTags());

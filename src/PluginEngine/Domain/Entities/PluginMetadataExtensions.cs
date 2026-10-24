@@ -54,7 +54,10 @@ public static class PluginMetadataExtensions
         {
             var key = $"customProperty{i}";
             if (metadata.GetCustomProperty(key) == null)
+            {
                 break;
+            }
+
             keys.Add(key);
         }
 
@@ -75,7 +78,10 @@ public static class PluginMetadataExtensions
         {
             var key = $"customProperty{i}";
             if (metadata.GetCustomProperty(key) == null)
+            {
                 break;
+            }
+
             keys.Add(key);
         }
 

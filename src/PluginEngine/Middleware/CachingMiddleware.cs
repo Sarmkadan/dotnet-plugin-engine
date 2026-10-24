@@ -75,7 +75,9 @@ public sealed class CachingMiddleware : IPluginMiddleware
                 cacheOptions.RegisterPostEvictionCallback(static (evictedKey, _, _, state) =>
                 {
                     if (state is ConcurrentDictionary<string, byte> keys && evictedKey is string k)
+                    {
                         keys.TryRemove(k, out _);
+                    }
                 }, _keysByPlugin.GetOrAdd(pluginId, static _ => new ConcurrentDictionary<string, byte>(StringComparer.Ordinal)));
 
                 _cache.Set(cacheKey, new CacheEntry
@@ -93,7 +95,10 @@ public sealed class CachingMiddleware : IPluginMiddleware
             // Ensure cache is not set on error
             _cache.Remove(cacheKey);
             if (_keysByPlugin.TryGetValue(context.Plugin.Id, out var trackedKeys))
+            {
                 trackedKeys.TryRemove(cacheKey, out _);
+            }
+
             throw;
         }
     }
@@ -114,10 +119,14 @@ public sealed class CachingMiddleware : IPluginMiddleware
     public void InvalidatePluginCache(Guid pluginId)
     {
         if (!_keysByPlugin.TryRemove(pluginId, out var keys))
+        {
             return;
+        }
 
         foreach (var key in keys.Keys)
+        {
             _cache.Remove(key);
+        }
     }
 
     /// <summary>

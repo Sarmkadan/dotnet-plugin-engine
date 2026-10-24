@@ -34,6 +34,7 @@ public sealed class HotReloadService : IHotReloadService
     private Task? _monitoringTask;
     private string _monitoringDirectory = string.Empty;
 
+    /// <summary>Initializes a new instance of the <see cref="HotReloadService"/> class.</summary>
     public HotReloadService(IPluginLoaderService pluginLoaderService)
     {
         _pluginLoaderService = pluginLoaderService ?? throw new ArgumentNullException(nameof(pluginLoaderService));
@@ -45,7 +46,9 @@ public sealed class HotReloadService : IHotReloadService
     public async Task StartHotReloadMonitoringAsync(CancellationToken cancellationToken = default)
     {
         if (_monitoringTokenSource is not null)
+        {
             return;
+        }
 
         _monitoringTokenSource = new CancellationTokenSource();
         _monitoringDirectory = AppContext.BaseDirectory;
@@ -64,7 +67,9 @@ public sealed class HotReloadService : IHotReloadService
     public async Task StopHotReloadMonitoringAsync()
     {
         if (_monitoringTokenSource is null)
+        {
             return;
+        }
 
         _monitoringTokenSource.Cancel();
         _fileSystemWatcher?.Dispose();
@@ -72,7 +77,9 @@ public sealed class HotReloadService : IHotReloadService
         _monitoringTokenSource = null;
 
         if (_monitoringTask is not null)
+        {
             await _monitoringTask;
+        }
     }
 
     /// <summary>
@@ -81,7 +88,9 @@ public sealed class HotReloadService : IHotReloadService
     public bool CanHotReload(Plugin plugin)
     {
         if (plugin is null)
+        {
             return false;
+        }
 
         return plugin.SupportsHotReload && plugin.Status == PluginStatus.Loaded;
     }
@@ -95,10 +104,14 @@ public sealed class HotReloadService : IHotReloadService
         var plugin = await _pluginLoaderService.GetLoadedPluginAsync(pluginId, cancellationToken);
 
         if (plugin is null)
+        {
             return false;
+        }
 
         if (!CanHotReload(plugin))
+        {
             return false;
+        }
 
         try
         {
@@ -117,7 +130,9 @@ public sealed class HotReloadService : IHotReloadService
             UpdateHotReloadStatus(pluginId, true, null);
 
             if (_hotReloadCallbacks.TryGetValue(pluginId, out var callback))
+            {
                 await callback(reloaded);
+            }
 
             return true;
         }
@@ -156,7 +171,9 @@ public sealed class HotReloadService : IHotReloadService
         };
 
         if (_recentEvents.Count > 0)
+        {
             stats.AverageReloadTime = TimeSpan.FromMilliseconds(_recentEvents.Average(e => e.Duration.TotalMilliseconds));
+        }
 
         return await Task.FromResult(stats);
     }
@@ -167,7 +184,9 @@ public sealed class HotReloadService : IHotReloadService
     public void RegisterHotReloadCallback(Guid pluginId, Func<Plugin, Task> callback)
     {
         if (callback is not null)
+        {
             _hotReloadCallbacks[pluginId] = callback;
+        }
     }
 
     /// <summary>
@@ -211,7 +230,9 @@ public sealed class HotReloadService : IHotReloadService
     {
         _recentEvents.Add(@event);
         if (_recentEvents.Count > MaxRecentEvents)
+        {
             _recentEvents.RemoveAt(0);
+        }
     }
 
     private void UpdateHotReloadStatus(Guid pluginId, bool success, string? errorMessage)
@@ -230,7 +251,10 @@ public sealed class HotReloadService : IHotReloadService
                 existing.LastReloadTime = DateTime.UtcNow;
                 existing.ReloadCount++;
                 if (!success)
+                {
                     existing.LastError = errorMessage;
+                }
+
                 return existing;
             });
     }

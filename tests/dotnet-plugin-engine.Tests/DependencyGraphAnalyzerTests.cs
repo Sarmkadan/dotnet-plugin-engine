@@ -3,8 +3,8 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using PluginEngine.Domain.Entities;
-using PluginEngine.Services.Abstractions;
 using PluginEngine.Services;
+using PluginEngine.Services.Abstractions;
 using PluginEngine.Utils.Helpers;
 using Xunit;
 

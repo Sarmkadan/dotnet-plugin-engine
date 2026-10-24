@@ -92,10 +92,14 @@ public class Plugin
     public void AddDependency(PluginDependency dependency)
     {
         if (dependency is null)
+        {
             throw new ArgumentNullException(nameof(dependency));
+        }
 
         if (!_dependencies.Any(d => d.DependencyPluginId == dependency.DependencyPluginId))
+        {
             _dependencies.Add(dependency);
+        }
     }
 
     /// <summary>
@@ -118,10 +122,14 @@ public class Plugin
     public void AddCapability(PluginCapability capability)
     {
         if (capability is null)
+        {
             throw new ArgumentNullException(nameof(capability));
+        }
 
         if (!_capabilities.Any(c => c.Name == capability.Name))
+        {
             _capabilities.Add(capability);
+        }
     }
 
     /// <summary>
@@ -141,13 +149,24 @@ public class Plugin
     public string GetValidationError()
     {
         if (string.IsNullOrWhiteSpace(Name))
+        {
             return "Plugin name is required.";
+        }
+
         if (string.IsNullOrWhiteSpace(Version))
+        {
             return "Plugin version is required.";
+        }
+
         if (string.IsNullOrWhiteSpace(AssemblyPath))
+        {
             return "Assembly path is required.";
+        }
+
         if (Id == Guid.Empty)
+        {
             return "Plugin ID cannot be empty.";
+        }
 
         return string.Empty;
     }
@@ -167,11 +186,18 @@ public class Plugin
 /// </summary>
 public enum PluginStatus
 {
+    /// <summary>The plugin is not loaded.</summary>
     Unloaded = 0,
+    /// <summary>The plugin is being loaded.</summary>
     Loading = 1,
+    /// <summary>The plugin is loaded but not yet active.</summary>
     Loaded = 2,
+    /// <summary>The plugin is active and processing operations.</summary>
     Active = 3,
+    /// <summary>The plugin is loaded but disabled.</summary>
     Inactive = 4,
+    /// <summary>The plugin failed to load or run.</summary>
     Failed = 5,
+    /// <summary>The plugin is being unloaded.</summary>
     Unloading = 6
 }

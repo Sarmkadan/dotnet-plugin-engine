@@ -32,7 +32,9 @@ public static class EnumExtensions
 
         var field = value.GetType().GetField(value.ToString());
         if (field is null)
+        {
             return value.ToString();
+        }
 
         var attribute = field.GetCustomAttribute<System.ComponentModel.DescriptionAttribute>();
         return attribute?.Description ?? value.ToString();
@@ -50,7 +52,9 @@ public static class EnumExtensions
 
         var field = value.GetType().GetField(value.ToString());
         if (field is null)
+        {
             return value.ToString();
+        }
 
         var attribute = field.GetCustomAttribute<System.ComponentModel.DataAnnotations.DisplayAttribute>();
         return attribute?.Name ?? value.ToString();
@@ -136,7 +140,9 @@ public static class EnumExtensions
         ArgumentNullException.ThrowIfNull(value);
 
         if (string.IsNullOrEmpty(value))
+        {
             return null;
+        }
 
         try
         {

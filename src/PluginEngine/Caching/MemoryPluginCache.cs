@@ -37,6 +37,12 @@ public sealed class MemoryPluginCache : IPluginCache
         _logger = logger;
     }
 
+    /// <summary>
+    /// Gets a value from the cache.
+    /// </summary>
+    /// <typeparam name="T">The expected type of the cached value.</typeparam>
+    /// <param name="key">The cache key.</param>
+    /// <returns>The cached value, or <c>default</c> if the key is not present.</returns>
     public Task<T?> GetAsync<T>(string key)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(key);
@@ -62,6 +68,13 @@ public sealed class MemoryPluginCache : IPluginCache
         }
     }
 
+    /// <summary>
+    /// Stores a value in the cache.
+    /// </summary>
+    /// <typeparam name="T">The type of the value to cache.</typeparam>
+    /// <param name="key">The cache key.</param>
+    /// <param name="value">The value to cache.</param>
+    /// <param name="expiration">Optional lifetime of the entry. When <c>null</c>, the cache default applies.</param>
     public Task SetAsync<T>(string key, T value, TimeSpan? expiration = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(key);
@@ -87,7 +100,9 @@ public sealed class MemoryPluginCache : IPluginCache
             options.RegisterPostEvictionCallback(static (evictedKey, _, _, state) =>
             {
                 if (state is ConcurrentDictionary<string, byte> keys && evictedKey is string k)
+                {
                     keys.TryRemove(k, out _);
+                }
             }, _keys);
 
             _cache.Set(key, value, options);
@@ -103,6 +118,10 @@ public sealed class MemoryPluginCache : IPluginCache
         }
     }
 
+    /// <summary>
+    /// Removes the entry with the specified key from the cache.
+    /// </summary>
+    /// <param name="key">The cache key.</param>
     public Task RemoveAsync(string key)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(key);
@@ -121,6 +140,9 @@ public sealed class MemoryPluginCache : IPluginCache
         }
     }
 
+    /// <summary>
+    /// Removes all entries from the cache.
+    /// </summary>
     public Task ClearAsync()
     {
         try
@@ -134,7 +156,9 @@ public sealed class MemoryPluginCache : IPluginCache
             {
                 _cache.Remove(key);
                 if (_keys.TryRemove(key, out _))
+                {
                     removed++;
+                }
             }
 
             _logger.LogInformation("Cache cleared: {Count} entries removed", removed);
@@ -147,6 +171,10 @@ public sealed class MemoryPluginCache : IPluginCache
         }
     }
 
+    /// <summary>
+    /// Gets a snapshot of the current cache statistics.
+    /// </summary>
+    /// <returns>The current <see cref="CacheStatistics"/>.</returns>
     public Task<CacheStatistics> GetStatisticsAsync()
     {
         var stats = new CacheStatistics

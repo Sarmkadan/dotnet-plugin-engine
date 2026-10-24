@@ -22,10 +22,14 @@ public sealed class PluginRepository : IPluginRepository
     public Task<Plugin> AddAsync(Plugin plugin, CancellationToken cancellationToken = default)
     {
         if (plugin is null)
+        {
             throw new ArgumentNullException(nameof(plugin));
+        }
 
         if (plugin.Id == Guid.Empty)
+        {
             plugin.Id = Guid.NewGuid();
+        }
 
         lock (_lockObject)
         {
@@ -41,12 +45,16 @@ public sealed class PluginRepository : IPluginRepository
     public Task<bool> UpdateAsync(Plugin plugin, CancellationToken cancellationToken = default)
     {
         if (plugin is null)
+        {
             throw new ArgumentNullException(nameof(plugin));
+        }
 
         lock (_lockObject)
         {
             if (!_plugins.ContainsKey(plugin.Id))
+            {
                 return Task.FromResult(false);
+            }
 
             plugin.ModifiedAt = DateTime.UtcNow;
             _plugins[plugin.Id] = plugin;
@@ -60,7 +68,9 @@ public sealed class PluginRepository : IPluginRepository
         lock (_lockObject)
         {
             if (!_plugins.Remove(pluginId))
+            {
                 return Task.FromResult(false);
+            }
 
             _dependencies.Remove(pluginId);
             _capabilities.Remove(pluginId);
@@ -81,7 +91,9 @@ public sealed class PluginRepository : IPluginRepository
     public Task<Plugin?> GetByNameAsync(string name, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(name))
+        {
             return Task.FromResult<Plugin?>(null);
+        }
 
         lock (_lockObject)
         {
@@ -131,7 +143,9 @@ public sealed class PluginRepository : IPluginRepository
     public Task<IEnumerable<Plugin>> SearchAsync(string searchTerm, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(searchTerm))
+        {
             return GetAllAsync(cancellationToken);
+        }
 
         lock (_lockObject)
         {
@@ -149,12 +163,16 @@ public sealed class PluginRepository : IPluginRepository
     public Task<bool> AddDependencyAsync(Guid pluginId, PluginDependency dependency, CancellationToken cancellationToken = default)
     {
         if (dependency is null)
+        {
             throw new ArgumentNullException(nameof(dependency));
+        }
 
         lock (_lockObject)
         {
             if (!_dependencies.ContainsKey(pluginId))
+            {
                 _dependencies[pluginId] = new List<PluginDependency>();
+            }
 
             _dependencies[pluginId].Add(dependency);
             return Task.FromResult(true);
@@ -167,11 +185,15 @@ public sealed class PluginRepository : IPluginRepository
         lock (_lockObject)
         {
             if (!_dependencies.TryGetValue(pluginId, out var deps))
+            {
                 return Task.FromResult(false);
+            }
 
             var dependency = deps.FirstOrDefault(d => d.Id == dependencyId);
             if (dependency is null)
+            {
                 return Task.FromResult(false);
+            }
 
             deps.Remove(dependency);
             return Task.FromResult(true);
@@ -184,7 +206,9 @@ public sealed class PluginRepository : IPluginRepository
         lock (_lockObject)
         {
             if (!_dependencies.TryGetValue(pluginId, out var deps))
+            {
                 return Task.FromResult(Enumerable.Empty<PluginDependency>());
+            }
 
             return Task.FromResult<IEnumerable<PluginDependency>>(new List<PluginDependency>(deps));
         }
@@ -194,12 +218,16 @@ public sealed class PluginRepository : IPluginRepository
     public Task<bool> AddCapabilityAsync(Guid pluginId, PluginCapability capability, CancellationToken cancellationToken = default)
     {
         if (capability is null)
+        {
             throw new ArgumentNullException(nameof(capability));
+        }
 
         lock (_lockObject)
         {
             if (!_capabilities.ContainsKey(pluginId))
+            {
                 _capabilities[pluginId] = new List<PluginCapability>();
+            }
 
             _capabilities[pluginId].Add(capability);
             return Task.FromResult(true);
@@ -212,7 +240,9 @@ public sealed class PluginRepository : IPluginRepository
         lock (_lockObject)
         {
             if (!_capabilities.TryGetValue(pluginId, out var caps))
+            {
                 return Task.FromResult(Enumerable.Empty<PluginCapability>());
+            }
 
             return Task.FromResult<IEnumerable<PluginCapability>>(new List<PluginCapability>(caps));
         }

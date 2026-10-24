@@ -75,7 +75,10 @@ public sealed class DependencyResolutionException : PluginException
     public DependencyResolutionException AddUnresolvedDependency(string name)
     {
         if (!string.IsNullOrWhiteSpace(name))
+        {
             UnresolvedDependencies.Add(name);
+        }
+
         return this;
     }
 
@@ -101,10 +104,16 @@ public sealed class DependencyResolutionException : PluginException
 /// </summary>
 public enum DependencyResolutionReason
 {
+    /// <summary>The reason could not be determined.</summary>
     Unknown = 0,
+    /// <summary>A required dependency is not registered.</summary>
     DependencyNotFound = 1,
+    /// <summary>An installed dependency version does not satisfy the constraint.</summary>
     VersionMismatch = 2,
+    /// <summary>The dependency graph contains a cycle.</summary>
     CircularDependency = 3,
+    /// <summary>A dependency exists but has not been loaded.</summary>
     DependencyNotLoaded = 4,
+    /// <summary>An optional dependency failed to resolve.</summary>
     OptionalDependencyFailed = 5
 }

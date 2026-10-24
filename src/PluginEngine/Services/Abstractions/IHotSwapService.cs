@@ -24,6 +24,7 @@ public interface IHotSwapService
     /// </summary>
     /// <param name="pluginId">Identifier of the plugin to swap.</param>
     /// <param name="newAssemblyPath">File-system path of the replacement assembly.</param>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
     Task<PluginOperationResult> SwapPluginAsync(
         Guid pluginId, string newAssemblyPath, CancellationToken cancellationToken = default);
 
@@ -32,6 +33,7 @@ public interface IHotSwapService
     /// that was active immediately before the last successful swap.
     /// </summary>
     /// <param name="pluginId">Identifier of the plugin to roll back.</param>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
     Task<PluginOperationResult> RollbackSwapAsync(
         Guid pluginId, CancellationToken cancellationToken = default);
 

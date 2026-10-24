@@ -29,14 +29,18 @@ public static class PluginRepositoryExtensions
 
         var ids = pluginIds.ToArray();
         if (ids.Contains(Guid.Empty))
+        {
             throw new ArgumentException("Plugin IDs cannot contain an empty ID.", nameof(pluginIds));
+        }
 
         var plugins = new List<Plugin>();
         foreach (var pluginId in ids)
         {
             var plugin = await repository.GetByIdAsync(pluginId, cancellationToken).ConfigureAwait(false);
             if (plugin is not null)
+            {
                 plugins.Add(plugin);
+            }
         }
 
         return plugins;
@@ -58,7 +62,9 @@ public static class PluginRepositoryExtensions
         var plugin = await repository.GetByNameAsync(name, cancellationToken).ConfigureAwait(false);
 
         if (plugin != null || !ignoreCase)
+        {
             return plugin;
+        }
 
         // If not found with exact case match and ignoreCase is true, try case-insensitive search
         var allPlugins = await repository.GetAllAsync(cancellationToken).ConfigureAwait(false);
@@ -76,7 +82,10 @@ public static class PluginRepositoryExtensions
     public static async Task<IEnumerable<Plugin>> GetByStatusAsync(this IPluginRepository repository, PluginStatus status, CancellationToken cancellationToken = default)
     {
         if (!Enum.IsDefined(status))
+        {
             throw new ArgumentOutOfRangeException(nameof(status), $"The value {status} is not defined in enum {nameof(PluginStatus)}.");
+        }
+
         return await repository.GetByStatusAsync(status, cancellationToken).ConfigureAwait(false) ?? Enumerable.Empty<Plugin>();
     }
 
@@ -94,7 +103,9 @@ public static class PluginRepositoryExtensions
 
         var statusArray = statuses.ToArray();
         if (statusArray.Length == 0)
+        {
             return await repository.GetAllAsync(cancellationToken).ConfigureAwait(false);
+        }
 
         var allPlugins = await repository.GetAllAsync(cancellationToken).ConfigureAwait(false);
         return allPlugins.Where(p => statusArray.Contains(p.Status));
@@ -111,7 +122,9 @@ public static class PluginRepositoryExtensions
     public static async Task<IEnumerable<Plugin>> GetDependentPluginsAsync(this IPluginRepository repository, Guid pluginId, CancellationToken cancellationToken = default)
     {
         if (pluginId == Guid.Empty)
+        {
             throw new ArgumentException("Plugin ID cannot be empty.", nameof(pluginId));
+        }
 
         var allPlugins = await repository.GetAllAsync(cancellationToken).ConfigureAwait(false);
 

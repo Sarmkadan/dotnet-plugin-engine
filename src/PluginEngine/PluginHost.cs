@@ -42,7 +42,9 @@ public sealed class PluginHost : IPluginHost, IDisposable
     public async Task StartAsync(CancellationToken cancellationToken = default)
     {
         if (_isDisposed)
+        {
             throw new ObjectDisposedException(nameof(PluginHost));
+        }
 
         PluginHostLog.HostStart(_logger);
         await _engine.InitializeAsync(cancellationToken);
@@ -68,7 +70,9 @@ public sealed class PluginHost : IPluginHost, IDisposable
     public async Task StopAsync(CancellationToken cancellationToken = default)
     {
         if (_isDisposed)
+        {
             throw new ObjectDisposedException(nameof(PluginHost));
+        }
 
         PluginHostLog.HostStop(_logger);
         var plugins = await _engine.PluginLoader.GetAllLoadedPluginsAsync(cancellationToken);
@@ -102,13 +106,19 @@ public sealed class PluginHost : IPluginHost, IDisposable
     public async Task ExecutePluginAsync(string pluginId, CancellationToken cancellationToken = default)
     {
         if (_isDisposed)
+        {
             throw new ObjectDisposedException(nameof(PluginHost));
+        }
 
         if (string.IsNullOrWhiteSpace(pluginId))
+        {
             throw new ArgumentException("Plugin ID cannot be null or empty.", nameof(pluginId));
+        }
 
         if (!Guid.TryParse(pluginId, out var parsedPluginId))
+        {
             throw new ArgumentException("Plugin ID must be a valid GUID.", nameof(pluginId));
+        }
 
         var correlationId = Guid.NewGuid().ToString();
         try
@@ -138,7 +148,9 @@ public sealed class PluginHost : IPluginHost, IDisposable
     public void Dispose()
     {
         if (_isDisposed)
+        {
             return;
+        }
 
         _isDisposed = true;
         // Note: We don't dispose the engine here as it might be shared

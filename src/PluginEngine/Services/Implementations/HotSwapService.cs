@@ -40,20 +40,28 @@ public sealed class HotSwapService : IHotSwapService
         Guid pluginId, string newAssemblyPath, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(newAssemblyPath))
+        {
             return PluginOperationResult.CreateFailure("New assembly path must not be empty.", ErrorCodeBadRequest);
+        }
 
         if (!File.Exists(newAssemblyPath))
+        {
             return PluginOperationResult.CreateFailure($"Assembly not found: {newAssemblyPath}", ErrorCodeNotFound);
+        }
 
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
         var currentPlugin = await _loader.GetLoadedPluginAsync(pluginId, cancellationToken);
 
         if (currentPlugin is null)
+        {
             return PluginOperationResult.CreateFailure($"Plugin {pluginId} is not loaded.", ErrorCodeNotFound);
+        }
 
         if (!CanSwap(currentPlugin))
+        {
             return PluginOperationResult.CreateFailure(
                 $"Plugin '{currentPlugin.Name}' cannot be swapped in its current state ({currentPlugin.Status}).", ErrorCodeConflict);
+        }
 
         var previousPath = currentPlugin.AssemblyPath;
 
@@ -133,8 +141,10 @@ public sealed class HotSwapService : IHotSwapService
         var lastSuccessful = history.LastOrDefault(r => r.Success && !r.RolledBack);
 
         if (lastSuccessful is null)
+        {
             return PluginOperationResult.CreateFailure(
                 $"No successful, un-rolled-back swap found for plugin {pluginId}.", ErrorCodeNotFound);
+        }
 
         var rollbackPath = lastSuccessful.PreviousAssemblyPath;
         _logger.LogInformation(
@@ -199,7 +209,11 @@ public sealed class HotSwapService : IHotSwapService
     /// <inheritdoc />
     public bool CanSwap(Plugin plugin)
     {
-        if (plugin is null) return false;
+        if (plugin is null)
+        {
+            return false;
+        }
+
         return plugin.Status is PluginStatus.Loaded or PluginStatus.Active
                && !string.IsNullOrWhiteSpace(plugin.AssemblyPath);
     }
@@ -217,7 +231,9 @@ public sealed class HotSwapService : IHotSwapService
             list.Add(record);
             // Cap history at 50 entries per plugin to avoid unbounded growth
             if (list.Count > MaxHistoryEntriesPerPlugin)
+            {
                 list.RemoveAt(0);
+            }
         }
     }
 

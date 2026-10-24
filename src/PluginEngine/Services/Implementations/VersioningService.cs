@@ -19,7 +19,9 @@ public sealed class VersioningService : IVersioningService
     public bool ValidateVersion(string version)
     {
         if (string.IsNullOrWhiteSpace(version))
+        {
             return false;
+        }
 
         return Version.TryParse(version, out _);
     }
@@ -30,10 +32,14 @@ public sealed class VersioningService : IVersioningService
     public bool IsSatisfiedBy(string constraint, string version)
     {
         if (string.IsNullOrWhiteSpace(constraint) || string.IsNullOrWhiteSpace(version))
+        {
             return false;
+        }
 
         if (!constraint.Contains(">=") && !constraint.Contains("<=") && !constraint.Contains("=="))
+        {
             return Version.TryParse(version, out var v) && v.ToString().StartsWith(constraint);
+        }
 
         if (constraint.StartsWith(">="))
         {
@@ -60,7 +66,9 @@ public sealed class VersioningService : IVersioningService
     public int CompareVersions(string version1, string version2)
     {
         if (!Version.TryParse(version1, out var v1) || !Version.TryParse(version2, out var v2))
+        {
             throw new ArgumentException("Invalid version format.");
+        }
 
         return v1.CompareTo(v2);
     }
@@ -71,7 +79,9 @@ public sealed class VersioningService : IVersioningService
     public SemanticVersion ParseVersion(string versionString)
     {
         if (string.IsNullOrWhiteSpace(versionString))
+        {
             throw new ArgumentException("Version string cannot be empty.", nameof(versionString));
+        }
 
         var version = new SemanticVersion();
         var parts = versionString.Split(new[] { '-', '+' }, StringSplitOptions.None);
@@ -119,7 +129,9 @@ public sealed class VersioningService : IVersioningService
     public string IncrementVersion(string currentVersion, VersionPart part)
     {
         if (!Version.TryParse(currentVersion, out var version))
+        {
             throw new ArgumentException("Invalid version format.", nameof(currentVersion));
+        }
 
         return part switch
         {
@@ -136,7 +148,9 @@ public sealed class VersioningService : IVersioningService
     public bool AreCompatible(string version1, string version2)
     {
         if (!Version.TryParse(version1, out var v1) || !Version.TryParse(version2, out var v2))
+        {
             return false;
+        }
 
         // Compatible if major versions match
         return v1.Major == v2.Major;

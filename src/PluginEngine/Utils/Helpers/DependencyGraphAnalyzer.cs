@@ -21,6 +21,7 @@ public sealed class DependencyGraphAnalyzer
     private readonly IDependencyResolutionService _dependencyResolver;
     private readonly ILogger<DependencyGraphAnalyzer> _logger;
 
+    /// <summary>Initializes a new instance of the <see cref="DependencyGraphAnalyzer"/> class.</summary>
     public DependencyGraphAnalyzer(
         IDependencyResolutionService dependencyResolver,
         ILogger<DependencyGraphAnalyzer> logger)
@@ -181,14 +182,23 @@ public sealed class DependencyAnalysisReport
     private const int ModerateComplexityThreshold = 50;
     private const int ComplexComplexityThreshold = 75;
 
+    /// <summary>Gets or sets the name of the analyzed plugin.</summary>
     public required string PluginName { get; set; }
+    /// <summary>Gets or sets the number of direct dependencies.</summary>
     public int DirectDependencies { get; set; }
+    /// <summary>Gets or sets the total number of dependencies, including transitive ones.</summary>
     public int TotalDependencies { get; set; }
+    /// <summary>Gets or sets a value indicating whether a circular dependency was detected.</summary>
     public bool HasCircularDependencies { get; set; }
+    /// <summary>Gets or sets the complexity score of the dependency graph.</summary>
     public int ComplexityScore { get; set; }
+    /// <summary>Gets or sets the UTC time at which the analysis ran.</summary>
     public DateTime AnalyzedAtUtc { get; set; }
+    /// <summary>Gets or sets the issues found during analysis.</summary>
     public List<string> Issues { get; set; } = [];
 
+    /// <summary>Gets a textual description of <see cref="ComplexityScore"/>.</summary>
+    /// <returns>One of <c>Simple</c>, <c>Moderate</c>, <c>Complex</c> or <c>Very Complex</c>.</returns>
     public string GetComplexityLevel() => ComplexityScore switch
     {
         < SimpleComplexityThreshold => "Simple",

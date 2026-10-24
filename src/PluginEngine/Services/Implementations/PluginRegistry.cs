@@ -58,7 +58,10 @@ public sealed class PluginRegistry
     {
         var removed = _plugins.TryRemove(pluginId, out var plugin);
         if (removed)
+        {
             _logger.LogInformation("Plugin {Name} ({Id}) unregistered.", plugin!.Name, pluginId);
+        }
+
         return removed;
     }
 

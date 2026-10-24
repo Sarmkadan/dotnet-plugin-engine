@@ -1,6 +1,6 @@
-using Xunit;
 using System;
 using PluginEngine.Exceptions;
+using Xunit;
 
 public class VersionMismatchExceptionExtensionsTests
 {
@@ -26,7 +26,7 @@ public class VersionMismatchExceptionExtensionsTests
     public void GetFormattedErrorMessage_ShouldThrowArgumentNullException_WhenExceptionIsNull()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => ((VersionMismatchException)null).GetFormattedErrorMessage());
+        Assert.Throws<ArgumentNullException>(() => ((VersionMismatchException)null!).GetFormattedErrorMessage());
     }
 
     [Fact]
@@ -106,7 +106,7 @@ public class VersionMismatchExceptionExtensionsTests
         var ex = new VersionMismatchException("Test", "1.0.0", "1.0.0", "Type", "Name", null);
 
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => ex.WithContext(null, "Value"));
+        Assert.Throws<ArgumentNullException>(() => ex.WithContext(null!, "Value"));
     }
 
     [Fact]

@@ -51,7 +51,7 @@ public class PluginException : Exception
     /// <summary>
     /// Initializes a new instance with a message and inner exception.
     /// </summary>
-    public PluginException(string message, Exception innerException) : base(message, innerException)
+    public PluginException(string message, Exception? innerException) : base(message, innerException)
     {
     }
 
@@ -72,7 +72,9 @@ public class PluginException : Exception
         var result = $"{GetType().FullName}: [{ErrorCode}] {Message}";
 
         if (EntityId.HasValue)
+        {
             result += $" (Entity: {EntityId})";
+        }
 
         if (Context.Count > 0)
         {
@@ -82,7 +84,9 @@ public class PluginException : Exception
         }
 
         if (InnerException is not null)
+        {
             result += $"\nInner: {InnerException.Message}";
+        }
 
         return result;
     }

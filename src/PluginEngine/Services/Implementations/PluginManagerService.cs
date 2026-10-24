@@ -52,7 +52,9 @@ public sealed class PluginManagerService : IPluginManagerService
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
         if (_initialized)
+        {
             return;
+        }
 
         _initialized = true;
         _initializedAt = DateTime.UtcNow;
@@ -119,10 +121,14 @@ public sealed class PluginManagerService : IPluginManagerService
     {
         var plugin = await _pluginLoaderService.GetLoadedPluginAsync(pluginId, cancellationToken);
         if (plugin is null)
+        {
             return false;
+        }
 
         if (!await _dependencyResolutionService.ValidateDependenciesAsync(plugin, cancellationToken))
+        {
             return false;
+        }
 
         plugin.Status = PluginStatus.Active;
         return true;
@@ -135,7 +141,9 @@ public sealed class PluginManagerService : IPluginManagerService
     {
         var plugin = await _pluginLoaderService.GetLoadedPluginAsync(pluginId, cancellationToken);
         if (plugin is null)
+        {
             return false;
+        }
 
         plugin.Status = PluginStatus.Inactive;
         return true;
@@ -148,7 +156,9 @@ public sealed class PluginManagerService : IPluginManagerService
     {
         var plugin = await _pluginLoaderService.GetLoadedPluginAsync(pluginId, cancellationToken);
         if (plugin is null)
+        {
             return null;
+        }
 
         var details = new PluginDetails
         {
@@ -170,16 +180,24 @@ public sealed class PluginManagerService : IPluginManagerService
         var results = allPlugins.AsEnumerable();
 
         if (!string.IsNullOrWhiteSpace(criteria.Name))
+        {
             results = results.Where(p => p.Name.Contains(criteria.Name, StringComparison.OrdinalIgnoreCase));
+        }
 
         if (!string.IsNullOrWhiteSpace(criteria.Author))
+        {
             results = results.Where(p => p.Author.Contains(criteria.Author, StringComparison.OrdinalIgnoreCase));
+        }
 
         if (criteria.Status.HasValue)
+        {
             results = results.Where(p => p.Status == criteria.Status.Value);
+        }
 
         if (!string.IsNullOrWhiteSpace(criteria.Version))
+        {
             results = results.Where(p => p.Version.Equals(criteria.Version));
+        }
 
         var list = results.ToList();
         var pageStart = (criteria.PageNumber - 1) * criteria.PageSize;

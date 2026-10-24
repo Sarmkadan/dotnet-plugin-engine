@@ -83,7 +83,9 @@ public sealed class LifecycleManager
         }
 
         if (lifecycle is not null)
+        {
             await _sandbox.ExecuteAsync(plugin.Id, ct => lifecycle.OnAfterLoadAsync(ct), cancellationToken);
+        }
 
         plugin.Status = PluginStatus.Loaded;
         plugin.ModifiedAt = DateTime.UtcNow;
@@ -181,12 +183,18 @@ public sealed class LifecycleManager
     private IPluginLifecycle? FindLifecycleHook(Guid pluginId)
     {
         var assembly = _loader.GetLoadedAssembly(pluginId);
-        if (assembly is null) return null;
+        if (assembly is null)
+        {
+            return null;
+        }
 
         var lifecycleType = assembly.GetTypes()
             .FirstOrDefault(t => typeof(IPluginLifecycle).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract);
 
-        if (lifecycleType is null) return null;
+        if (lifecycleType is null)
+        {
+            return null;
+        }
 
         try
         {

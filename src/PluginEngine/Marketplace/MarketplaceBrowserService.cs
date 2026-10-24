@@ -23,6 +23,7 @@ public interface IMarketplaceBrowserService
     /// Returns plugins trending by download count, ordered descending.
     /// </summary>
     /// <param name="limit">Maximum number of results to return (1–50).</param>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
     Task<PluginOperationResult<List<MarketplaceEntry>>> GetTrendingAsync(
         int limit = 10, CancellationToken cancellationToken = default);
 
@@ -37,6 +38,7 @@ public interface IMarketplaceBrowserService
     /// </summary>
     /// <param name="categoryId">The category slug to browse (e.g., "logging").</param>
     /// <param name="filter">Optional additional search/pagination parameters.</param>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
     Task<PluginOperationResult<List<MarketplaceEntry>>> BrowseCategoryAsync(
         string categoryId,
         MarketplaceSearchFilter? filter = null,
@@ -143,8 +145,10 @@ public sealed class MarketplaceBrowserService : IMarketplaceBrowserService
         CancellationToken cancellationToken = default)
     {
         if (_cache.TryGetValue("mp_categories", out List<MarketplaceCategory>? cached) && cached is not null)
+        {
             return Task.FromResult(
                 PluginOperationResult<List<MarketplaceCategory>>.CreateSuccess(cached, $"Returned {cached.Count} categories."));
+        }
 
         var categories = new List<MarketplaceCategory>(BuiltInCategories);
         _cache.Set("mp_categories", categories, new MemoryCacheEntryOptions
@@ -165,7 +169,9 @@ public sealed class MarketplaceBrowserService : IMarketplaceBrowserService
         var cacheKey = $"mp_trending_{limit}";
 
         if (_cache.TryGetValue(cacheKey, out List<MarketplaceEntry>? cached) && cached is not null)
+        {
             return PluginOperationResult<List<MarketplaceEntry>>.CreateSuccess(cached, $"Trending: {cached.Count} plugin(s).");
+        }
 
         try
         {
@@ -176,7 +182,9 @@ public sealed class MarketplaceBrowserService : IMarketplaceBrowserService
             }, cancellationToken);
 
             if (!searchResult.Success)
+            {
                 return searchResult;
+            }
 
             var trending = searchResult.Data ?? [];
             _cache.Set(cacheKey, trending, new MemoryCacheEntryOptions
@@ -199,7 +207,9 @@ public sealed class MarketplaceBrowserService : IMarketplaceBrowserService
         CancellationToken cancellationToken = default)
     {
         if (_cache.TryGetValue("mp_featured", out List<MarketplaceEntry>? cached) && cached is not null)
+        {
             return PluginOperationResult<List<MarketplaceEntry>>.CreateSuccess(cached, $"Featured: {cached.Count} plugin(s).");
+        }
 
         try
         {
@@ -211,7 +221,9 @@ public sealed class MarketplaceBrowserService : IMarketplaceBrowserService
             }, cancellationToken);
 
             if (!searchResult.Success)
+            {
                 return searchResult;
+            }
 
             var featured = searchResult.Data ?? [];
             _cache.Set("mp_featured", featured, new MemoryCacheEntryOptions
@@ -236,13 +248,17 @@ public sealed class MarketplaceBrowserService : IMarketplaceBrowserService
         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(categoryId))
+        {
             return PluginOperationResult<List<MarketplaceEntry>>.CreateFailure("Category ID is required.", 400);
+        }
 
         try
         {
             var effectiveFilter = filter ?? new MarketplaceSearchFilter();
             if (!effectiveFilter.Tags.Contains(categoryId, StringComparer.OrdinalIgnoreCase))
+            {
                 effectiveFilter.Tags = [categoryId, ..effectiveFilter.Tags];
+            }
 
             var result = await _marketplace.SearchAsync(effectiveFilter, cancellationToken);
 
@@ -263,7 +279,9 @@ public sealed class MarketplaceBrowserService : IMarketplaceBrowserService
         CancellationToken cancellationToken = default)
     {
         if (_cache.TryGetValue("mp_homepage", out MarketplaceHomePage? cached) && cached is not null)
+        {
             return PluginOperationResult<MarketplaceHomePage>.CreateSuccess(cached, "Home page served from cache.");
+        }
 
         try
         {

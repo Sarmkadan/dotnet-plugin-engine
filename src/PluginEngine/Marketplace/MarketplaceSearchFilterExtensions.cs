@@ -23,7 +23,9 @@ public static class MarketplaceSearchFilterExtensions
     public static MarketplaceSearchFilter WithQuery(this MarketplaceSearchFilter filter, string? query)
     {
         if (filter is null)
+        {
             throw new ArgumentNullException(nameof(filter));
+        }
 
         filter.Query = query;
         return filter;
@@ -39,7 +41,9 @@ public static class MarketplaceSearchFilterExtensions
     public static MarketplaceSearchFilter WithTags(this MarketplaceSearchFilter filter, params string[]? tags)
     {
         if (filter is null)
+        {
             throw new ArgumentNullException(nameof(filter));
+        }
 
         filter.Tags = tags?.ToList() ?? new List<string>();
         return filter;
@@ -55,7 +59,9 @@ public static class MarketplaceSearchFilterExtensions
     public static MarketplaceSearchFilter SortedBy(this MarketplaceSearchFilter filter, MarketplaceSortOrder sortOrder)
     {
         if (filter is null)
+        {
             throw new ArgumentNullException(nameof(filter));
+        }
 
         filter.SortOrder = sortOrder;
         return filter;
@@ -73,12 +79,19 @@ public static class MarketplaceSearchFilterExtensions
     public static MarketplaceSearchFilter Page(this MarketplaceSearchFilter filter, int page, int pageSize)
     {
         if (filter is null)
+        {
             throw new ArgumentNullException(nameof(filter));
+        }
 
         if (page < 1)
+        {
             throw new ArgumentOutOfRangeException(nameof(page), "Page number must be greater than or equal to 1.");
+        }
+
         if (pageSize < 1 || pageSize > 100)
+        {
             throw new ArgumentOutOfRangeException(nameof(pageSize), "Page size must be between 1 and 100.");
+        }
 
         filter.Page = page;
         filter.PageSize = pageSize;
@@ -94,7 +107,9 @@ public static class MarketplaceSearchFilterExtensions
     public static MarketplaceSearchFilter VerifiedOnly(this MarketplaceSearchFilter filter)
     {
         if (filter is null)
+        {
             throw new ArgumentNullException(nameof(filter));
+        }
 
         filter.OnlyVerified = true;
         return filter;
@@ -109,7 +124,9 @@ public static class MarketplaceSearchFilterExtensions
     public static bool IsEmpty(this MarketplaceSearchFilter filter)
     {
         if (filter is null)
+        {
             throw new ArgumentNullException(nameof(filter));
+        }
 
         return string.IsNullOrWhiteSpace(filter.Query) && filter.Tags.Count == 0;
     }

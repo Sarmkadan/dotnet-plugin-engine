@@ -1,9 +1,9 @@
 #nullable enable
+using System.Runtime.InteropServices;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using PluginEngine.Utils.Helpers;
-using System.Runtime.InteropServices;
 using Xunit;
 
 namespace PluginEngine.Tests;
@@ -57,7 +57,9 @@ public sealed class FileSystemHelperTests
 		finally
 		{
 			if (Directory.Exists(testDir))
+			{
 				Directory.Delete(testDir);
+			}
 		}
 	}
 
@@ -79,7 +81,9 @@ public sealed class FileSystemHelperTests
 		finally
 		{
 			if (Directory.Exists(testDir))
+			{
 				Directory.Delete(testDir);
+			}
 		}
 	}
 
@@ -292,8 +296,15 @@ public sealed class FileSystemHelperTests
 		}
 		finally
 		{
-			if (File.Exists(sourceFile)) File.Delete(sourceFile);
-			if (File.Exists(destFile)) File.Delete(destFile);
+			if (File.Exists(sourceFile))
+			{
+				File.Delete(sourceFile);
+			}
+
+			if (File.Exists(destFile))
+			{
+				File.Delete(destFile);
+			}
 		}
 	}
 
@@ -442,9 +453,14 @@ public sealed class FileSystemHelperTests
 		finally
 		{
 			if (File.Exists(testFile))
+			{
 				File.Delete(testFile);
+			}
+
 			if (backupPath != null && File.Exists(backupPath))
+			{
 				File.Delete(backupPath);
+			}
 		}
 	}
 

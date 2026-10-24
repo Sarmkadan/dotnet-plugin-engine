@@ -58,7 +58,9 @@ public class PluginOperationResult
         long durationMs)
     {
         if (!success)
+        {
             ArgumentException.ThrowIfNullOrWhiteSpace(message);
+        }
 
         Success = success;
         Message = message ?? string.Empty;
@@ -215,7 +217,7 @@ public sealed class PluginOperationResult<T> : PluginOperationResult
     /// <param name="durationMs">The operation duration in milliseconds.</param>
     /// <returns>A failed operation result without data.</returns>
     /// <exception cref="ArgumentException"><paramref name="message"/> is empty.</exception>
-    public static PluginOperationResult<T> CreateFailure(
+    public static new PluginOperationResult<T> CreateFailure(
         string message,
         int errorCode = DefaultErrorCode,
         string? details = null,
@@ -231,7 +233,7 @@ public sealed class PluginOperationResult<T> : PluginOperationResult
     /// <param name="durationMs">The operation duration in milliseconds.</param>
     /// <returns>A failed operation result containing information from the exception.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="ex"/> is <see langword="null"/>.</exception>
-    public static PluginOperationResult<T> FromException(Exception ex, long durationMs = 0)
+    public static new PluginOperationResult<T> FromException(Exception ex, long durationMs = 0)
     {
         ArgumentNullException.ThrowIfNull(ex);
 
@@ -282,9 +284,13 @@ public sealed class PluginBatchOperationResult
         Results.Add((pluginId, pluginName, result));
 
         if (result.Success)
+        {
             SuccessCount++;
+        }
         else
+        {
             FailureCount++;
+        }
     }
 
     /// <summary>

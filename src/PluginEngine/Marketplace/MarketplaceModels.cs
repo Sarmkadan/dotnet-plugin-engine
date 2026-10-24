@@ -158,7 +158,9 @@ public sealed class VersionCompatibilityMatrix
     {
         if (_matrix.TryGetValue(pluginVersion, out var row) &&
             row.TryGetValue(engineVersion, out var status))
+        {
             return status;
+        }
 
         return CompatibilityStatus.Unknown;
     }

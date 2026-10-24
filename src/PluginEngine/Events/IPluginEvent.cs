@@ -98,6 +98,7 @@ public abstract class PluginEventBase : IPluginEvent
     /// Gets the plugin associated with the event.
     /// </summary>
     public required Guid PluginId { get; set; }
+    /// <summary>Gets the name of the event type.</summary>
     public abstract string EventType { get; }
 }
 

@@ -149,13 +149,17 @@ public static class TypeExtensions
         ArgumentNullException.ThrowIfNull(type);
 
         if (type.IsPrimitive || type == typeof(string) || type == typeof(decimal))
+        {
             return true;
+        }
 
         if (type.IsGenericType && (
             type.GetGenericTypeDefinition() == typeof(List<>) ||
             type.GetGenericTypeDefinition() == typeof(Dictionary<,>) ||
             type.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
+        {
             return true;
+        }
 
         return !type.IsInterface && !type.IsAbstract;
     }

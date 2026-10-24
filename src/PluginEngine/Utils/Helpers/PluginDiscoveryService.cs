@@ -90,7 +90,9 @@ public sealed class PluginDiscoveryService
 
             var fileInfo = _fileSystemHelper.GetFileInfo(filePath);
             if (fileInfo is null)
+            {
                 return null;
+            }
 
             var assemblyName = Path.GetFileNameWithoutExtension(filePath);
             var (size, modified) = fileInfo.Value;

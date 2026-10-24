@@ -20,6 +20,7 @@ public sealed class PluginValidator
     private readonly ILogger<PluginValidator> _logger;
     private readonly VersionHelper _versionHelper;
 
+    /// <summary>Initializes a new instance of the <see cref="PluginValidator"/> class.</summary>
     public PluginValidator(ILogger<PluginValidator> logger, VersionHelper versionHelper)
     {
         _logger = logger;
@@ -109,7 +110,9 @@ public sealed class PluginValidator
     private void ValidateMetadata(PluginMetadata? metadata, List<string> errors)
     {
         if (metadata is null)
+        {
             return;
+        }
 
         if (string.IsNullOrWhiteSpace(metadata.Description))
         {
@@ -197,11 +200,17 @@ public sealed class PluginValidator
 /// </summary>
 public sealed class PluginValidationResult
 {
+    /// <summary>Gets or sets the identifier of the validated plugin.</summary>
     public required Guid PluginId { get; set; }
+    /// <summary>Gets or sets the name of the validated plugin.</summary>
     public required string PluginName { get; set; }
+    /// <summary>Gets or sets a value indicating whether the plugin passed validation.</summary>
     public required bool IsValid { get; set; }
+    /// <summary>Gets or sets the validation error messages.</summary>
     public required List<string> Errors { get; set; }
 
+    /// <summary>Joins all validation errors into a single multi-line summary.</summary>
+    /// <returns>A string containing each error on its own line.</returns>
     public string GetErrorSummary() => string.Join("\n  ", Errors);
 
     /// <summary>

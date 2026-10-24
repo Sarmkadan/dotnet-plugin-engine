@@ -1,8 +1,8 @@
 #nullable enable
+using System.Text.Json;
 using FluentAssertions;
 using PluginEngine.Domain.Entities;
 using PluginEngine.Formatters;
-using System.Text.Json;
 using Xunit;
 
 namespace PluginEngine.Tests;
