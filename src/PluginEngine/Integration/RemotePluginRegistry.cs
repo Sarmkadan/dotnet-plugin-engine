@@ -14,7 +14,7 @@ namespace PluginEngine.Integration;
 /// </summary>
 public sealed class RemotePluginRegistry : IRemotePluginRegistry
 {
-    private readonly HttpPluginClient _httpClient;
+    private readonly IHttpPluginClient _httpClient;
     private readonly IMemoryCache _cache;
     private readonly ILogger<RemotePluginRegistry> _logger;
     private readonly VersionHelper _versionHelper;
@@ -24,7 +24,7 @@ public sealed class RemotePluginRegistry : IRemotePluginRegistry
     /// </summary>
     /// <exception cref="ArgumentNullException">Thrown when any argument is null.</exception>
     public RemotePluginRegistry(
-        HttpPluginClient httpClient,
+        IHttpPluginClient httpClient,
         IMemoryCache cache,
         ILogger<RemotePluginRegistry> logger,
         VersionHelper versionHelper)

@@ -10,7 +10,7 @@ namespace PluginEngine.Integration;
 /// HTTP client for communicating with remote plugin registries and services.
 /// Handles plugin updates, notifications, and metadata synchronization.
 /// </summary>
-public sealed class HttpPluginClient : IIntegrationClient
+public sealed class HttpPluginClient : IIntegrationClient, IHttpPluginClient
 {
     private const string RegistryBaseUrlConfigKey = "PluginRegistry:BaseUrl";
     private const string HealthRoute = "/health";

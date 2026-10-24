@@ -21,9 +21,9 @@ namespace dotnet_plugin_engine.Tests
                 ReleaseNotes = "Release notes",
                 IsPrerelease = false,
                 PrereleaseIdentifier = null,
-                BuildMetadata = null,
-                Compatibility = null,
-                DeprecationNotice = null,
+                BuildMetadata = string.Empty,
+                Compatibility = string.Empty,
+                DeprecationNotice = string.Empty,
                 DownloadCount = 0
             };
 
@@ -57,9 +57,9 @@ namespace dotnet_plugin_engine.Tests
                 ReleaseNotes = "Release notes",
                 IsPrerelease = false,
                 PrereleaseIdentifier = null,
-                BuildMetadata = null,
-                Compatibility = null,
-                DeprecationNotice = null,
+                BuildMetadata = string.Empty,
+                Compatibility = string.Empty,
+                DeprecationNotice = string.Empty,
                 DownloadCount = 0
             };
 
@@ -83,9 +83,9 @@ namespace dotnet_plugin_engine.Tests
                 ReleaseNotes = "Release notes",
                 IsPrerelease = false,
                 PrereleaseIdentifier = null,
-                BuildMetadata = null,
-                Compatibility = null,
-                DeprecationNotice = null,
+                BuildMetadata = string.Empty,
+                Compatibility = string.Empty,
+                DeprecationNotice = string.Empty,
                 DownloadCount = 0
             };
 
@@ -109,9 +109,9 @@ namespace dotnet_plugin_engine.Tests
                 ReleaseNotes = "Release notes",
                 IsPrerelease = false,
                 PrereleaseIdentifier = null,
-                BuildMetadata = null,
-                Compatibility = null,
-                DeprecationNotice = null,
+                BuildMetadata = string.Empty,
+                Compatibility = string.Empty,
+                DeprecationNotice = string.Empty,
                 DownloadCount = 0
             };
 
@@ -135,9 +135,9 @@ namespace dotnet_plugin_engine.Tests
                 ReleaseNotes = "Release notes",
                 IsPrerelease = false,
                 PrereleaseIdentifier = null,
-                BuildMetadata = null,
-                Compatibility = null,
-                DeprecationNotice = null,
+                BuildMetadata = string.Empty,
+                Compatibility = string.Empty,
+                DeprecationNotice = string.Empty,
                 DownloadCount = 0
             };
 
@@ -161,9 +161,9 @@ namespace dotnet_plugin_engine.Tests
                 ReleaseNotes = "Release notes",
                 IsPrerelease = false,
                 PrereleaseIdentifier = null,
-                BuildMetadata = null,
-                Compatibility = null,
-                DeprecationNotice = null,
+                BuildMetadata = string.Empty,
+                Compatibility = string.Empty,
+                DeprecationNotice = string.Empty,
                 DownloadCount = 0
             };
 
@@ -187,9 +187,9 @@ namespace dotnet_plugin_engine.Tests
                 ReleaseNotes = "Release notes",
                 IsPrerelease = false,
                 PrereleaseIdentifier = null,
-                BuildMetadata = null,
-                Compatibility = null,
-                DeprecationNotice = null,
+                BuildMetadata = string.Empty,
+                Compatibility = string.Empty,
+                DeprecationNotice = string.Empty,
                 DownloadCount = 0
             };
 
@@ -213,9 +213,9 @@ namespace dotnet_plugin_engine.Tests
                 ReleaseNotes = "Release notes",
                 IsPrerelease = false,
                 PrereleaseIdentifier = null,
-                BuildMetadata = null,
-                Compatibility = null,
-                DeprecationNotice = null,
+                BuildMetadata = string.Empty,
+                Compatibility = string.Empty,
+                DeprecationNotice = string.Empty,
                 DownloadCount = 0
             };
 
@@ -239,9 +239,9 @@ namespace dotnet_plugin_engine.Tests
                 ReleaseNotes = null,
                 IsPrerelease = false,
                 PrereleaseIdentifier = null,
-                BuildMetadata = null,
-                Compatibility = null,
-                DeprecationNotice = null,
+                BuildMetadata = string.Empty,
+                Compatibility = string.Empty,
+                DeprecationNotice = string.Empty,
                 DownloadCount = 0
             };
 
@@ -265,9 +265,9 @@ namespace dotnet_plugin_engine.Tests
                 ReleaseNotes = "Release notes",
                 IsPrerelease = true,
                 PrereleaseIdentifier = null,
-                BuildMetadata = null,
-                Compatibility = null,
-                DeprecationNotice = null,
+                BuildMetadata = string.Empty,
+                Compatibility = string.Empty,
+                DeprecationNotice = string.Empty,
                 DownloadCount = 0
             };
 
@@ -291,9 +291,9 @@ namespace dotnet_plugin_engine.Tests
                 ReleaseNotes = "Release notes",
                 IsPrerelease = true,
                 PrereleaseIdentifier = "   ",
-                BuildMetadata = null,
-                Compatibility = null,
-                DeprecationNotice = null,
+                BuildMetadata = string.Empty,
+                Compatibility = string.Empty,
+                DeprecationNotice = string.Empty,
                 DownloadCount = 0
             };
 
@@ -318,8 +318,8 @@ namespace dotnet_plugin_engine.Tests
                 IsPrerelease = false,
                 PrereleaseIdentifier = null,
                 BuildMetadata = null,
-                Compatibility = null,
-                DeprecationNotice = null,
+                Compatibility = string.Empty,
+                DeprecationNotice = string.Empty,
                 DownloadCount = 0
             };
 
@@ -343,9 +343,9 @@ namespace dotnet_plugin_engine.Tests
                 ReleaseNotes = "Release notes",
                 IsPrerelease = false,
                 PrereleaseIdentifier = null,
-                BuildMetadata = null,
+                BuildMetadata = string.Empty,
                 Compatibility = null,
-                DeprecationNotice = null,
+                DeprecationNotice = string.Empty,
                 DownloadCount = 0
             };
 
@@ -369,8 +369,8 @@ namespace dotnet_plugin_engine.Tests
                 ReleaseNotes = "Release notes",
                 IsPrerelease = false,
                 PrereleaseIdentifier = null,
-                BuildMetadata = null,
-                Compatibility = null,
+                BuildMetadata = string.Empty,
+                Compatibility = string.Empty,
                 DeprecationNotice = null,
                 DownloadCount = 0
             };
@@ -395,9 +395,9 @@ namespace dotnet_plugin_engine.Tests
                 ReleaseNotes = "Release notes",
                 IsPrerelease = false,
                 PrereleaseIdentifier = null,
-                BuildMetadata = null,
-                Compatibility = null,
-                DeprecationNotice = null,
+                BuildMetadata = string.Empty,
+                Compatibility = string.Empty,
+                DeprecationNotice = string.Empty,
                 DownloadCount = -1
             };
 
@@ -421,9 +421,9 @@ namespace dotnet_plugin_engine.Tests
                 ReleaseNotes = "Release notes",
                 IsPrerelease = false,
                 PrereleaseIdentifier = null,
-                BuildMetadata = null,
-                Compatibility = null,
-                DeprecationNotice = null,
+                BuildMetadata = string.Empty,
+                Compatibility = string.Empty,
+                DeprecationNotice = string.Empty,
                 DownloadCount = 0
             };
 
@@ -447,9 +447,9 @@ namespace dotnet_plugin_engine.Tests
                 ReleaseNotes = "Release notes",
                 IsPrerelease = false,
                 PrereleaseIdentifier = null,
-                BuildMetadata = null,
-                Compatibility = null,
-                DeprecationNotice = null,
+                BuildMetadata = string.Empty,
+                Compatibility = string.Empty,
+                DeprecationNotice = string.Empty,
                 DownloadCount = 0
             };
 
@@ -483,9 +483,9 @@ namespace dotnet_plugin_engine.Tests
                 ReleaseNotes = "Release notes",
                 IsPrerelease = false,
                 PrereleaseIdentifier = null,
-                BuildMetadata = null,
-                Compatibility = null,
-                DeprecationNotice = null,
+                BuildMetadata = string.Empty,
+                Compatibility = string.Empty,
+                DeprecationNotice = string.Empty,
                 DownloadCount = 0
             };
 
@@ -509,9 +509,9 @@ namespace dotnet_plugin_engine.Tests
                 ReleaseNotes = "Release notes",
                 IsPrerelease = false,
                 PrereleaseIdentifier = null,
-                BuildMetadata = null,
-                Compatibility = null,
-                DeprecationNotice = null,
+                BuildMetadata = string.Empty,
+                Compatibility = string.Empty,
+                DeprecationNotice = string.Empty,
                 DownloadCount = 0
             };
 

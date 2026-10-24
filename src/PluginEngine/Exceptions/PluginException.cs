@@ -58,7 +58,7 @@ public class PluginException : Exception
     /// <summary>
     /// Initializes a new instance with a message, error code, and inner exception.
     /// </summary>
-    public PluginException(string message, string errorCode, Exception innerException)
+    public PluginException(string message, string errorCode, Exception? innerException)
         : base(message, innerException)
     {
         ErrorCode = errorCode;
@@ -69,7 +69,7 @@ public class PluginException : Exception
     /// </summary>
     public override string ToString()
     {
-        var result = $"[{ErrorCode}] {Message}";
+        var result = $"{GetType().FullName}: [{ErrorCode}] {Message}";
 
         if (EntityId.HasValue)
             result += $" (Entity: {EntityId})";

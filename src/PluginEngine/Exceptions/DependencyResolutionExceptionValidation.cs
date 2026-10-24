@@ -60,15 +60,16 @@ public static class DependencyResolutionExceptionValidation
                 problems.Add("UnresolvedDependencies collection exceeds maximum size of 1000 items.");
             }
 
-            var duplicateDependencies = value.UnresolvedDependencies
+            var duplicateGroups = value.UnresolvedDependencies
                 .GroupBy(d => d, StringComparer.Ordinal)
                 .Where(g => g.Count() > 1)
-                .Select(g => g.Key)
                 .ToList();
 
-            if (duplicateDependencies.Count > 0)
+            if (duplicateGroups.Count > 0)
             {
-                problems.Add($"UnresolvedDependencies contains {duplicateDependencies.Count} duplicate entries: {string.Join(", ", duplicateDependencies.Take(5))}{(duplicateDependencies.Count > 5 ? "..." : "")}.");
+                var duplicateEntryCount = duplicateGroups.Sum(g => g.Count());
+                var duplicateNames = duplicateGroups.Select(g => g.Key).ToList();
+                problems.Add($"UnresolvedDependencies contains {duplicateEntryCount} duplicate entries: {string.Join(", ", duplicateNames.Take(5))}{(duplicateNames.Count > 5 ? "..." : "")}.");
             }
 
             foreach (var dependency in value.UnresolvedDependencies)

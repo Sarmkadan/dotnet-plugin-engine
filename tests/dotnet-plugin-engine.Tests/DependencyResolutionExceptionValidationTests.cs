@@ -158,7 +158,7 @@ public class DependencyResolutionExceptionValidationTests
             Reason = DependencyResolutionReason.DependencyNotFound
         };
         exception.AddUnresolvedDependency("PluginA");
-        exception.AddUnresolvedDependency(" "); // Whitespace only
+        exception.UnresolvedDependencies.Add(" "); // Whitespace only (bypasses AddUnresolvedDependency, which filters it)
         exception.AddUnresolvedDependency("PluginB");
 
         // Act
@@ -306,7 +306,7 @@ public class DependencyResolutionExceptionValidationTests
             Reason = (DependencyResolutionReason)999 // Invalid
         };
         exception.AddUnresolvedDependency("PluginA");
-        exception.AddUnresolvedDependency(" "); // Whitespace
+        exception.UnresolvedDependencies.Add(" "); // Whitespace (bypasses AddUnresolvedDependency, which filters it)
 
         // Act
         var problems = exception.Validate();

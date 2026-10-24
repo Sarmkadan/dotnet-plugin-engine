@@ -305,7 +305,7 @@ public sealed class PluginEventPublisherTests
             return Task.CompletedTask;
         });
 
-        // Act: Publish the first error event
+        // Act: Publish the first error event. The failing handler's exception is surfaced to the caller.
         var firstEvent = new PluginErrorEvent
         {
             PluginId = Guid.NewGuid(),
@@ -313,7 +313,7 @@ public sealed class PluginEventPublisherTests
             ErrorCode = 500
         };
 
-        await publisher.PublishAsync(firstEvent);
+        await Assert.ThrowsAsync<AggregateException>(() => publisher.PublishAsync(firstEvent));
 
         // Assert: Handler should have been invoked, but nested publishing should have been prevented
         handlerInvocationCount.Should().BeGreaterThan(0);

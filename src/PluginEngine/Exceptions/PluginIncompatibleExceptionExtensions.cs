@@ -53,7 +53,7 @@ namespace PluginEngine.Exceptions
         public static bool HasDeclaredConstraint(this PluginIncompatibleException exception)
         {
             ArgumentNullException.ThrowIfNull(exception);
-            return !string.IsNullOrEmpty(exception.DeclaredConstraint);
+            return !string.IsNullOrWhiteSpace(exception.DeclaredConstraint);
         }
     }
 }

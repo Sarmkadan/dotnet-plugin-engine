@@ -169,6 +169,11 @@ public sealed class PluginEventPublisher : IPluginEventPublisher
                 }
             }
         }
+        catch (AggregateException)
+        {
+            // Handler failures are surfaced to the caller; they are already logged above.
+            throw;
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error publishing event: {EventType}", @event?.EventType ?? typeof(T).Name);
