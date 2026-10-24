@@ -40,11 +40,17 @@ public sealed class HttpPluginClient : IIntegrationClient, IHttpPluginClient
     internal readonly ILogger<HttpPluginClient> _logger;
     internal readonly string? _registryBaseUrl;
 
+    /// <summary>Gets or sets the identifier of the plugin.</summary>
     public required Guid PluginId { get; set; }
+    /// <summary>Gets or sets the currently installed version.</summary>
     public required string CurrentVersion { get; set; } = string.Empty;
+    /// <summary>Gets or sets the newest available version.</summary>
     public required string AvailableVersion { get; set; } = string.Empty;
+    /// <summary>Gets or sets the URL to download the update from.</summary>
     public required string DownloadUrl { get; set; } = string.Empty;
+    /// <summary>Gets or sets a value indicating whether the update fixes a security issue.</summary>
     public bool IsSecurityUpdate { get; set; }
+    /// <summary>Gets or sets the release notes for the update.</summary>
     public string? ReleaseNotes { get; set; }
 
     /// <summary>
@@ -99,7 +105,9 @@ public sealed class HttpPluginClient : IIntegrationClient, IHttpPluginClient
     public async Task<bool> IsAvailableAsync(CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(_registryBaseUrl))
+        {
             return false;
+        }
 
         try
         {
@@ -240,7 +248,9 @@ public sealed class HttpPluginClient : IIntegrationClient, IHttpPluginClient
     public async Task<bool> UploadPluginAsync(string filePath, string description = "", CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(_registryBaseUrl) || !File.Exists(filePath))
+        {
             return false;
+        }
 
         try
         {
@@ -390,7 +400,9 @@ public sealed class HttpPluginClient : IIntegrationClient, IHttpPluginClient
         var updates = new List<PluginUpdateInfo>();
 
         if (string.IsNullOrEmpty(_registryBaseUrl))
+        {
             return updates;
+        }
 
         try
         {

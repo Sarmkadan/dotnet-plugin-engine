@@ -24,7 +24,9 @@ public static class PluginEngineOptionsExtensions
     public static PluginEngineOptions Clone(this PluginEngineOptions options)
     {
         if (options == null)
+        {
             throw new ArgumentNullException(nameof(options));
+        }
 
         return new PluginEngineOptions
         {
@@ -53,7 +55,9 @@ public static class PluginEngineOptionsExtensions
     public static bool IsHotReloadEnabled(this PluginEngineOptions options)
     {
         if (options == null)
+        {
             throw new ArgumentNullException(nameof(options));
+        }
 
         return options.EnableHotReload;
     }
@@ -68,10 +72,14 @@ public static class PluginEngineOptionsExtensions
     public static string GetAbsolutePluginDirectory(this PluginEngineOptions options)
     {
         if (options == null)
+        {
             throw new ArgumentNullException(nameof(options));
+        }
 
         if (string.IsNullOrWhiteSpace(options.PluginDirectory))
+        {
             throw new ArgumentException("Plugin directory cannot be empty.", nameof(options.PluginDirectory));
+        }
 
         return Path.GetFullPath(options.PluginDirectory);
     }
@@ -85,7 +93,9 @@ public static class PluginEngineOptionsExtensions
     public static void EnsureValid(this PluginEngineOptions options)
     {
         if (options == null)
+        {
             throw new ArgumentNullException(nameof(options));
+        }
 
         if (!options.IsValid())
         {

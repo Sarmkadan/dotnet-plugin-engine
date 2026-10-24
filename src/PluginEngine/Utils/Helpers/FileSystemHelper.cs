@@ -15,6 +15,7 @@ public sealed class FileSystemHelper
 {
     private readonly ILogger<FileSystemHelper> _logger;
 
+    /// <summary>Initializes a new instance of the <see cref="FileSystemHelper"/> class.</summary>
     public FileSystemHelper(ILogger<FileSystemHelper> logger)
     {
         ArgumentNullException.ThrowIfNull(logger);
@@ -51,7 +52,9 @@ public sealed class FileSystemHelper
         try
         {
             if (!Directory.Exists(directory))
+            {
                 return [];
+            }
 
             return Directory.GetFiles(directory, "*.dll", SearchOption.TopDirectoryOnly)
                 .Where(f => !Path.GetFileName(f).StartsWith("_"));
@@ -71,7 +74,9 @@ public sealed class FileSystemHelper
         try
         {
             if (!File.Exists(filePath))
+            {
                 return null;
+            }
 
             var info = new FileInfo(filePath);
             return (info.Length, info.LastWriteTimeUtc);
@@ -143,7 +148,9 @@ public sealed class FileSystemHelper
         try
         {
             if (!Directory.Exists(path))
+            {
                 return 0;
+            }
 
             var info = new DirectoryInfo(path);
             return info.EnumerateFiles("*", SearchOption.AllDirectories)
@@ -164,7 +171,9 @@ public sealed class FileSystemHelper
         try
         {
             if (!File.Exists(filePath))
+            {
                 return null;
+            }
 
             var timestamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture);
             var backupPath = Path.Combine(

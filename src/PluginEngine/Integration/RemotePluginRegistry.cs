@@ -61,7 +61,9 @@ public sealed class RemotePluginRegistry : IRemotePluginRegistry
             var cacheKey = $"registry_search_{query}_{limit.ToString(CultureInfo.InvariantCulture)}";
 
             if (_cache.TryGetValue(cacheKey, out List<PluginInfo>? cached))
+            {
                 return cached ?? [];
+            }
 
             var results = await _httpClient.SearchPluginsAsync(query, limit);
 
@@ -95,7 +97,9 @@ public sealed class RemotePluginRegistry : IRemotePluginRegistry
             var cacheKey = $"registry_plugin_{pluginId}";
 
             if (_cache.TryGetValue(cacheKey, out PluginInfo? cached))
+            {
                 return cached;
+            }
 
             var pluginInfo = await _httpClient.GetPluginInfoAsync(pluginId);
 
@@ -132,7 +136,9 @@ public sealed class RemotePluginRegistry : IRemotePluginRegistry
             var cacheKey = $"registry_versions_{pluginId}";
 
             if (_cache.TryGetValue(cacheKey, out List<PluginVersionInfo>? cached))
+            {
                 return cached ?? [];
+            }
 
             var versions = await _httpClient.GetPluginVersionsAsync(pluginId);
 

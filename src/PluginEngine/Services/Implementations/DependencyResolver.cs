@@ -58,7 +58,9 @@ public sealed class DependencyResolver
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (!visited.Contains(plugin.Id))
+            {
                 Visit(plugin, lookup, visited, visiting, sorted);
+            }
         }
 
         _logger.LogInformation("Load order computed: {Order}.",
@@ -123,7 +125,9 @@ public sealed class DependencyResolver
             {
                 var nested = await GetTransitiveDependentsAsync(dep.Id, cancellationToken);
                 foreach (var n in nested)
+                {
                     all.TryAdd(n.Id, n);
+                }
             }
         }
 
@@ -137,14 +141,22 @@ public sealed class DependencyResolver
         HashSet<Guid> visiting,
         List<Plugin> sorted)
     {
-        if (visited.Contains(plugin.Id)) return;
+        if (visited.Contains(plugin.Id))
+        {
+            return;
+        }
+
         if (!visiting.Add(plugin.Id))
+        {
             throw new DependencyResolutionException($"Circular dependency detected involving plugin '{plugin.Name}'.");
+        }
 
         foreach (var dep in plugin.Dependencies)
         {
             if (lookup.TryGetValue(dep.DependencyPluginId, out var depPlugin))
+            {
                 Visit(depPlugin, lookup, visited, visiting, sorted);
+            }
         }
 
         visiting.Remove(plugin.Id);

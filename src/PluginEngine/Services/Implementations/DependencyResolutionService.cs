@@ -35,10 +35,14 @@ public sealed class DependencyResolutionService : IDependencyResolutionService
     public async Task<IEnumerable<Plugin>> ResolveDependenciesAsync(Plugin plugin, CancellationToken cancellationToken = default)
     {
         if (plugin is null)
+        {
             throw new ArgumentNullException(nameof(plugin));
+        }
 
         if (_dependencyCache.TryGetValue(plugin.Id, out var cached))
+        {
             return cached;
+        }
 
         var resolvedDependencies = new List<Plugin>();
         var visited = new HashSet<Guid>();
@@ -55,13 +59,17 @@ public sealed class DependencyResolutionService : IDependencyResolutionService
     public async Task<bool> ValidateDependenciesAsync(Plugin plugin, CancellationToken cancellationToken = default)
     {
         if (plugin is null)
+        {
             throw new ArgumentNullException(nameof(plugin));
+        }
 
         foreach (var dependency in plugin.Dependencies)
         {
             var resolved = await ResolveSingleDependencyAsync(dependency, cancellationToken);
             if (resolved is null && !dependency.IsOptional)
+            {
                 return false;
+            }
         }
 
         return true;
@@ -73,7 +81,9 @@ public sealed class DependencyResolutionService : IDependencyResolutionService
     public async Task<bool> HasCircularDependenciesAsync(Plugin plugin, CancellationToken cancellationToken = default)
     {
         if (plugin is null)
+        {
             throw new ArgumentNullException(nameof(plugin));
+        }
 
         var visited = new HashSet<Guid>();
         var recursionStack = new HashSet<Guid>();
@@ -88,7 +98,9 @@ public sealed class DependencyResolutionService : IDependencyResolutionService
     {
         var plugin = await _pluginLoaderService.GetLoadedPluginAsync(pluginId, cancellationToken);
         if (plugin is null)
+        {
             throw new PluginException($"Plugin {pluginId} not found.", "PLUGIN_NOT_FOUND");
+        }
 
         var graph = new DependencyGraph { RootPluginId = pluginId };
         var nodes = new Dictionary<Guid, DependencyNode>();
@@ -105,16 +117,22 @@ public sealed class DependencyResolutionService : IDependencyResolutionService
     public async Task<Plugin?> ResolveSingleDependencyAsync(PluginDependency dependency, CancellationToken cancellationToken = default)
     {
         if (dependency is null)
+        {
             throw new ArgumentNullException(nameof(dependency));
+        }
 
         var loadedPlugins = await _pluginLoaderService.GetAllLoadedPluginsAsync(cancellationToken);
         var resolved = loadedPlugins.FirstOrDefault(p => p.Id == dependency.DependencyPluginId);
 
         if (resolved is null)
+        {
             return null;
+        }
 
         if (!dependency.IsSatisfiedBy(resolved.Version))
+        {
             return null;
+        }
 
         return resolved;
     }
@@ -130,7 +148,9 @@ public sealed class DependencyResolutionService : IDependencyResolutionService
         foreach (var plugin in allPlugins)
         {
             if (plugin.Dependencies.Any(d => d.DependencyPluginId == pluginId))
+            {
                 dependents.Add(plugin);
+            }
         }
 
         return dependents;
@@ -148,7 +168,9 @@ public sealed class DependencyResolutionService : IDependencyResolutionService
     private async Task ResolveDependenciesRecursiveAsync(Plugin plugin, List<Plugin> resolved, HashSet<Guid> visited, CancellationToken cancellationToken)
     {
         if (visited.Contains(plugin.Id))
+        {
             return;
+        }
 
         visited.Add(plugin.Id);
 
@@ -170,17 +192,23 @@ public sealed class DependencyResolutionService : IDependencyResolutionService
 
         var plugin = await _pluginLoaderService.GetLoadedPluginAsync(pluginId, cancellationToken);
         if (plugin is null)
+        {
             return false;
+        }
 
         foreach (var dep in plugin.Dependencies)
         {
             if (!visited.Contains(dep.DependencyPluginId))
             {
                 if (await HasCircularDependenciesRecursiveAsync(dep.DependencyPluginId, visited, recursionStack, cancellationToken))
+                {
                     return true;
+                }
             }
             else if (recursionStack.Contains(dep.DependencyPluginId))
+            {
                 return true;
+            }
         }
 
         recursionStack.Remove(pluginId);

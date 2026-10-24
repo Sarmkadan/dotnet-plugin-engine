@@ -71,10 +71,14 @@ public sealed class AssemblyLoadContextInfo : IEquatable<AssemblyLoadContextInfo
     public void AddLoadedAssembly(string assemblyName)
     {
         if (string.IsNullOrWhiteSpace(assemblyName))
+        {
             throw new ArgumentException("Assembly name cannot be empty.", nameof(assemblyName));
+        }
 
         if (!_loadedAssemblies.Contains(assemblyName))
+        {
             _loadedAssemblies.Add(assemblyName);
+        }
     }
 
     /// <summary>

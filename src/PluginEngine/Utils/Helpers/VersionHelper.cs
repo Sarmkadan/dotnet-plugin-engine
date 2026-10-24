@@ -15,6 +15,7 @@ public sealed class VersionHelper
 {
     private readonly ILogger<VersionHelper> _logger;
 
+    /// <summary>Initializes a new instance of the <see cref="VersionHelper"/> class.</summary>
     public VersionHelper(ILogger<VersionHelper> logger)
     {
         _logger = logger;
@@ -29,7 +30,9 @@ public sealed class VersionHelper
         try
         {
             if (string.IsNullOrWhiteSpace(versionString))
+            {
                 return null;
+            }
 
             // Clean the version string of common prefixes
             var cleaned = versionString
@@ -53,7 +56,7 @@ public sealed class VersionHelper
     }
 
     /// <summary>
-    /// Compares two version strings. Returns -1 if v1 < v2, 0 if equal, 1 if v1 > v2.
+    /// Compares two version strings. Returns -1 if v1 &lt; v2, 0 if equal, 1 if v1 &gt; v2.
     /// </summary>
     public int CompareVersions(string version1, string version2)
     {
@@ -61,7 +64,9 @@ public sealed class VersionHelper
         var v2 = ParseVersion(version2);
 
         if (v1 is null || v2 is null)
+        {
             return -1;
+        }
 
         return v1.CompareTo(v2);
     }
@@ -73,7 +78,9 @@ public sealed class VersionHelper
     {
         var parsedVersion = ParseVersion(version);
         if (parsedVersion is null)
+        {
             return false;
+        }
 
         constraint = constraint.Trim();
 
@@ -124,7 +131,9 @@ public sealed class VersionHelper
         {
             var target = ParseVersion(constraint[1..]);
             if (target is null)
+            {
                 return false;
+            }
 
             return parsedVersion.Major == target.Major &&
                    parsedVersion >= target;
@@ -135,7 +144,9 @@ public sealed class VersionHelper
         {
             var target = ParseVersion(constraint[1..]);
             if (target is null)
+            {
                 return false;
+            }
 
             return parsedVersion.Major == target.Major &&
                    parsedVersion.Minor == target.Minor &&
@@ -192,10 +203,16 @@ public sealed class VersionHelper
 /// </summary>
 public sealed class ParsedVersionInfo
 {
+    /// <summary>Gets or sets the original version string as provided.</summary>
     public required string Original { get; set; }
+    /// <summary>Gets or sets the major version number.</summary>
     public int Major { get; set; }
+    /// <summary>Gets or sets the minor version number.</summary>
     public int Minor { get; set; }
+    /// <summary>Gets or sets the patch version number.</summary>
     public int Patch { get; set; }
+    /// <summary>Gets or sets a value indicating whether the version is a prerelease.</summary>
     public bool IsPrerelease { get; set; }
+    /// <summary>Gets or sets a value indicating whether the version is a stable release.</summary>
     public bool IsStable { get; set; }
 }

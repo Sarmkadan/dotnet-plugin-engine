@@ -81,10 +81,14 @@ public sealed class VersionInfo
         var version = Version;
 
         if (IsPrerelease && !string.IsNullOrWhiteSpace(PrereleaseIdentifier))
+        {
             version = $"{version}-{PrereleaseIdentifier}";
+        }
 
         if (!string.IsNullOrWhiteSpace(BuildMetadata))
+        {
             version = $"{version}+{BuildMetadata}";
+        }
 
         return version;
     }
@@ -96,10 +100,14 @@ public sealed class VersionInfo
     {
         var display = GetSemanticVersion();
         if (IsPrerelease)
+        {
             display += " (pre-release)";
+        }
 
         if (!string.IsNullOrWhiteSpace(DeprecationNotice))
+        {
             display += " [DEPRECATED]";
+        }
 
         return display;
     }
@@ -110,10 +118,14 @@ public sealed class VersionInfo
     public bool IsCompatibleWith(string otherVersion)
     {
         if (string.IsNullOrWhiteSpace(otherVersion))
+        {
             return false;
+        }
 
         if (!SystemVersion.TryParse(this.Version, out var thisVer) || !SystemVersion.TryParse(otherVersion, out var otherVer))
+        {
             return false;
+        }
 
         // Compatible if major versions match
         return thisVer.Major == otherVer.Major;

@@ -98,7 +98,9 @@ public sealed class PluginAssembly
     public string GetQualifiedName()
     {
         if (string.IsNullOrWhiteSpace(PublicKeyToken))
+        {
             return $"{AssemblyName}, Version={AssemblyVersion}";
+        }
 
         return $"{AssemblyName}, Version={AssemblyVersion}, PublicKeyToken={PublicKeyToken}";
     }
@@ -109,7 +111,9 @@ public sealed class PluginAssembly
     public void UpdateFileInfo(string filePath, long fileSize, string fileHash)
     {
         if (string.IsNullOrWhiteSpace(filePath))
+        {
             throw new ArgumentException("File path cannot be empty.", nameof(filePath));
+        }
 
         FilePath = filePath;
         FileSizeBytes = fileSize;
@@ -141,7 +145,7 @@ public sealed class PluginAssembly
     /// <summary>
     /// Returns a string representation of the assembly, including its qualified name and load status.
     /// </summary>
-    /// <returns>A string in the format "<qualified name> [<status>]"</returns>
+    /// <returns>A string in the format "&lt;qualified name&gt; [&lt;status&gt;]"</returns>
     public override string ToString()
     {
         return $"{GetQualifiedName()} [{Status}]";
@@ -153,9 +157,14 @@ public sealed class PluginAssembly
 /// </summary>
 public enum AssemblyLoadStatus
 {
+    /// <summary>The assembly is not loaded into any context.</summary>
     Unloaded = 0,
+    /// <summary>The assembly is being loaded.</summary>
     Loading = 1,
+    /// <summary>The assembly is loaded and available.</summary>
     Loaded = 2,
+    /// <summary>Loading the assembly failed.</summary>
     Failed = 3,
+    /// <summary>The assembly is being unloaded.</summary>
     Unloading = 4
 }

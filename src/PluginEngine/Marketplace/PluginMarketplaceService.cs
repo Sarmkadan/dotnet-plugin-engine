@@ -121,8 +121,10 @@ public sealed class PluginMarketplaceService : IPluginMarketplaceService
         {
             var info = await _registry.GetPluginAsync(pluginId);
             if (info is null)
+            {
                 return PluginOperationResult<MarketplaceEntry>.CreateFailure(
                     "Plugin not found in the marketplace.", NotFoundErrorCode);
+            }
 
             var versions = await _registry.GetVersionsAsync(pluginId);
             var entry = ToMarketplaceEntry(info);
@@ -144,7 +146,9 @@ public sealed class PluginMarketplaceService : IPluginMarketplaceService
         var cacheKey = $"mp_matrix_{pluginId}";
 
         if (_cache.TryGetValue(cacheKey, out VersionCompatibilityMatrix? cached) && cached is not null)
+        {
             return PluginOperationResult<VersionCompatibilityMatrix>.CreateSuccess(cached, "Matrix served from cache.");
+        }
 
         try
         {
@@ -160,7 +164,9 @@ public sealed class PluginMarketplaceService : IPluginMarketplaceService
             foreach (var ver in versions)
             {
                 foreach (var engineVer in KnownEngineVersions)
+                {
                     matrix.Record(ver.Version, engineVer, DetermineCompatibility(ver, engineVer));
+                }
             }
 
             _cache.Set(cacheKey, matrix, new MemoryCacheEntryOptions
@@ -188,7 +194,9 @@ public sealed class PluginMarketplaceService : IPluginMarketplaceService
     {
         var matrixResult = await GetCompatibilityMatrixAsync(pluginId, cancellationToken);
         if (!matrixResult.Success)
+        {
             return PluginOperationResult<CompatibilityStatus>.CreateFailure(matrixResult.Message, matrixResult.ErrorCode ?? DefaultFailureErrorCode);
+        }
 
         var status = matrixResult.Data!.GetStatus(pluginVersion, engineVersion);
         return PluginOperationResult<CompatibilityStatus>.CreateSuccess(status, $"Compatibility status: {status}.");
@@ -202,12 +210,16 @@ public sealed class PluginMarketplaceService : IPluginMarketplaceService
         try
         {
             if (!Directory.Exists(targetDirectory))
+            {
                 Directory.CreateDirectory(targetDirectory);
+            }
 
             var filePath = await _registry.DownloadPluginAsync(pluginId, version, targetDirectory);
             if (filePath is null)
+            {
                 return PluginOperationResult.CreateFailure(
                     "Download failed: the registry returned no file.", BadGatewayErrorCode);
+            }
 
             _logger.LogInformation("Installed plugin {PluginId} v{Version} -> {Directory}", pluginId, version, targetDirectory);
             return PluginOperationResult.CreateSuccess($"Plugin installed successfully at: {filePath}");
@@ -236,15 +248,21 @@ public sealed class PluginMarketplaceService : IPluginMarketplaceService
     private static CompatibilityStatus DetermineCompatibility(PluginVersionInfo ver, string engineVersion)
     {
         if (!Version.TryParse(engineVersion, out var engine))
+        {
             return CompatibilityStatus.Unknown;
+        }
 
         if (ver.IsPrerelease)
+        {
             return engine.Major >= MinEngineMajorForCurrent
                 ? CompatibilityStatus.Compatible
                 : CompatibilityStatus.Unknown;
+        }
 
         if (!ver.IsStable)
+        {
             return CompatibilityStatus.Unknown;
+        }
 
         var ageDays = (DateTime.UtcNow - ver.PublishedAtUtc).TotalDays;
 

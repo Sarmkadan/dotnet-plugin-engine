@@ -97,8 +97,10 @@ public sealed class PluginDependencyResolver : IPluginDependencyResolver
         {
             var root = await _loader.GetLoadedPluginAsync(pluginId, cancellationToken);
             if (root is null)
+            {
                 return PluginOperationResult<DependencyResolutionPlan>.CreateFailure(
                     $"Plugin {pluginId} is not loaded.", 404);
+            }
 
             var allPlugins = (await _loader.GetAllLoadedPluginsAsync(cancellationToken)).ToList();
             var pluginMap  = allPlugins.ToDictionary(p => p.Id);
@@ -121,10 +123,14 @@ public sealed class PluginDependencyResolver : IPluginDependencyResolver
                 // Check if any dependency of root declares this plugin but the version is off
                 var dep = root.Dependencies.FirstOrDefault(d => d.DependencyPluginId == p.Id);
                 if (dep is not null && !dep.IsSatisfiedBy(p.Version))
+                {
                     action = ResolutionAction.Upgrade;
+                }
 
                 if (conflicts.Any(c => c.DependencyPluginId == p.Id))
+                {
                     action = ResolutionAction.ManualResolutionRequired;
+                }
 
                 return new ResolutionStep
                 {
@@ -170,14 +176,18 @@ public sealed class PluginDependencyResolver : IPluginDependencyResolver
         var adjacency = new Dictionary<Guid, List<Guid>>();
 
         foreach (var p in plugins)
+        {
             adjacency[p.Id] = [];
+        }
 
         foreach (var plugin in plugins)
         {
             foreach (var dep in plugin.Dependencies)
             {
                 if (!idSet.Contains(dep.DependencyPluginId))
+                {
                     continue; // dependency outside the provided set – skip
+                }
 
                 // dep must come before plugin → dep → plugin edge
                 adjacency[dep.DependencyPluginId].Add(plugin.Id);
@@ -197,14 +207,18 @@ public sealed class PluginDependencyResolver : IPluginDependencyResolver
             foreach (var neighbour in adjacency[current])
             {
                 if (--inDegree[neighbour] == 0)
+                {
                     queue.Enqueue(neighbour);
+                }
             }
         }
 
         if (result.Count != plugins.Count)
+        {
             throw new DependencyResolutionException(
                 "Circular dependency detected: could not produce a valid install order.",
                 DependencyResolutionReason.CircularDependency);
+        }
 
         return result;
     }
@@ -234,13 +248,17 @@ public sealed class PluginDependencyResolver : IPluginDependencyResolver
         foreach (var (depId, requirements) in requirementGroups)
         {
             if (requirements.Count < 2)
+            {
                 continue; // Nothing to conflict with
+            }
 
             // Check if all requirements can be satisfied simultaneously by at least one version
             // We detect conflicts by checking min/max bounds overlap.
             var conflict = FindConflictInRequirements(depId, requirements);
             if (conflict is not null)
+            {
                 conflicts.Add(conflict);
+            }
         }
 
         return conflicts;
@@ -255,11 +273,15 @@ public sealed class PluginDependencyResolver : IPluginDependencyResolver
         foreach (var (_, dep) in requirements)
         {
             if (Version.TryParse(dep.MinimumVersion, out var min))
+            {
                 highestMin = highestMin is null || min > highestMin ? min : highestMin;
+            }
 
             if (!string.IsNullOrWhiteSpace(dep.MaximumVersion) &&
                 Version.TryParse(dep.MaximumVersion, out var max))
+            {
                 lowestMax = lowestMax is null || max < lowestMax ? max : lowestMax;
+            }
         }
 
         // Conflict: the tightest lower bound exceeds the tightest upper bound
@@ -292,10 +314,14 @@ public sealed class PluginDependencyResolver : IPluginDependencyResolver
         foreach (var dep in root.Dependencies)
         {
             if (!visited.Add(dep.DependencyPluginId))
+            {
                 continue;
+            }
 
             if (!pluginMap.TryGetValue(dep.DependencyPluginId, out var depPlugin))
+            {
                 continue;
+            }
 
             result.AddRange(CollectTransitive(depPlugin, pluginMap, visited));
             result.Add(depPlugin);

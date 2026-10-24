@@ -1,4 +1,5 @@
 #nullable enable
+using System.Text.Json;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -9,7 +10,6 @@ using PluginEngine.Services.Abstractions;
 using PluginEngine.Services.Implementations;
 using PluginEngine.Utils.Helpers;
 using PluginEngine.Utils.Validators;
-using System.Text.Json;
 using Xunit;
 
 namespace PluginEngine.Tests;

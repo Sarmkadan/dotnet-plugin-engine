@@ -122,7 +122,9 @@ public sealed class PluginEngine
     public async Task<int> LoadAllPluginsAsync(CancellationToken cancellationToken = default)
     {
         if (!Directory.Exists(_options.PluginDirectory))
+        {
             throw new DirectoryNotFoundException($"Plugin directory not found: {_options.PluginDirectory}");
+        }
 
         var loadedPlugins = await _pluginLoaderService.LoadPluginsFromDirectoryAsync(_options.PluginDirectory, cancellationToken);
         return loadedPlugins.Count();

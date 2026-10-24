@@ -76,9 +76,15 @@ public sealed class XmlPluginFormatter : IPluginFormatter
             xmlWriter.WriteStartElement("Metadata");
             xmlWriter.WriteElementString("Description", plugin.Metadata.Description);
             if (!string.IsNullOrEmpty(plugin.Metadata.Author))
+            {
                 xmlWriter.WriteElementString("Author", plugin.Metadata.Author);
+            }
+
             if (!string.IsNullOrEmpty(plugin.Metadata.Company))
+            {
                 xmlWriter.WriteElementString("Company", plugin.Metadata.Company);
+            }
+
             xmlWriter.WriteEndElement();
         }
 

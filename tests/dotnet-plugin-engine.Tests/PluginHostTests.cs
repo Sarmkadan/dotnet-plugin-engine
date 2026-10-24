@@ -58,7 +58,9 @@ public class PluginHostTests : IDisposable
     public void Dispose()
     {
         if (Directory.Exists(_pluginDirectory))
+        {
             Directory.Delete(_pluginDirectory, recursive: true);
+        }
     }
 
     [Fact]

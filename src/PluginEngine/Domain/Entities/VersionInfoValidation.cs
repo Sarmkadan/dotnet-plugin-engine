@@ -31,32 +31,48 @@ public static class VersionInfoValidation
 
         // Validate Id
         if (value.Id == Guid.Empty)
+        {
             errors.Add("Id must not be empty.");
+        }
 
         // Validate EntityId
         if (value.EntityId == Guid.Empty)
+        {
             errors.Add("EntityId must not be empty.");
+        }
 
         // Validate Version
         if (string.IsNullOrWhiteSpace(value.Version))
+        {
             errors.Add("Version must not be null or whitespace.");
+        }
         else if (!Version.TryParse(value.Version, out _))
+        {
             errors.Add("Version must be a valid semantic version string (e.g., 1.0.0).");
+        }
 
         // Validate ReleaseDate
         if (value.ReleaseDate == default)
+        {
             errors.Add("ReleaseDate must not be the default DateTime value.");
+        }
         else if (value.ReleaseDate > DateTime.UtcNow.AddDays(1))
+        {
             errors.Add("ReleaseDate cannot be in the future.");
+        }
         else if (value.ReleaseDate < new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Utc))
+        {
             errors.Add("ReleaseDate must be a valid date after year 2000.");
+        }
 
         // Validate ReleaseNotes (can be empty, but not null)
         ArgumentNullException.ThrowIfNull(value.ReleaseNotes);
 
         // Validate IsPrerelease and PrereleaseIdentifier
         if (value.IsPrerelease && string.IsNullOrWhiteSpace(value.PrereleaseIdentifier))
+        {
             errors.Add("PrereleaseIdentifier must not be null or whitespace when IsPrerelease is true.");
+        }
 
         // Validate BuildMetadata (can be empty)
         ArgumentNullException.ThrowIfNull(value.BuildMetadata);
@@ -69,7 +85,9 @@ public static class VersionInfoValidation
 
         // Validate DownloadCount
         if (value.DownloadCount < 0)
+        {
             errors.Add("DownloadCount must not be negative.");
+        }
 
         return errors.AsReadOnly();
     }

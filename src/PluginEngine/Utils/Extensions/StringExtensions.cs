@@ -62,7 +62,9 @@ public static class StringExtensions
 			if (char.IsWhiteSpace(character) || character is '_' or '-')
 			{
 				if (length > 0 && result[length - 1] != '-')
+				{
 					result[length++] = '-';
+				}
 
 				continue;
 			}
@@ -71,7 +73,9 @@ public static class StringExtensions
 		}
 
 		if (length > 0 && result[length - 1] == '-')
+		{
 			length--;
+		}
 
 		return new string(result, 0, length);
 	}
@@ -85,7 +89,9 @@ public static class StringExtensions
 		ArgumentNullException.ThrowIfNull(value);
 
 		if (string.IsNullOrEmpty(value))
+		{
 			return string.Empty;
+		}
 
 		var invalidChars = Path.GetInvalidFileNameChars();
 		var sanitized = value.Where(c => !invalidChars.Contains(c)).ToArray();
@@ -125,7 +131,9 @@ public static class StringExtensions
 		ArgumentNullException.ThrowIfNull(value);
 
 		if (maxLength < 3)
+		{
 			throw new ArgumentOutOfRangeException(nameof(maxLength), "Maximum length must be at least 3 to accommodate the ellipsis.");
+		}
 
 		return value.Length <= maxLength
 			? value
@@ -139,10 +147,25 @@ public static class StringExtensions
 	{
 		var parts = new List<string>();
 
-		if (span.Days > 0) parts.Add($"{span.Days}d");
-		if (span.Hours > 0) parts.Add($"{span.Hours}h");
-		if (span.Minutes > 0) parts.Add($"{span.Minutes}m");
-		if (span.Seconds > 0) parts.Add($"{span.Seconds}s");
+		if (span.Days > 0)
+		{
+			parts.Add($"{span.Days}d");
+		}
+
+		if (span.Hours > 0)
+		{
+			parts.Add($"{span.Hours}h");
+		}
+
+		if (span.Minutes > 0)
+		{
+			parts.Add($"{span.Minutes}m");
+		}
+
+		if (span.Seconds > 0)
+		{
+			parts.Add($"{span.Seconds}s");
+		}
 
 		return parts.Count > 0 ? string.Join(" ", parts) : "0s";
 	}
@@ -154,7 +177,9 @@ public static class StringExtensions
 	public static string FormatBytes(this long bytes)
 	{
 		if (bytes < 0)
+		{
 			throw new ArgumentOutOfRangeException(nameof(bytes), "Byte count cannot be negative.");
+		}
 
 		string[] sizes = ["B", "KB", "MB", "GB"];
 		double len = bytes;

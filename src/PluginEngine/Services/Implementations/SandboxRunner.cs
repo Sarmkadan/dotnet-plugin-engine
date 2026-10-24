@@ -117,13 +117,18 @@ public sealed class SandboxRunner
     public bool IsMemoryWithinLimits()
     {
         long maxBytes = _options.Value.MaxConcurrentPluginLoads * 256L * 1024 * 1024;
-        if (maxBytes <= 0) return true;
+        if (maxBytes <= 0)
+        {
+            return true;
+        }
 
         var used = GC.GetTotalMemory(forceFullCollection: false);
         var withinLimits = used < maxBytes;
 
         if (!withinLimits)
+        {
             _logger.LogWarning("Memory pressure: {Used} bytes used, limit is {Max} bytes.", used, maxBytes);
+        }
 
         return withinLimits;
     }

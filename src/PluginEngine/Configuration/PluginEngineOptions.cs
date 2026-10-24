@@ -84,22 +84,34 @@ public sealed class PluginEngineOptions
     public bool IsValid()
     {
         if (string.IsNullOrWhiteSpace(PluginDirectory))
+        {
             return false;
+        }
 
         if (HotReloadCheckIntervalMs <= 0)
+        {
             return false;
+        }
 
         if (OperationTimeoutMs <= 0)
+        {
             return false;
+        }
 
         if (MaxConcurrentPluginLoads <= 0)
+        {
             return false;
+        }
 
         if (DependencyCacheTtlMinutes <= 0)
+        {
             return false;
+        }
 
         if (MaxDependencyResolutionAttempts <= 0)
+        {
             return false;
+        }
 
         return true;
     }
@@ -112,22 +124,34 @@ public sealed class PluginEngineOptions
         var errors = new List<string>();
 
         if (string.IsNullOrWhiteSpace(PluginDirectory))
+        {
             errors.Add("Plugin directory cannot be empty.");
+        }
 
         if (HotReloadCheckIntervalMs <= 0)
+        {
             errors.Add("Hot reload check interval must be greater than 0.");
+        }
 
         if (OperationTimeoutMs <= 0)
+        {
             errors.Add("Operation timeout must be greater than 0.");
+        }
 
         if (MaxConcurrentPluginLoads <= 0)
+        {
             errors.Add("Max concurrent plugin loads must be greater than 0.");
+        }
 
         if (DependencyCacheTtlMinutes <= 0)
+        {
             errors.Add("Dependency cache TTL must be greater than 0.");
+        }
 
         if (MaxDependencyResolutionAttempts <= 0)
+        {
             errors.Add("Max dependency resolution attempts must be greater than 0.");
+        }
 
         return errors;
     }
@@ -149,11 +173,18 @@ public sealed class PluginEngineOptions
 /// </summary>
 public enum LogLevel
 {
+    /// <summary>Trace-level diagnostic messages.</summary>
     Trace = 0,
+    /// <summary>Debug-level diagnostic messages.</summary>
     Debug = 1,
+    /// <summary>Informational messages describing normal operation.</summary>
     Information = 2,
+    /// <summary>Warnings about recoverable problems.</summary>
     Warning = 3,
+    /// <summary>Errors that prevent an operation from completing.</summary>
     Error = 4,
+    /// <summary>Critical failures that affect the whole engine.</summary>
     Critical = 5,
+    /// <summary>Disables logging.</summary>
     None = 6
 }

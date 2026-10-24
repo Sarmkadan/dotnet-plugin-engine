@@ -18,15 +18,26 @@ public sealed class RateLimitMiddleware : IPluginMiddleware
     private readonly int _windowSizeSeconds;
     private readonly object _lock = new();
 
+    /// <summary>The default number of operations allowed per window.</summary>
     public const int DefaultMaxTokensPerSecond = 100;
+    /// <summary>The default length of the rate-limit window, in seconds.</summary>
     public const int DefaultWindowSizeSeconds = 1;
 
+    /// <summary>Initializes a new instance of the <see cref="RateLimitMiddleware"/> class.</summary>
+    /// <param name="maxTokensPerSecond">The maximum number of operations allowed per window.</param>
+    /// <param name="windowSizeSeconds">The length of the rate-limit window, in seconds.</param>
     public RateLimitMiddleware(int maxTokensPerSecond = DefaultMaxTokensPerSecond, int windowSizeSeconds = DefaultWindowSizeSeconds)
     {
         _maxTokensPerSecond = maxTokensPerSecond;
         _windowSizeSeconds = windowSizeSeconds;
     }
 
+    /// <summary>
+    /// Consumes a token for the plugin in the operation context and invokes the next delegate in the pipeline.
+    /// </summary>
+    /// <param name="context">The operation context. Its plugin determines the rate-limit bucket.</param>
+    /// <param name="next">The next delegate in the pipeline.</param>
+    /// <exception cref="InvalidOperationException">Thrown when the plugin has exhausted its rate limit.</exception>
     public async Task InvokeAsync(PluginOperationContext context, PluginOperationDelegate next)
     {
         var bucket = GetOrCreateBucket(context.Plugin.Id);

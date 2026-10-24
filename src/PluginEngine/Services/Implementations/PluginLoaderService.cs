@@ -71,10 +71,14 @@ public sealed class PluginLoaderService : IPluginLoaderService
     public async Task<Plugin> LoadPluginAsync(string assemblyPath, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(assemblyPath))
+        {
             throw new ArgumentException("Assembly path cannot be empty.", nameof(assemblyPath));
+        }
 
         if (!File.Exists(assemblyPath))
+        {
             throw new PluginLoadException($"Assembly file not found: {assemblyPath}", "ASSEMBLY_NOT_FOUND", assemblyPath, PluginLoadStage.AssemblyResolution);
+        }
 
         try
         {
@@ -195,12 +199,14 @@ public sealed class PluginLoaderService : IPluginLoaderService
         {
             lock (_lockObject)
             {
-                return _loadedPlugins.TryGetValue(pluginId, out var data) ? (Plugin: data.Plugin, Context: data.Context, Lifecycles: data.Lifecycles) : ((Plugin, AssemblyLoadContext, List<global::PluginEngine.Execution.IPluginLifecycle>)?)(null);
+                return _loadedPlugins.TryGetValue(pluginId, out var data) ? (Plugin: data.Plugin, Context: data.Context, Lifecycles: data.Lifecycles) : ((Plugin Plugin, AssemblyLoadContext Context, List<global::PluginEngine.Execution.IPluginLifecycle> Lifecycles)?)(null);
             }
         });
 
         if (dataOptional == null)
+        {
             return false;
+        }
 
         var (plugin, context, lifecycles) = dataOptional.Value;
         plugin.Status = PluginStatus.Unloading;
@@ -301,7 +307,9 @@ public sealed class PluginLoaderService : IPluginLoaderService
     public async Task<IEnumerable<Plugin>> LoadPluginsFromDirectoryAsync(string directoryPath, CancellationToken cancellationToken = default)
     {
         if (!Directory.Exists(directoryPath))
+        {
             throw new DirectoryNotFoundException($"Directory not found: {directoryPath}");
+        }
 
         var loadedPlugins = new List<Plugin>();
         var dllFiles = Directory.GetFiles(directoryPath, "*.dll");
@@ -330,7 +338,9 @@ public sealed class PluginLoaderService : IPluginLoaderService
     {
         Plugin? existingPlugin = await GetLoadedPluginAsync(pluginId, cancellationToken);
         if (existingPlugin is null)
+        {
             throw new PluginException($"Plugin {pluginId} is not loaded.", "PLUGIN_NOT_FOUND");
+        }
 
         var assemblyPath = existingPlugin.AssemblyPath;
         await UnloadPluginAsync(pluginId, cancellationToken);

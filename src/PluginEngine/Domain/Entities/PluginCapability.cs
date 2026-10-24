@@ -68,10 +68,23 @@ public sealed class PluginCapability : IEquatable<PluginCapability>
     /// </summary>
     public DateTime ModifiedAt { get; set; } = DateTime.UtcNow;
 
+    /// <summary>
+    /// Determines whether this capability has the same identifying fields as another capability.
+    /// </summary>
+    /// <param name="other">The capability to compare with.</param>
+    /// <returns><see langword="true"/> if the capabilities are equal; otherwise, <see langword="false"/>.</returns>
     public bool Equals(PluginCapability? other)
     {
-        if (ReferenceEquals(null, other)) return false;
-        if (ReferenceEquals(this, other)) return true;
+        if (ReferenceEquals(null, other))
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(this, other))
+        {
+            return true;
+        }
+
         return Id.Equals(other.Id) &&
                PluginId.Equals(other.PluginId) &&
                Name == other.Name &&
@@ -82,21 +95,42 @@ public sealed class PluginCapability : IEquatable<PluginCapability>
                Tags == other.Tags;
     }
 
+    /// <summary>
+    /// Determines whether the specified object is equal to this capability.
+    /// </summary>
+    /// <param name="obj">The object to compare with.</param>
+    /// <returns><see langword="true"/> if the object is an equal capability; otherwise, <see langword="false"/>.</returns>
     public override bool Equals(object? obj)
     {
         return ReferenceEquals(this, obj) || (obj is PluginCapability other && Equals(other));
     }
 
+    /// <summary>
+    /// Returns a hash code based on the identifying fields of this capability.
+    /// </summary>
+    /// <returns>A hash code for this capability.</returns>
     public override int GetHashCode()
     {
         return HashCode.Combine(Id, PluginId, Name, Version, InterfaceTypeName, ImplementationTypeName, Description, Tags);
     }
 
+    /// <summary>
+    /// Determines whether two capabilities are equal.
+    /// </summary>
+    /// <param name="left">The first capability.</param>
+    /// <param name="right">The second capability.</param>
+    /// <returns><see langword="true"/> if the capabilities are equal; otherwise, <see langword="false"/>.</returns>
     public static bool operator ==(PluginCapability? left, PluginCapability? right)
     {
         return Equals(left, right);
     }
 
+    /// <summary>
+    /// Determines whether two capabilities are not equal.
+    /// </summary>
+    /// <param name="left">The first capability.</param>
+    /// <param name="right">The second capability.</param>
+    /// <returns><see langword="true"/> if the capabilities are not equal; otherwise, <see langword="false"/>.</returns>
     public static bool operator !=(PluginCapability? left, PluginCapability? right)
     {
         return !Equals(left, right);
@@ -108,7 +142,9 @@ public sealed class PluginCapability : IEquatable<PluginCapability>
     public IEnumerable<string> GetTags()
     {
         if (string.IsNullOrWhiteSpace(Tags))
+        {
             return Enumerable.Empty<string>();
+        }
 
         return Tags.Split(',')
             .Select(t => t.Trim())

@@ -111,7 +111,9 @@ public sealed class PluginMetadata
     public void SetCustomProperty(string key, string value)
     {
         if (string.IsNullOrWhiteSpace(key))
+        {
             throw new ArgumentException("Property key cannot be empty.", nameof(key));
+        }
 
         _customProperties[key] = value ?? string.Empty;
     }

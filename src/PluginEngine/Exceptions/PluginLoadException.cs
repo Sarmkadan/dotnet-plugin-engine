@@ -45,7 +45,7 @@ public sealed class PluginLoadException : PluginException
     /// <summary>
     /// Initializes a new instance with a message and inner exception.
     /// </summary>
-    public PluginLoadException(string message, Exception innerException)
+    public PluginLoadException(string message, Exception? innerException)
         : base(message, innerException)
     {
         ErrorCode = "PLUGIN_LOAD_ERROR";
@@ -66,7 +66,7 @@ public sealed class PluginLoadException : PluginException
     /// <summary>
     /// Initializes a new instance with full details and inner exception.
     /// </summary>
-    public PluginLoadException(string message, string pluginName, string assemblyPath, PluginLoadStage stage, Exception innerException)
+    public PluginLoadException(string message, string pluginName, string assemblyPath, PluginLoadStage stage, Exception? innerException)
         : base(message, innerException)
     {
         ErrorCode = "PLUGIN_LOAD_ERROR";
@@ -91,12 +91,20 @@ public sealed class PluginLoadException : PluginException
 /// </summary>
 public enum PluginLoadStage
 {
+    /// <summary>The stage could not be determined.</summary>
     Unknown = 0,
+    /// <summary>Validating the plugin metadata.</summary>
     MetadataValidation = 1,
+    /// <summary>Resolving the plugin assembly on disk.</summary>
     AssemblyResolution = 2,
+    /// <summary>Loading types from the plugin assembly.</summary>
     TypeLoading = 3,
+    /// <summary>Validating the plugin interface implementation.</summary>
     InterfaceValidation = 4,
+    /// <summary>Creating the plugin instance.</summary>
     Instantiation = 5,
+    /// <summary>Initializing the plugin.</summary>
     Initialization = 6,
+    /// <summary>Resolving plugin dependencies.</summary>
     DependencyResolution = 7
 }

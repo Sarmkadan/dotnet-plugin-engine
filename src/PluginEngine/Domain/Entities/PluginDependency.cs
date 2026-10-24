@@ -62,21 +62,29 @@ public sealed class PluginDependency
     public bool IsSatisfiedBy(string version)
     {
         if (string.IsNullOrWhiteSpace(version))
+        {
             return false;
+        }
 
         var parsed = Version.TryParse(version, out var versionObj);
         if (!parsed)
+        {
             return false;
+        }
 
         var minVersion = Version.Parse(MinimumVersion);
         if (versionObj < minVersion)
+        {
             return false;
+        }
 
         if (!string.IsNullOrWhiteSpace(MaximumVersion))
         {
             var maxVersion = Version.Parse(MaximumVersion);
             if (versionObj > maxVersion)
+            {
                 return false;
+            }
         }
 
         return true;
@@ -88,7 +96,9 @@ public sealed class PluginDependency
     public string GetVersionConstraint()
     {
         if (string.IsNullOrWhiteSpace(MaximumVersion))
+        {
             return $">= {MinimumVersion}";
+        }
 
         return $">= {MinimumVersion} && <= {MaximumVersion}";
     }
@@ -120,8 +130,12 @@ public sealed class PluginDependency
 /// </summary>
 public enum DependencyType
 {
+    /// <summary>A dependency required at runtime.</summary>
     Runtime = 0,
+    /// <summary>A dependency required only at compile time.</summary>
     CompileTime = 1,
+    /// <summary>A dependency that may be absent.</summary>
     Optional = 2,
+    /// <summary>A dependency that applies only under certain conditions.</summary>
     Conditional = 3
 }

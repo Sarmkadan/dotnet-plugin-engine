@@ -88,9 +88,15 @@ public sealed class SemanticVersion
     {
         var version = $"{Major}.{Minor}.{Patch}";
         if (!string.IsNullOrWhiteSpace(Prerelease))
+        {
             version += $"-{Prerelease}";
+        }
+
         if (!string.IsNullOrWhiteSpace(Metadata))
+        {
             version += $"+{Metadata}";
+        }
+
         return version;
     }
 }
