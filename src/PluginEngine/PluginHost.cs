@@ -80,12 +80,12 @@ public sealed class PluginHost : IPluginHost, IDisposable
             {
                 await _engine.PluginLoader.UnloadPluginAsync(plugin.Id, cancellationToken);
                 stopwatch.Stop();
-                PluginHostLog.PluginUnloaded(_logger, plugin.Id, plugin.Name, stopwatch.ElapsedMilliseconds);
+                PluginHostLog.PluginUnloaded(_logger, plugin.Id.ToString(), plugin.Name, stopwatch.ElapsedMilliseconds);
             }
             catch (Exception ex)
             {
                 stopwatch.Stop();
-                PluginHostLog.PluginUnloadFailed(_logger, plugin.Id, plugin.Name, stopwatch.ElapsedMilliseconds, ex.ToString());
+                PluginHostLog.PluginUnloadFailed(_logger, plugin.Id.ToString(), plugin.Name, stopwatch.ElapsedMilliseconds, ex.ToString());
             }
         }
 
@@ -107,12 +107,15 @@ public sealed class PluginHost : IPluginHost, IDisposable
         if (string.IsNullOrWhiteSpace(pluginId))
             throw new ArgumentException("Plugin ID cannot be null or empty.", nameof(pluginId));
 
+        if (!Guid.TryParse(pluginId, out var parsedPluginId))
+            throw new ArgumentException("Plugin ID must be a valid GUID.", nameof(pluginId));
+
         var correlationId = Guid.NewGuid().ToString();
         try
         {
             // In a real implementation, this would invoke the plugin's entry point
             // For now, we simulate execution by checking if the plugin is loaded
-            var plugin = await _engine.PluginLoader.GetLoadedPluginAsync(pluginId, cancellationToken);
+            var plugin = await _engine.PluginLoader.GetLoadedPluginAsync(parsedPluginId, cancellationToken);
             if (plugin == null)
             {
                 throw new InvalidOperationException($"Plugin '{pluginId}' is not loaded.");
