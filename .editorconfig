@@ -11,8 +11,11 @@ trim_trailing_whitespace = true
 [*.cs]
 indent_style = space
 indent_size = 4
+file_header_template = Copyright (c) 2026 Vladyslav Zaiets. Licensed under the MIT License.
+dotnet_sort_system_directives_first = true
 
 # Code style rules
+csharp_style_namespace_declarations = file_scoped:warning
 csharp_prefer_braces = true:warning
 csharp_prefer_simple_using_statement = true:suggestion
 csharp_style_inlined_variable_declaration = true:suggestion
@@ -28,6 +31,15 @@ dotnet_naming_rule.public_members_should_be_pascal_case.severity = suggestion
 dotnet_naming_rule.public_members_should_be_pascal_case.symbols = public_symbols
 dotnet_naming_rule.public_members_should_be_pascal_case.style = pascal_case
 
+# Constants are checked first: naming rules apply in order, so this must precede the private-field rule
+dotnet_naming_rule.constants_should_be_pascal_case.severity = suggestion
+dotnet_naming_rule.constants_should_be_pascal_case.symbols = const_symbols
+dotnet_naming_rule.constants_should_be_pascal_case.style = pascal_case
+
+dotnet_naming_rule.private_fields_should_be_underscore_camel_case.severity = suggestion
+dotnet_naming_rule.private_fields_should_be_underscore_camel_case.symbols = private_field_symbols
+dotnet_naming_rule.private_fields_should_be_underscore_camel_case.style = underscore_camel_case
+
 dotnet_naming_rule.private_members_should_be_camel_case.severity = suggestion
 dotnet_naming_rule.private_members_should_be_camel_case.symbols = private_symbols
 dotnet_naming_rule.private_members_should_be_camel_case.style = camel_case
@@ -39,12 +51,21 @@ dotnet_naming_symbols.interface.applicable_accessibilities = *
 dotnet_naming_symbols.public_symbols.applicable_kinds = namespace, class, struct, enum, property, method
 dotnet_naming_symbols.public_symbols.applicable_accessibilities = public, internal, protected, protected_internal
 
-dotnet_naming_symbols.private_symbols.applicable_kinds = field, property, method, local
+dotnet_naming_symbols.const_symbols.applicable_kinds = field
+dotnet_naming_symbols.const_symbols.applicable_accessibilities = *
+dotnet_naming_symbols.const_symbols.required_modifiers = const
+
+dotnet_naming_symbols.private_field_symbols.applicable_kinds = field
+dotnet_naming_symbols.private_field_symbols.applicable_accessibilities = private, private_protected
+
+dotnet_naming_symbols.private_symbols.applicable_kinds = property, method, local
 dotnet_naming_symbols.private_symbols.applicable_accessibilities = private, private_protected
 
 # Styles
 dotnet_naming_style.pascal_case.capitalization = pascal_case
 dotnet_naming_style.camel_case.capitalization = camel_case
+dotnet_naming_style.underscore_camel_case.required_prefix = _
+dotnet_naming_style.underscore_camel_case.capitalization = camel_case
 dotnet_naming_style.begins_with_i.required_prefix = I
 dotnet_naming_style.begins_with_i.capitalization = pascal_case
 
@@ -129,21 +150,11 @@ csharp_indent_switch_labels = true
 csharp_preserve_single_line_blocks = true
 csharp_preserve_single_line_statements = true
 
-# JSON files
-[*.json]
+# JSON, YAML, MSBuild and project files
+[*.{json,yml,yaml,props,csproj}]
 indent_style = space
 indent_size = 2
 
-# YAML files
-[*.{yml,yaml}]
-indent_style = space
-indent_size = 2
-
-# Markdown files
+# Markdown files (trailing spaces are significant line breaks)
 [*.md]
 trim_trailing_whitespace = false
-
-# Project files
-[*.csproj]
-indent_style = space
-indent_size = 2
