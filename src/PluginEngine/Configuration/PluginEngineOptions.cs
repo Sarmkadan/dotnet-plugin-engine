@@ -95,6 +95,12 @@ public sealed class PluginEngineOptions
         if (MaxConcurrentPluginLoads <= 0)
             return false;
 
+        if (DependencyCacheTtlMinutes <= 0)
+            return false;
+
+        if (MaxDependencyResolutionAttempts <= 0)
+            return false;
+
         return true;
     }
 

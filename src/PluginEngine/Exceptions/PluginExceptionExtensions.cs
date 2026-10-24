@@ -92,10 +92,10 @@ public static class PluginExceptionExtensions
             report.AppendLine($"  Message: {exception.InnerException.Message}");
         }
 
-        if (includeStackTrace && exception.StackTrace is not null)
+        if (includeStackTrace)
         {
             report.AppendLine("\n=== STACK TRACE ===");
-            report.AppendLine(exception.StackTrace);
+            report.AppendLine(exception.StackTrace ?? "(not available: exception has not been thrown)");
         }
 
         report.AppendLine("=== END REPORT ===");

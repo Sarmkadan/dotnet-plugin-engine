@@ -131,7 +131,7 @@ public sealed class VersionMismatchException : PluginException
     /// <param name="componentName">The component name.</param>
     /// <param name="innerException">The inner exception.</param>
     /// <exception cref="ArgumentNullException">Thrown when any argument is <c>null</c>.</exception>
-    public VersionMismatchException(string message, string expectedVersion, string actualVersion, string componentType, string componentName, Exception innerException)
+    public VersionMismatchException(string message, string expectedVersion, string actualVersion, string componentType, string componentName, Exception? innerException)
         : base(message, innerException)
     {
         ArgumentNullException.ThrowIfNull(message);
@@ -139,7 +139,6 @@ public sealed class VersionMismatchException : PluginException
         ArgumentNullException.ThrowIfNull(actualVersion);
         ArgumentNullException.ThrowIfNull(componentType);
         ArgumentNullException.ThrowIfNull(componentName);
-        ArgumentNullException.ThrowIfNull(innerException);
 
         ErrorCode = "VERSION_MISMATCH_ERROR";
         ExpectedVersion = expectedVersion;

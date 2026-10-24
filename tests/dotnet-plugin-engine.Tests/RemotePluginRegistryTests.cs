@@ -11,10 +11,10 @@ namespace PluginEngine.Tests;
 
 public sealed class RemotePluginRegistryTests
 {
-    private readonly Mock<HttpPluginClient> _httpClientMock = new();
+    private readonly Mock<IHttpPluginClient> _httpClientMock = new();
     private readonly MemoryCache _cache = new MemoryCache(new MemoryCacheOptions());
     private readonly Mock<ILogger<RemotePluginRegistry>> _loggerMock = new();
-    private readonly Mock<VersionHelper> _versionHelperMock = new(MockBehavior.Strict);
+    private readonly VersionHelper _versionHelper = new(new Mock<ILogger<VersionHelper>>().Object);
     private readonly RemotePluginRegistry _registry;
 
     public RemotePluginRegistryTests()
@@ -23,7 +23,7 @@ public sealed class RemotePluginRegistryTests
             _httpClientMock.Object,
             _cache,
             _loggerMock.Object,
-            _versionHelperMock.Object);
+            _versionHelper);
     }
 
     [Fact]

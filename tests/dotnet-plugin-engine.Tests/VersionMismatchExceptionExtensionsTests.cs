@@ -73,7 +73,8 @@ public class VersionMismatchExceptionExtensionsTests
     {
         // Arrange
         var ex1 = new VersionMismatchException("Test", "", "1.0.0", "Type", "Name", null);
-        var ex2 = new VersionMismatchException("Test", null, "1.0.0", "Type", "Name", null);
+        var ex2 = new VersionMismatchException("Test", "1.0.0", "1.0.0", "Type", "Name", null);
+        ex2.ExpectedVersion = null!; // Constructors reject null; the public property can still be cleared
 
         // Act
         var result1 = ex1.IsCriticalVersionMismatch();

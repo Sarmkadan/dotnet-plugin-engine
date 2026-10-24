@@ -52,7 +52,7 @@ public enum MarketplaceSortOrder
 public sealed class MarketplaceEntry
 {
     /// <summary>Gets or sets the unique plugin identifier.</summary>
-    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid Id { get; set; } = Guid.Empty;
 
     /// <summary>Gets or sets the plugin name.</summary>
     public string Name { get; set; } = string.Empty;
@@ -76,10 +76,10 @@ public sealed class MarketplaceEntry
     public double Rating { get; set; }
 
     /// <summary>Gets or sets when the plugin was first published.</summary>
-    public DateTime PublishedAtUtc { get; set; } = DateTime.UtcNow;
+    public DateTime PublishedAtUtc { get; set; } = DateTime.MinValue;
 
     /// <summary>Gets or sets when the plugin was last updated.</summary>
-    public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAtUtc { get; set; } = DateTime.MinValue;
 
     /// <summary>Gets or sets whether this plugin has been verified by the marketplace.</summary>
     public bool IsVerified { get; set; }
