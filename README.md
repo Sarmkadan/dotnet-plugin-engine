@@ -688,6 +688,94 @@ else
 - `GetTrendingAsync` and `GetFeaturedAsync` search with an empty query, which the registry rejects. They return a failed result. `GetHomePageAsync` still succeeds, with empty `Trending` and `Featured` lists, and caches that page for 10 minutes.
 - `BrowseCategoryAsync` returns a failed result unless `filter.Query` is set.
 
+## Validation and Versioning
+
+Three types handle plugin validation and version strings. `PluginValidator` checks a whole `Plugin` entity. `VersionHelper` parses and matches individual version strings, including the constraint syntax used by plugin dependencies. `IVersioningService` is the service-layer API for the same kinds of checks.
+
+| Type | Namespace | Role |
+|------|-----------|------|
+| `PluginValidator` | `PluginEngine.Utils.Validators` | Validates a `Plugin` and its metadata and dependencies. Returns a `PluginValidationResult`. |
+| `VersionHelper` | `PluginEngine.Utils.Helpers` | Parses, compares, and matches version strings. Supports constraint syntax. |
+| `IVersioningService` | `PluginEngine.Services.Abstractions` | Version validation, comparison, and increment. Implemented by `VersioningService`. |
+
+### PluginValidator
+
+`PluginValidator` takes an `ILogger<PluginValidator>` and a `VersionHelper`. `ServiceCollectionExtensions.AddPluginEngineStack` registers it, along with `VersionHelper`, as a singleton. `Validate(Plugin)` collects every error instead of stopping at the first one. It applies these rules:
+
+| Field | Rule |
+|-------|------|
+| Name | Required. At most 100 characters. Must not start with `System.` or `Microsoft.`. Must start with a letter or digit. Other characters must be letters, digits, `-`, `_`, or `.`. |
+| Version | Required. Must be a valid version (`VersionHelper.IsValidSemanticVersion`). Must not be `0.0.0`. |
+| Metadata | Skipped when `Metadata` is `null`. Otherwise `Description` and `Author` are required, and `Author` must be at most 100 characters. |
+| Dependencies | At most 50 dependencies. Each `MinimumVersion` is required and must be a valid version. `MaximumVersion` is optional, but when set it must be a valid version that is not less than `MinimumVersion`. Each `DependencyPluginId` may appear only once. |
+
+`ValidateDependencyRelationship(dependent, dependency, depSpec)` is a separate check. It returns `false` when a plugin depends on itself, or when `dependency.Version` does not satisfy `depSpec.MinimumVersion` under the constraint rules below.
+
+```csharp
+using Microsoft.Extensions.Logging.Abstractions;
+using PluginEngine.Utils.Helpers;
+using PluginEngine.Utils.Validators;
+
+var versionHelper = new VersionHelper(NullLogger<VersionHelper>.Instance);
+var validator = new PluginValidator(NullLogger<PluginValidator>.Instance, versionHelper);
+
+PluginValidationResult result = validator.Validate(plugin);
+if (!result.IsValid)
+{
+    Console.WriteLine(result);                  // "Invalid: N errors, 0 warnings"
+    Console.WriteLine(result.GetErrorSummary()); // one error per line
+}
+```
+
+### VersionHelper Constraint Syntax
+
+`SatisfiesConstraint(version, constraint)` returns `true` when `version` satisfies `constraint`. Write constraints without spaces between the operator and the version:
+
+| Constraint | Matches when |
+|------------|--------------|
+| `1.2.0` (no operator) | The version equals `1.2.0` exactly. |
+| `>=1.2.0` | The version is `1.2.0` or later. |
+| `>1.2.0` | The version is later than `1.2.0`. |
+| `<=1.2.0` | The version is `1.2.0` or earlier. |
+| `<1.2.0` | The version is earlier than `1.2.0`. |
+| `^1.2.0` | The major version is `1`, and the version is `1.2.0` or later. |
+| `~1.2.0` | The major and minor versions are `1.2`, and the version is `1.2.0` or later. |
+
+- A leading `v` is ignored. Prerelease and build suffixes (`-beta`, `+build`) are dropped before comparison, so `2.0.0-beta` is compared as `2.0.0`.
+- `==` is not an operator here. `SatisfiesConstraint` returns `false` for it. Use a bare version for an exact match.
+- Unsupported operators, unparseable versions, and unparseable constraint targets return `false`.
+- An empty constraint throws `IndexOutOfRangeException`. Pass a non-empty string.
+
+```csharp
+var versionHelper = new VersionHelper(NullLogger<VersionHelper>.Instance);
+
+versionHelper.SatisfiesConstraint("1.4.2", "^1.2.0");         // true
+versionHelper.SatisfiesConstraint("1.3.0", "~1.2.0");         // false
+versionHelper.SatisfiesConstraint("2.0.0-beta", ">=1.5.0");   // true
+```
+
+### VersioningService
+
+`VersioningService` implements `IVersioningService`. `DependencyInjectionSetup.AddPluginEngine` registers it as a singleton. It uses `System.Version` directly, not `VersionHelper`, so its rules differ from the constraint syntax above:
+
+- `ValidateVersion` accepts any string that `Version.TryParse` accepts. Prerelease strings such as `1.0.0-beta` are rejected.
+- `IsSatisfiedBy(constraint, version)` handles only `>=` and `==`. A constraint without `>=`, `<=`, or `==` is a prefix match on the version's string form, so `1.2` also matches `1.20.0`. Constraints such as `>1.0`, `<=1.0`, `^1.0`, and `~1.0` always return `false`.
+- `CompareVersions` throws `ArgumentException` when either input is not a valid version. `VersionHelper.CompareVersions` returns `-1` in that case.
+- `ParseVersion` returns a `SemanticVersion` with `Major`, `Minor`, `Patch`, `Prerelease`, and `Metadata`. It throws `ArgumentException` for an empty string.
+- `IncrementVersion(version, VersionPart)` returns the next version as a string. `Major`, `Minor`, and `Patch` increment their part and reset the lower parts to `0`.
+- `AreCompatible` returns `true` when both versions have the same major version.
+- `GetVersionHistoryAsync` and `GetLatestVersionAsync` are placeholders. They return an empty sequence and `null`, because they do not query a repository yet.
+
+```csharp
+using PluginEngine.Services.Abstractions;
+
+IVersioningService versioning = serviceProvider.GetRequiredService<IVersioningService>();
+
+string next = versioning.IncrementVersion("1.4.2", VersionPart.Minor); // "1.5.0"
+bool compatible = versioning.AreCompatible("1.4.2", "1.9.0");          // true
+bool satisfied = versioning.IsSatisfiedBy(">=1.4.0", "1.4.2");         // true
+```
+
 ## Contributing
 Fork the repository, create a branch for your feature or bug fix, make your changes, and ensure that `dotnet test` passes before submitting a pull request. Follow conventional commits for commit messages.
 
