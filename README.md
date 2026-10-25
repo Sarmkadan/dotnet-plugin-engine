@@ -1019,6 +1019,33 @@ These constants are not used by the library. The exception types set their own `
 
 For the numeric codes on `PluginOperationResult.ErrorCode` and how exceptions map to them, see [docs/error-codes.md](docs/error-codes.md).
 
+## Project Structure
+
+```
+dotnet-plugin-engine/
+├── src/PluginEngine/                      The library (the only buildable source)
+│   ├── BackgroundServices/                Hosted services: background plugin monitor and health checks (excluded from build)
+│   ├── Caching/                           Plugin cache abstraction (IPluginCache), in-memory implementation, cache statistics
+│   ├── Cli/                               Command-line host and command parser (excluded from build)
+│   ├── Configuration/                     PluginEngineOptions, DI registration (AddPluginEngine), logging and webhook settings
+│   ├── Constants/                         Library-wide defaults: plugin directory and config file names, length limits, timeouts
+│   ├── Data/                              Repositories, including the in-memory IPluginRepository
+│   ├── Domain/                            Domain entities: Plugin, PluginMetadata, PluginDependency, VersionInfo, and related types
+│   ├── Events/                            In-process pub/sub: IPluginEvent, event publisher and subscriber
+│   ├── Exceptions/                        PluginException hierarchy and the *Extensions and *Validation helpers
+│   ├── Execution/                         Plugin lifecycle contract (IPluginLifecycle) and execution context
+│   ├── Formatters/                        Output formatters for plugin data: JSON, XML, CSV
+│   ├── Integration/                       HTTP plugin client, remote plugin registry, and webhook handler
+│   ├── Marketplace/                       Marketplace browsing and publishing services and their models
+│   ├── Middleware/                        ASP.NET-style pipeline: caching, error handling, logging, rate limiting
+│   ├── Results/                           PluginOperationResult and its extensions
+│   ├── Services/                          Abstractions (I*Service interfaces) and implementations (loader, manager, versioning, hot reload/swap)
+│   └── Utils/                             Extensions, helpers and validators shared across the library
+├── tests/dotnet-plugin-engine.Tests/      xUnit tests (one file per type, FluentAssertions and Moq)
+├── benchmarks/dotnet-plugin-engine.Benchmarks/   BenchmarkDotNet suites for resolution, loading, discovery and events
+└── docs/                                  ARCHITECTURE.md, guides, and one reference page per public type
+```
+
 ## Contributing
 Fork the repository, create a branch for your feature or bug fix, make your changes, and ensure that `dotnet test` passes before submitting a pull request. Follow conventional commits for commit messages.
 
