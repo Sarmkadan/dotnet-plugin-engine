@@ -169,6 +169,13 @@ public sealed class PluginDependencyResolver : IPluginDependencyResolver
 
     // ── Topological sort (Kahn's algorithm) ───────────────────────────────────
 
+    /// <summary>
+    /// Orders plugins so that every dependency precedes the plugins that require it.
+    /// Dependencies outside <paramref name="plugins"/> are ignored.
+    /// </summary>
+    /// <param name="plugins">The plugins to order.</param>
+    /// <returns>The plugins in install order.</returns>
+    /// <exception cref="DependencyResolutionException">A circular dependency prevents a full ordering.</exception>
     private static List<Plugin> TopologicalSort(List<Plugin> plugins)
     {
         var idSet    = new HashSet<Guid>(plugins.Select(p => p.Id));
@@ -225,6 +232,12 @@ public sealed class PluginDependencyResolver : IPluginDependencyResolver
 
     // ── Conflict detection ────────────────────────────────────────────────────
 
+    /// <summary>
+    /// Groups every dependency declaration by the required plugin and reports
+    /// each group whose version constraints cannot be satisfied together.
+    /// </summary>
+    /// <param name="plugins">The plugins whose declared dependencies are scanned.</param>
+    /// <returns>The detected conflicts; empty when none are found.</returns>
     private static List<DependencyConflict> DetectConflicts(List<Plugin> plugins)
     {
         // Group all dependency declarations by the shared dependency plugin id
@@ -264,6 +277,13 @@ public sealed class PluginDependencyResolver : IPluginDependencyResolver
         return conflicts;
     }
 
+    /// <summary>
+    /// Checks whether the tightest lower bound among the requirements exceeds the
+    /// tightest upper bound, which would make the constraints unsatisfiable.
+    /// </summary>
+    /// <param name="depId">The identifier of the plugin being required.</param>
+    /// <param name="requirements">The declarations that require <paramref name="depId"/>.</param>
+    /// <returns>A <see cref="DependencyConflict"/> when the bounds do not overlap; otherwise <see langword="null"/>.</returns>
     private static DependencyConflict? FindConflictInRequirements(
         Guid depId, List<(Plugin Requirer, PluginDependency Dep)> requirements)
     {
@@ -307,6 +327,14 @@ public sealed class PluginDependencyResolver : IPluginDependencyResolver
 
     // ── Transitive closure ────────────────────────────────────────────────────
 
+    /// <summary>
+    /// Recursively collects the dependencies of <paramref name="root"/> that are
+    /// present in <paramref name="pluginMap"/>, each dependency before its dependents.
+    /// </summary>
+    /// <param name="root">The plugin whose dependencies are collected.</param>
+    /// <param name="pluginMap">Loaded plugins keyed by identifier.</param>
+    /// <param name="visited">Identifiers already visited; shared across recursive calls to prevent cycles.</param>
+    /// <returns>The collected dependency plugins. The root itself is not included.</returns>
     private static List<Plugin> CollectTransitive(
         Plugin root, Dictionary<Guid, Plugin> pluginMap, HashSet<Guid> visited)
     {
