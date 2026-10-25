@@ -18,6 +18,11 @@ public sealed class MemoryPluginCache : IPluginCache
     /// </summary>
     private static readonly TimeSpan DefaultSlidingExpiration = TimeSpan.FromMinutes(15);
 
+    /// <summary>
+    /// The default absolute expiration for cached entries stored without an explicit lifetime.
+    /// </summary>
+    private static readonly TimeSpan DefaultAbsoluteExpiration = TimeSpan.FromHours(1);
+
     private readonly IMemoryCache _cache;
     private readonly ILogger<MemoryPluginCache> _logger;
     private readonly ConcurrentDictionary<string, byte> _keys = new(StringComparer.Ordinal);
@@ -89,7 +94,7 @@ public sealed class MemoryPluginCache : IPluginCache
             }
             else
             {
-                options.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+                options.AbsoluteExpirationRelativeToNow = DefaultAbsoluteExpiration;
             }
 
             // Add sliding expiration for frequently accessed items
