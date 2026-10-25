@@ -12,6 +12,11 @@ namespace PluginEngine.Integration;
 /// </summary>
 public sealed class HttpPluginClient : IIntegrationClient, IHttpPluginClient
 {
+    /// <summary>
+    /// The default maximum number of results returned by plugin search.
+    /// </summary>
+    public const int DefaultSearchLimit = 20;
+
     private const string RegistryBaseUrlConfigKey = "PluginRegistry:BaseUrl";
     private const string HealthRoute = "/health";
     private const string PluginsRoute = "/plugins";
@@ -22,6 +27,10 @@ public sealed class HttpPluginClient : IIntegrationClient, IHttpPluginClient
     private const string PluginSearchRoute = PluginsRoute + "/search";
     private const string PluginUpdateCheckRoute = PluginsRoute + "/check-updates";
     private const string JsonContentType = "application/json";
+    private const string UploadFileFieldName = "file";
+    private const string UploadDescriptionFieldName = "description";
+    private const string SearchQueryParameterName = "query";
+    private const string SearchLimitParameterName = "limit";
 
     private static readonly TimeSpan HealthCheckTimeout = TimeSpan.FromSeconds(5);
     private static readonly TimeSpan NotificationTimeout = TimeSpan.FromSeconds(30);
@@ -262,8 +271,8 @@ public sealed class HttpPluginClient : IIntegrationClient, IHttpPluginClient
         {
             using var fileStream = File.OpenRead(filePath);
             using var content = new MultipartFormDataContent();
-            content.Add(new StreamContent(fileStream), "file", Path.GetFileName(filePath));
-            content.Add(new StringContent(description), "description");
+            content.Add(new StreamContent(fileStream), UploadFileFieldName, Path.GetFileName(filePath));
+            content.Add(new StringContent(description), UploadDescriptionFieldName);
 
             var url = _registryBaseUrl + PluginUploadRoute;
 
@@ -298,7 +307,7 @@ public sealed class HttpPluginClient : IIntegrationClient, IHttpPluginClient
     /// <returns>The matching plugins, or an empty list when the registry is not configured or unreachable.</returns>
     /// <exception cref="ArgumentException">Thrown when <paramref name="query"/> is null or whitespace.</exception>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="limit"/> is not positive.</exception>
-    public async Task<List<PluginInfo>> SearchPluginsAsync(string query, int limit = 20, CancellationToken cancellationToken = default)
+    public async Task<List<PluginInfo>> SearchPluginsAsync(string query, int limit = DefaultSearchLimit, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(query);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(limit);
@@ -312,8 +321,8 @@ public sealed class HttpPluginClient : IIntegrationClient, IHttpPluginClient
         try
         {
             var url = _registryBaseUrl + PluginSearchRoute +
-                      $"?query={Uri.EscapeDataString(query)}" +
-                      $"&limit={limit.ToString(CultureInfo.InvariantCulture)}";
+                      $"?{SearchQueryParameterName}={Uri.EscapeDataString(query)}" +
+                      $"&{SearchLimitParameterName}={limit.ToString(CultureInfo.InvariantCulture)}";
 
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             cts.CancelAfter(PluginSearchTimeout);
@@ -343,7 +352,7 @@ public sealed class HttpPluginClient : IIntegrationClient, IHttpPluginClient
     /// <returns>The matching plugins, or an empty list when the registry is not configured or unreachable.</returns>
     /// <exception cref="ArgumentException">Thrown when <paramref name="query"/> is null or whitespace.</exception>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="limit"/> is not positive.</exception>
-    public Task<List<PluginInfo>> SearchPluginsAsync(string query, int limit = 20)
+    public Task<List<PluginInfo>> SearchPluginsAsync(string query, int limit = DefaultSearchLimit)
         => SearchPluginsAsync(query, limit, CancellationToken.None);
 
     /// <summary>
