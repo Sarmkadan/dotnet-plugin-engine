@@ -127,6 +127,8 @@ public sealed class MemoryPluginCache : IPluginCache
     /// Removes the entry with the specified key from the cache.
     /// </summary>
     /// <param name="key">The cache key.</param>
+    /// <returns>A completed task once the entry has been removed.</returns>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="key"/> is null, empty, or consists only of white-space characters.</exception>
     public Task RemoveAsync(string key)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(key);
