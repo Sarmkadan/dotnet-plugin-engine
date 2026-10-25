@@ -5,6 +5,7 @@
 // =====================================================================
 
 using System.Collections.Immutable;
+using System.Globalization;
 
 namespace PluginEngine.Events;
 
@@ -293,4 +294,19 @@ public sealed class EventPublisherStatistics
     public int MonitoredEventTypes { get; set; }
     /// <summary>Gets the UTC time at which the statistics were captured.</summary>
     public DateTime Timestamp { get; set; }
+
+    /// <summary>
+    /// Returns a concise, culture-invariant summary of the statistics.
+    /// </summary>
+    /// <returns>A string containing the events published, registered subscribers, monitored event types, and timestamp.</returns>
+    public override string ToString()
+    {
+        return string.Format(
+            CultureInfo.InvariantCulture,
+            "EventsPublished={0}, RegisteredSubscribers={1}, MonitoredEventTypes={2}, Timestamp={3:O}",
+            EventsPublished,
+            RegisteredSubscribers,
+            MonitoredEventTypes,
+            Timestamp);
+    }
 }
