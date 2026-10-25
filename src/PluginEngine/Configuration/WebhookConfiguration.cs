@@ -210,10 +210,16 @@ public static class WebhookConfigurationExtensions
     /// <summary>
     /// Configures webhook events to process.
     /// </summary>
+    /// <param name="config">The webhook configuration to update.</param>
+    /// <param name="eventTypes">The event types to process.</param>
+    /// <returns>The same configuration instance for chaining.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="config"/> is <see langword="null"/>.</exception>
     public static WebhookConfiguration WithEventFilters(
         this WebhookConfiguration config,
         params string[] eventTypes)
     {
+        ArgumentNullException.ThrowIfNull(config);
+
         config.EventFilters.Clear();
         config.EventFilters.AddRange(eventTypes);
         return config;
@@ -222,8 +228,13 @@ public static class WebhookConfigurationExtensions
     /// <summary>
     /// Enables all standard plugin webhook events.
     /// </summary>
+    /// <param name="config">The webhook configuration to update.</param>
+    /// <returns>The same configuration instance for chaining.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="config"/> is <see langword="null"/>.</exception>
     public static WebhookConfiguration WithAllEvents(this WebhookConfiguration config)
     {
+        ArgumentNullException.ThrowIfNull(config);
+
         return config.WithEventFilters(
             "plugin.created",
             "plugin.updated",
@@ -234,8 +245,13 @@ public static class WebhookConfigurationExtensions
     /// <summary>
     /// Configures aggressive retry policy for reliability.
     /// </summary>
+    /// <param name="config">The webhook configuration to update.</param>
+    /// <returns>The same configuration instance for chaining.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="config"/> is <see langword="null"/>.</exception>
     public static WebhookConfiguration WithAggressiveRetry(this WebhookConfiguration config)
     {
+        ArgumentNullException.ThrowIfNull(config);
+
         config.RetryPolicy.MaxRetries = WebhookRetryPolicy.AggressiveMaxRetries;
         config.RetryPolicy.InitialDelayMs = WebhookRetryPolicy.AggressiveInitialDelayMs;
         config.RetryPolicy.BackoffMultiplier = WebhookRetryPolicy.AggressiveBackoffMultiplier;
