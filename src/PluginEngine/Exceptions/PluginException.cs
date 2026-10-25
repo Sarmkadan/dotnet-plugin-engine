@@ -94,8 +94,14 @@ public class PluginException : Exception
     /// <summary>
     /// Adds context information to the exception.
     /// </summary>
+    /// <param name="key">The context key. Must not be <c>null</c>, empty, or white-space.</param>
+    /// <param name="value">The context value to store under <paramref name="key"/>.</param>
+    /// <returns>This exception instance, to allow fluent chaining.</returns>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="key"/> is <c>null</c>, empty, or consists only of white-space characters.</exception>
     public PluginException WithContext(string key, object value)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(key);
+
         Context[key] = value;
         return this;
     }
