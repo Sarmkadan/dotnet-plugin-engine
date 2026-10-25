@@ -178,8 +178,11 @@ public sealed class DependencyGraphAnalyzer
 /// </summary>
 public sealed class DependencyAnalysisReport
 {
+    /// <summary>Scores below this value are classified as <c>Simple</c>.</summary>
     private const int SimpleComplexityThreshold = 20;
+    /// <summary>Scores from <see cref="SimpleComplexityThreshold"/> (inclusive) up to this value (exclusive) are <c>Moderate</c>.</summary>
     private const int ModerateComplexityThreshold = 50;
+    /// <summary>Scores from <see cref="ModerateComplexityThreshold"/> (inclusive) up to this value (exclusive) are <c>Complex</c>; higher scores are <c>Very Complex</c>.</summary>
     private const int ComplexComplexityThreshold = 75;
 
     /// <summary>Gets or sets the name of the analyzed plugin.</summary>
@@ -197,7 +200,11 @@ public sealed class DependencyAnalysisReport
     /// <summary>Gets or sets the issues found during analysis.</summary>
     public List<string> Issues { get; set; } = [];
 
-    /// <summary>Gets a textual description of <see cref="ComplexityScore"/>.</summary>
+    /// <summary>
+    /// Gets a textual description of <see cref="ComplexityScore"/> based on these thresholds:
+    /// below 20 is <c>Simple</c>, 20 to 49 is <c>Moderate</c>, 50 to 74 is <c>Complex</c>,
+    /// and 75 or above is <c>Very Complex</c>.
+    /// </summary>
     /// <returns>One of <c>Simple</c>, <c>Moderate</c>, <c>Complex</c> or <c>Very Complex</c>.</returns>
     public string GetComplexityLevel() => ComplexityScore switch
     {
