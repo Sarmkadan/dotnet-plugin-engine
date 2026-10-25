@@ -81,19 +81,25 @@ public sealed class HttpPluginClient : IIntegrationClient, IHttpPluginClient
     /// <summary>
     /// Sends a GET request to the specified URL.
     /// </summary>
-    /// <param name="url">The URL to send the request to.</param>
+    /// <param name="url">The URL to send the request to. Cannot be null or whitespace.</param>
     /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
     /// <returns>The HTTP response message.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="url"/> is null.</exception>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="url"/> is empty or whitespace.</exception>
     public Task<HttpResponseMessage> GetAsync(string url, CancellationToken cancellationToken = default)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(url);
+
         return _httpClient.GetAsync(url, cancellationToken);
     }
 
     /// <summary>
     /// Sends a GET request to the specified URL.
     /// </summary>
-    /// <param name="url">The URL to send the request to.</param>
+    /// <param name="url">The URL to send the request to. Cannot be null or whitespace.</param>
     /// <returns>The HTTP response message.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="url"/> is null.</exception>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="url"/> is empty or whitespace.</exception>
     public Task<HttpResponseMessage> GetAsync(string url)
         => GetAsync(url, CancellationToken.None);
 
@@ -395,8 +401,11 @@ public sealed class HttpPluginClient : IIntegrationClient, IHttpPluginClient
     /// <param name="pluginIds">The plugin identifiers to check for updates.</param>
     /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
     /// <returns>A list of update information for the plugins.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="pluginIds"/> is null.</exception>
     public async Task<List<PluginUpdateInfo>> CheckForUpdatesAsync(List<Guid> pluginIds, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(pluginIds);
+
         var updates = new List<PluginUpdateInfo>();
 
         if (string.IsNullOrEmpty(_registryBaseUrl))
@@ -434,6 +443,7 @@ public sealed class HttpPluginClient : IIntegrationClient, IHttpPluginClient
     /// </summary>
     /// <param name="pluginIds">The plugin identifiers to check for updates.</param>
     /// <returns>A list of update information for the plugins.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="pluginIds"/> is null.</exception>
     public Task<List<PluginUpdateInfo>> CheckForUpdatesAsync(List<Guid> pluginIds)
         => CheckForUpdatesAsync(pluginIds, CancellationToken.None);
 }
