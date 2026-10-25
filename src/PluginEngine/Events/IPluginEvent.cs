@@ -100,6 +100,12 @@ public abstract class PluginEventBase : IPluginEvent
     public required Guid PluginId { get; set; }
     /// <summary>Gets the name of the event type.</summary>
     public abstract string EventType { get; }
+
+    /// <summary>
+    /// Returns a short, human-readable description of the event.
+    /// </summary>
+    /// <returns>A string in the form "{EventType} plugin={PluginId} at {OccurredAtUtc:O}".</returns>
+    public override string ToString() => $"{EventType} plugin={PluginId} at {OccurredAtUtc:O}";
 }
 
 /// <summary>
@@ -188,6 +194,12 @@ public sealed class PluginErrorEvent : PluginEventBase
     /// Gets or sets the error code.
     /// </summary>
     public int ErrorCode { get; set; }
+
+    /// <summary>
+    /// Returns a short, human-readable description of the error event, including the error message.
+    /// </summary>
+    /// <returns>The base description followed by " error=" and <see cref="ErrorMessage"/>.</returns>
+    public override string ToString() => $"{base.ToString()} error={ErrorMessage}";
 }
 
 /// <summary>
