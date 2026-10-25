@@ -33,8 +33,11 @@ public sealed class DependencyGraphAnalyzer
     /// <summary>
     /// Generates a visual text representation of dependency graph.
     /// </summary>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="rootPlugin"/> is null.</exception>
     public async Task<string> GenerateGraphVisualizationAsync(Plugin rootPlugin)
     {
+        ArgumentNullException.ThrowIfNull(rootPlugin);
+
         try
         {
             var graph = await _dependencyResolver.GetDependencyGraphAsync(rootPlugin.Id);
@@ -84,8 +87,11 @@ public sealed class DependencyGraphAnalyzer
     /// <summary>
     /// Analyzes dependency complexity and identifies issues.
     /// </summary>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="plugin"/> is null.</exception>
     public async Task<DependencyAnalysisReport> AnalyzeAsync(Plugin plugin)
     {
+        ArgumentNullException.ThrowIfNull(plugin);
+
         try
         {
             var dependencies = await _dependencyResolver.ResolveDependenciesAsync(plugin);
@@ -132,8 +138,11 @@ public sealed class DependencyGraphAnalyzer
     /// <summary>
     /// Finds all plugins that depend on a given plugin.
     /// </summary>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="allPlugins"/> is null.</exception>
     public async Task<List<Guid>> FindDependentsAsync(IEnumerable<Plugin> allPlugins, Guid targetPluginId)
     {
+        ArgumentNullException.ThrowIfNull(allPlugins);
+
         var dependents = new List<Guid>();
 
         foreach (var plugin in allPlugins)
