@@ -84,8 +84,13 @@ public sealed class AssemblyLoadContextInfo : IEquatable<AssemblyLoadContextInfo
     /// <summary>
     /// Removes an assembly from the loaded collection.
     /// </summary>
+    /// <param name="assemblyName">The name of the assembly to remove.</param>
+    /// <returns>true if the assembly was found and removed; otherwise, false.</returns>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="assemblyName"/> is null, empty, or consists only of white-space characters.</exception>
     public bool RemoveLoadedAssembly(string assemblyName)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(assemblyName);
+
         return _loadedAssemblies.Remove(assemblyName);
     }
 
@@ -100,8 +105,13 @@ public sealed class AssemblyLoadContextInfo : IEquatable<AssemblyLoadContextInfo
     /// <summary>
     /// Checks if an assembly is loaded in this context.
     /// </summary>
+    /// <param name="assemblyName">The name of the assembly to check.</param>
+    /// <returns>true if the assembly is loaded in this context; otherwise, false.</returns>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="assemblyName"/> is null, empty, or consists only of white-space characters.</exception>
     public bool IsAssemblyLoaded(string assemblyName)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(assemblyName);
+
         return _loadedAssemblies.Any(a => a.Equals(assemblyName, StringComparison.OrdinalIgnoreCase));
     }
 
