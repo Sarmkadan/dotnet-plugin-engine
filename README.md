@@ -928,6 +928,97 @@ bool compatible = versioning.AreCompatible("1.4.2", "1.9.0");          // true
 bool satisfied = versioning.IsSatisfiedBy(">=1.4.0", "1.4.2");         // true
 ```
 
+## Exceptions and Error Codes
+
+Every engine exception derives from `PluginException` (namespace `PluginEngine.Exceptions`). It adds three members:
+
+- `ErrorCode` (`string`, default `"PLUGIN_ERROR"`): a machine-readable code.
+- `EntityId` (`Guid?`): the plugin or entity the error relates to. Set it with `WithEntityId(Guid)`.
+- `Context` (`Dictionary<string, object>`): extra details. Add entries with `WithContext(key, value)`.
+
+`WithContext` and `WithEntityId` return the exception, so you can chain them.
+
+### Exception hierarchy
+
+```
+Exception
+└── PluginException
+    ├── PluginLoadException            (sealed)
+    ├── DependencyResolutionException  (sealed)
+    ├── VersionMismatchException       (sealed)
+    └── PluginIncompatibleException    (sealed)
+```
+
+| Exception | Thrown when | Type-specific members | Default `ErrorCode` |
+|-----------|-------------|-----------------------|---------------------|
+| `PluginLoadException` | A plugin fails to load. | `PluginName`, `AssemblyPath`, `LoadStage` (`PluginLoadStage`) | `PLUGIN_LOAD_ERROR` |
+| `DependencyResolutionException` | Dependency resolution fails. | `DependencyPluginId` (`Guid?`), `VersionConstraint`, `Reason` (`DependencyResolutionReason`), `UnresolvedDependencies` (`List<string>`) | `DEPENDENCY_RESOLUTION_ERROR` |
+| `VersionMismatchException` | A version constraint is not satisfied. | `ExpectedVersion`, `ActualVersion`, `ComponentType`, `ComponentName` | `VERSION_MISMATCH_ERROR` |
+| `PluginIncompatibleException` | A plugin's declared constraint does not match the host engine version. | `DeclaredConstraint`, `HostEngineVersion` | `PLUGIN_INCOMPATIBLE` |
+
+### PluginLoadException and PluginLoadStage
+
+`PluginLoadStage` records the step where loading failed:
+
+| Value | Meaning |
+|-------|---------|
+| `Unknown` (0) | The stage could not be determined. This is the default. |
+| `MetadataValidation` (1) | Validating the plugin metadata. |
+| `AssemblyResolution` (2) | Resolving the plugin assembly on disk. |
+| `TypeLoading` (3) | Loading types from the plugin assembly. |
+| `InterfaceValidation` (4) | Validating the plugin interface implementation. |
+| `Instantiation` (5) | Creating the plugin instance. |
+| `Initialization` (6) | Initializing the plugin. |
+| `DependencyResolution` (7) | Resolving plugin dependencies. |
+
+### DependencyResolutionException and DependencyResolutionReason
+
+`DependencyResolutionReason` records why resolution failed:
+
+| Value | Meaning |
+|-------|---------|
+| `Unknown` (0) | The reason could not be determined. This is the default. |
+| `DependencyNotFound` (1) | A required dependency is not registered. |
+| `VersionMismatch` (2) | An installed dependency version does not satisfy the constraint. |
+| `CircularDependency` (3) | The dependency graph contains a cycle. |
+| `DependencyNotLoaded` (4) | A dependency exists but has not been loaded. |
+| `OptionalDependencyFailed` (5) | An optional dependency failed to resolve. |
+
+```csharp
+try
+{
+    // ... resolve the plugin's dependencies
+}
+catch (DependencyResolutionException ex) when (ex.Reason == DependencyResolutionReason.DependencyNotFound)
+{
+    foreach (var name in ex.UnresolvedDependencies)
+    {
+        Console.WriteLine($"{ex.ErrorCode}: missing {name}");
+    }
+}
+```
+
+### Error codes
+
+`PluginEngine.Constants.ErrorCodes` declares these string constants:
+
+| Constant | Value |
+|----------|-------|
+| `GenericError` | `PLUGIN_ERROR` |
+| `PluginNotFound` | `PLUGIN_NOT_FOUND` |
+| `PluginAlreadyLoaded` | `PLUGIN_ALREADY_LOADED` |
+| `PluginLoadFailed` | `PLUGIN_LOAD_FAILED` |
+| `DependencyResolutionFailed` | `DEPENDENCY_RESOLUTION_FAILED` |
+| `VersionMismatch` | `VERSION_MISMATCH` |
+| `InvalidConfiguration` | `INVALID_CONFIGURATION` |
+| `HotReloadFailed` | `HOT_RELOAD_FAILED` |
+| `CircularDependency` | `CIRCULAR_DEPENDENCY` |
+| `OperationTimeout` | `OPERATION_TIMEOUT` |
+
+These constants are not used by the library. The exception types set their own `ErrorCode` values, listed in the table above, and those values differ from the constants. For example, `PluginLoadException` sets `PLUGIN_LOAD_ERROR`, not `ErrorCodes.PluginLoadFailed` (`PLUGIN_LOAD_FAILED`). When you handle exceptions, match on the exception type or on `ErrorCode` as set by the exception, not on `ErrorCodes`.
+
+For the numeric codes on `PluginOperationResult.ErrorCode` and how exceptions map to them, see [docs/error-codes.md](docs/error-codes.md).
+
 ## Contributing
 Fork the repository, create a branch for your feature or bug fix, make your changes, and ensure that `dotnet test` passes before submitting a pull request. Follow conventional commits for commit messages.
 
