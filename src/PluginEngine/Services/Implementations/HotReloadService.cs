@@ -181,6 +181,8 @@ public sealed class HotReloadService : IHotReloadService
     /// <summary>
     /// Registers a hot reload callback.
     /// </summary>
+    /// <param name="pluginId">The identifier of the plugin the callback is registered for.</param>
+    /// <param name="callback">The callback to invoke after the plugin is hot reloaded. Ignored when <c>null</c>.</param>
     public void RegisterHotReloadCallback(Guid pluginId, Func<Plugin, Task> callback)
     {
         if (callback is not null)
@@ -192,6 +194,7 @@ public sealed class HotReloadService : IHotReloadService
     /// <summary>
     /// Unregisters a hot reload callback.
     /// </summary>
+    /// <param name="pluginId">The identifier of the plugin whose callback should be removed.</param>
     public void UnregisterHotReloadCallback(Guid pluginId)
     {
         _hotReloadCallbacks.Remove(pluginId);
@@ -208,8 +211,12 @@ public sealed class HotReloadService : IHotReloadService
     /// <summary>
     /// Removes callbacks belonging to a specific AssemblyLoadContext to prevent memory leaks.
     /// </summary>
+    /// <param name="context">The AssemblyLoadContext whose callbacks should be removed.</param>
+    /// <exception cref="ArgumentNullException"><paramref name="context"/> is <c>null</c>.</exception>
     public void RemoveCallbacksForContext(System.Runtime.Loader.AssemblyLoadContext context)
     {
+        ArgumentNullException.ThrowIfNull(context);
+
         foreach (var key in _hotReloadCallbacks.Keys.ToList())
         {
             var callback = _hotReloadCallbacks[key];
