@@ -2,8 +2,16 @@ using System;
 using PluginEngine.Exceptions;
 using Xunit;
 
+/// <summary>
+/// xUnit tests for the extension methods that operate on <c>VersionMismatchException</c>:
+/// formatted error message, critical-mismatch detection, context attachment and simplified message.
+/// </summary>
 public class VersionMismatchExceptionExtensionsTests
 {
+    /// <summary>
+    /// Verifies that <c>GetFormattedErrorMessage</c> produces a multi-line report containing the header,
+    /// component type and name, expected and actual versions, and the details section with the exception message.
+    /// </summary>
     [Fact]
     public void GetFormattedErrorMessage_ShouldReturnFormattedString_WhenExceptionHasDetails()
     {
@@ -22,6 +30,9 @@ public class VersionMismatchExceptionExtensionsTests
         Assert.Contains("Test error message", result);
     }
 
+    /// <summary>
+    /// Verifies that calling <c>GetFormattedErrorMessage</c> on a null exception reference throws <see cref="ArgumentNullException"/>.
+    /// </summary>
     [Fact]
     public void GetFormattedErrorMessage_ShouldThrowArgumentNullException_WhenExceptionIsNull()
     {
@@ -29,6 +40,9 @@ public class VersionMismatchExceptionExtensionsTests
         Assert.Throws<ArgumentNullException>(() => ((VersionMismatchException)null!).GetFormattedErrorMessage());
     }
 
+    /// <summary>
+    /// Verifies that <c>IsCriticalVersionMismatch</c> returns <c>true</c> when the expected and actual major versions differ (1.x vs 2.x).
+    /// </summary>
     [Fact]
     public void IsCriticalVersionMismatch_ShouldReturnTrue_WhenMajorVersionsDiffer()
     {
@@ -42,6 +56,9 @@ public class VersionMismatchExceptionExtensionsTests
         Assert.True(result);
     }
 
+    /// <summary>
+    /// Verifies that <c>IsCriticalVersionMismatch</c> returns <c>false</c> when the major versions match and only the minor version differs (1.0.0 vs 1.5.0).
+    /// </summary>
     [Fact]
     public void IsCriticalVersionMismatch_ShouldReturnFalse_WhenMajorVersionsMatch()
     {
@@ -55,6 +72,9 @@ public class VersionMismatchExceptionExtensionsTests
         Assert.False(result);
     }
 
+    /// <summary>
+    /// Verifies that <c>IsCriticalVersionMismatch</c> returns <c>false</c> when either version string cannot be parsed as a version (e.g. "abc" and "def").
+    /// </summary>
     [Fact]
     public void IsCriticalVersionMismatch_ShouldReturnFalse_WhenVersionsAreInvalidFormat()
     {
@@ -68,6 +88,10 @@ public class VersionMismatchExceptionExtensionsTests
         Assert.False(result);
     }
 
+    /// <summary>
+    /// Verifies that <c>IsCriticalVersionMismatch</c> returns <c>false</c> when the expected version is an empty string,
+    /// and when the expected version property has been cleared to <c>null</c> after construction.
+    /// </summary>
     [Fact]
     public void IsCriticalVersionMismatch_ShouldReturnFalse_WhenVersionsAreNullOrEmpty()
     {
@@ -85,6 +109,9 @@ public class VersionMismatchExceptionExtensionsTests
         Assert.False(result2);
     }
 
+    /// <summary>
+    /// Verifies that <c>WithContext</c> returns an exception whose <c>Context</c> dictionary contains the supplied key and value.
+    /// </summary>
     [Fact]
     public void WithContext_ShouldAddContext_WhenCalledWithValidKey()
     {
@@ -99,6 +126,9 @@ public class VersionMismatchExceptionExtensionsTests
         Assert.Equal("CustomValue", newEx.Context["CustomKey"]);
     }
 
+    /// <summary>
+    /// Verifies that <c>WithContext</c> throws <see cref="ArgumentNullException"/> when the context key is <c>null</c>.
+    /// </summary>
     [Fact]
     public void WithContext_ShouldThrowArgumentNullException_WhenKeyIsNull()
     {
@@ -109,6 +139,10 @@ public class VersionMismatchExceptionExtensionsTests
         Assert.Throws<ArgumentNullException>(() => ex.WithContext(null!, "Value"));
     }
 
+    /// <summary>
+    /// Verifies that <c>GetSimplifiedMessage</c> returns the single-line form
+    /// <c>VersionMismatch[Type:Name] Expected: X, Actual: Y</c>.
+    /// </summary>
     [Fact]
     public void GetSimplifiedMessage_ShouldReturnCorrectFormat()
     {
