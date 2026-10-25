@@ -17,7 +17,8 @@ namespace PluginEngine.Services.Implementations;
 /// </summary>
 public sealed class HotSwapService : IHotSwapService
 {
-    private const int MaxHistoryEntriesPerPlugin = 50;
+    /// <summary>Maximum number of swap records retained per plugin; the oldest are discarded first.</summary>
+    private const int MaxSwapHistoryPerPlugin = 50;
     private const int ErrorCodeBadRequest = 400;
     private const int ErrorCodeNotFound = 404;
     private const int ErrorCodeConflict = 409;
@@ -226,7 +227,7 @@ public sealed class HotSwapService : IHotSwapService
 
     /// <summary>
     /// Appends a swap record to the plugin's history and trims the oldest entries
-    /// so that no more than <see cref="MaxHistoryEntriesPerPlugin"/> records are kept.
+    /// so that no more than <see cref="MaxSwapHistoryPerPlugin"/> records are kept.
     /// </summary>
     private void AppendRecord(Guid pluginId, SwapRecord record)
     {
@@ -234,8 +235,7 @@ public sealed class HotSwapService : IHotSwapService
         lock (list)
         {
             list.Add(record);
-            // Cap history at 50 entries per plugin to avoid unbounded growth
-            if (list.Count > MaxHistoryEntriesPerPlugin)
+            if (list.Count > MaxSwapHistoryPerPlugin)
             {
                 list.RemoveAt(0);
             }
