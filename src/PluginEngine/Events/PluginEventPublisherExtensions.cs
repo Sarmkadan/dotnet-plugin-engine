@@ -252,6 +252,9 @@ public static class PluginEventPublisherExtensions
         return 0;
     }
 
+    /// <summary>
+    /// Disposable handle that runs an unsubscribe action at most once.
+    /// </summary>
     private sealed class SubscriptionHandle : IDisposable
     {
         private readonly Action _unsubscribeAction;
@@ -262,6 +265,9 @@ public static class PluginEventPublisherExtensions
             _unsubscribeAction = unsubscribeAction ?? throw new ArgumentNullException(nameof(unsubscribeAction));
         }
 
+        /// <summary>
+        /// Unsubscribes the handler from the event publisher. Subsequent calls have no effect.
+        /// </summary>
         public void Dispose()
         {
             if (Interlocked.Exchange(ref _disposed, 1) == 0)
