@@ -279,8 +279,16 @@ public sealed class PluginBatchOperationResult
     /// <summary>
     /// Adds a result to the batch.
     /// </summary>
+    /// <param name="pluginId">The identifier of the plugin the result belongs to.</param>
+    /// <param name="pluginName">The name of the plugin the result belongs to.</param>
+    /// <param name="result">The operation result to record.</param>
+    /// <exception cref="ArgumentException"><paramref name="pluginName"/> is null, empty, or whitespace.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="result"/> is <see langword="null"/>.</exception>
     public void AddResult(Guid pluginId, string pluginName, PluginOperationResult result)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(pluginName);
+        ArgumentNullException.ThrowIfNull(result);
+
         Results.Add((pluginId, pluginName, result));
 
         if (result.Success)
