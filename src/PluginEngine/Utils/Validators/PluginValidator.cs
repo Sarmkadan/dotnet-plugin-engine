@@ -31,8 +31,13 @@ public sealed class PluginValidator
     /// Validates a plugin entity for basic correctness.
     /// Returns a validation result with detailed error messages.
     /// </summary>
+    /// <param name="plugin">The plugin to validate.</param>
+    /// <returns>A <see cref="PluginValidationResult"/> describing the outcome of the validation.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="plugin"/> is <see langword="null"/>.</exception>
     public PluginValidationResult Validate(Plugin plugin)
     {
+        ArgumentNullException.ThrowIfNull(plugin);
+
         var errors = new List<string>();
 
         ValidateName(plugin.Name, errors);
@@ -175,8 +180,19 @@ public sealed class PluginValidator
     /// <summary>
     /// Validates a dependency relationship between two plugins.
     /// </summary>
+    /// <param name="dependent">The plugin that declares the dependency.</param>
+    /// <param name="dependency">The plugin that is being depended upon.</param>
+    /// <param name="depSpec">The dependency specification declared by <paramref name="dependent"/>.</param>
+    /// <returns><see langword="true"/> if the relationship is valid; otherwise, <see langword="false"/>.</returns>
+    /// <exception cref="ArgumentNullException">
+    /// <paramref name="dependent"/>, <paramref name="dependency"/>, or <paramref name="depSpec"/> is <see langword="null"/>.
+    /// </exception>
     public bool ValidateDependencyRelationship(Plugin dependent, Plugin dependency, PluginDependency depSpec)
     {
+        ArgumentNullException.ThrowIfNull(dependent);
+        ArgumentNullException.ThrowIfNull(dependency);
+        ArgumentNullException.ThrowIfNull(depSpec);
+
         if (dependent.Id == dependency.Id)
         {
             _logger.LogError("Plugin cannot depend on itself: {PluginId}", dependent.Id);
