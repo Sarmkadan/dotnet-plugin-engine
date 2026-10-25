@@ -87,6 +87,14 @@ public sealed class PluginHealthInfo
     /// Gets or sets the list of issues.
     /// </summary>
     public List<string> Issues { get; set; } = [];
+
+    /// <summary>
+    /// Returns a single-line summary of the plugin's health, including its name, status,
+    /// health flag, dependency and capability counts, and the number of reported issues.
+    /// </summary>
+    /// <returns>A human-readable summary of this health snapshot.</returns>
+    public override string ToString() =>
+        $"{PluginName} [{Status}] Healthy={IsHealthy} Deps={DependencyCount} Caps={CapabilityCount} Issues={Issues?.Count ?? 0}";
 }
 
 /// <summary>
