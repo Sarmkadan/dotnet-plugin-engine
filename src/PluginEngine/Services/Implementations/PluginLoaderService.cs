@@ -20,6 +20,11 @@ namespace PluginEngine.Services.Implementations;
 /// </summary>
 public sealed class PluginLoaderService : IPluginLoaderService
 {
+    private const string PluginManifestFileName = "plugin.json";
+    private const string AssemblySearchPattern = "*.dll";
+    private const string AssemblyNotFoundErrorCode = "ASSEMBLY_NOT_FOUND";
+    private const string DefaultPluginVersion = "1.0.0";
+
     private sealed class PluginAssemblyLoadContext : AssemblyLoadContext
     {
         private readonly AssemblyDependencyResolver _resolver;
@@ -92,7 +97,7 @@ public sealed class PluginLoaderService : IPluginLoaderService
 
         if (!File.Exists(assemblyPath))
         {
-            throw new PluginLoadException($"Assembly file not found: {assemblyPath}", "ASSEMBLY_NOT_FOUND", assemblyPath, PluginLoadStage.AssemblyResolution);
+            throw new PluginLoadException($"Assembly file not found: {assemblyPath}", AssemblyNotFoundErrorCode, assemblyPath, PluginLoadStage.AssemblyResolution);
         }
 
         try
@@ -107,7 +112,7 @@ public sealed class PluginLoaderService : IPluginLoaderService
 
                 var assemblyName = assembly.GetName();
                 var assemblyNameStr = assemblyName.Name ?? "Unknown";
-                var versionStr = assemblyName.Version?.ToString() ?? "1.0.0";
+                var versionStr = assemblyName.Version?.ToString() ?? DefaultPluginVersion;
                 var plugin = new Plugin
                 {
                     Id = Guid.NewGuid(),
@@ -119,7 +124,7 @@ public sealed class PluginLoaderService : IPluginLoaderService
                 };
 
                 var directory = Path.GetDirectoryName(fullPath) ?? string.Empty;
-                var pluginJsonPath = Path.Combine(directory, "plugin.json");
+                var pluginJsonPath = Path.Combine(directory, PluginManifestFileName);
 
                 if (!File.Exists(pluginJsonPath))
                 {
@@ -138,7 +143,7 @@ public sealed class PluginLoaderService : IPluginLoaderService
                             var versioningService = _serviceProvider?.GetService(typeof(IVersioningService)) as IVersioningService;
                             if (versioningService != null)
                             {
-                                var hostVersion = typeof(PluginLoaderService).Assembly.GetName().Version?.ToString(3) ?? "1.0.0";
+                                var hostVersion = typeof(PluginLoaderService).Assembly.GetName().Version?.ToString(3) ?? DefaultPluginVersion;
                                 if (!versioningService.IsSatisfiedBy(plugin.Metadata.EngineVersionConstraint, hostVersion))
                                 {
                                     context.Unload();
@@ -189,7 +194,7 @@ public sealed class PluginLoaderService : IPluginLoaderService
         }
         catch (Exception ex) when (!(ex is PluginException))
         {
-            throw new PluginLoadException($"Failed to load plugin: {ex.Message}", "ASSEMBLY_NOT_FOUND", assemblyPath, PluginLoadStage.AssemblyResolution, ex);
+            throw new PluginLoadException($"Failed to load plugin: {ex.Message}", AssemblyNotFoundErrorCode, assemblyPath, PluginLoadStage.AssemblyResolution, ex);
         }
     }
 
@@ -333,7 +338,7 @@ public sealed class PluginLoaderService : IPluginLoaderService
         }
 
         var loadedPlugins = new List<Plugin>();
-        var dllFiles = Directory.GetFiles(directoryPath, "*.dll");
+        var dllFiles = Directory.GetFiles(directoryPath, AssemblySearchPattern);
 
         foreach (var dllPath in dllFiles)
         {
@@ -379,7 +384,7 @@ public sealed class PluginLoaderService : IPluginLoaderService
     {
         var assemblyName = AssemblyName.GetAssemblyName(fullPath);
         var assemblyNameStr = assemblyName.Name ?? "Unknown";
-        var versionStr = assemblyName.Version?.ToString() ?? "1.0.0";
+        var versionStr = assemblyName.Version?.ToString() ?? DefaultPluginVersion;
 
         var plugin = new Plugin
         {
@@ -405,7 +410,7 @@ public sealed class PluginLoaderService : IPluginLoaderService
     private async Task LoadPluginMetadataAsync(Plugin plugin, string fullPath)
     {
         var directory = Path.GetDirectoryName(fullPath) ?? string.Empty;
-        var pluginJsonPath = Path.Combine(directory, "plugin.json");
+        var pluginJsonPath = Path.Combine(directory, PluginManifestFileName);
 
         if (!File.Exists(pluginJsonPath))
         {
@@ -442,7 +447,7 @@ public sealed class PluginLoaderService : IPluginLoaderService
         var versioningService = _serviceProvider?.GetService(typeof(IVersioningService)) as IVersioningService;
         if (versioningService != null)
         {
-            var hostVersion = typeof(PluginLoaderService).Assembly.GetName().Version?.ToString(3) ?? "1.0.0";
+            var hostVersion = typeof(PluginLoaderService).Assembly.GetName().Version?.ToString(3) ?? DefaultPluginVersion;
             if (!versioningService.IsSatisfiedBy(plugin.Metadata!.EngineVersionConstraint, hostVersion))
             {
                 throw new PluginIncompatibleException(plugin.Name, plugin.Metadata.EngineVersionConstraint, hostVersion);
