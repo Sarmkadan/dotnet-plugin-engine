@@ -151,6 +151,16 @@ public sealed class AssemblyLoadContextInfo : IEquatable<AssemblyLoadContextInfo
     }
 
     /// <summary>
+    /// Returns a concise string representation of the load context: name, context identifier, activity state and assembly count.
+    /// </summary>
+    /// <returns>A string in the form "{Name} ({ContextId}) [Active|Inactive] assemblies={count}".</returns>
+    public override string ToString()
+    {
+        var status = IsActive ? "Active" : "Inactive";
+        return $"{Name} ({ContextId}) [{status}] assemblies={GetAssemblyCount()}";
+    }
+
+    /// <summary>
     /// Determines whether the specified AssemblyLoadContextInfo is equal to the current AssemblyLoadContextInfo.
     /// The following properties are used for equality: Id, ContextId, PluginId, Name, CreatedAt, LastActivityAt, IsActive, MemoryUsageBytes.
     /// </summary>
