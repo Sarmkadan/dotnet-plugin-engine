@@ -2,6 +2,23 @@
 
 dotnet-plugin-engine is a robust and extensible .NET plugin engine. It loads plugin assemblies from a directory into isolated, collectible `AssemblyLoadContext`s, so each plugin can be unloaded independently, and supports dynamic loading, hot reload and hot swap of plugins at runtime without restarting the host. Inter-plugin dependencies are resolved into a validated graph and versions are checked for compatibility. Plugins are discovered and installed through a marketplace and remote registry, and plugin operations pass through an ASP.NET-style middleware pipeline (logging, caching, error handling, rate limiting). Everything is exposed through dependency injection and a thin `PluginEngine` facade.
 
+## Features
+
+- **`PluginEngine` facade**: a single entry point over the core services for loading, managing, reloading and swapping plugins.
+- **Isolated loading (`PluginLoaderService`)**: each plugin is loaded into its own collectible `AssemblyLoadContext`, so it can be unloaded independently.
+- **Hot reload (`HotReloadService`)**: reloads a changed plugin at runtime without restarting the host.
+- **Hot swap (`HotSwapService`)**: replaces a running plugin with a new version while the host keeps running.
+- **Dependency resolution (`DependencyResolutionService`, `PluginDependencyResolver`)**: resolves inter-plugin dependencies into a validated graph.
+- **Versioning (`VersioningService`)**: checks plugin version compatibility, using the constraint syntax from `VersionHelper`.
+- **Validation (`PluginValidator`)**: validates a plugin and its dependency relationships before it is used.
+- **Discovery (`PluginDiscoveryService`)**: scans a directory for plugin assemblies, inspects them and filters the candidates.
+- **In-memory caching (`MemoryPluginCache`)**: an `IPluginCache` implementation backed by memory, with cache statistics.
+- **Middleware pipeline**: ASP.NET-style pipeline with `CachingMiddleware` and `RateLimitMiddleware` for plugin operations.
+- **Events (`PluginEventPublisher`, `PluginEventSubscriber`)**: in-process publish/subscribe for plugin events.
+- **Output formatters (`JsonPluginFormatter`, `XmlPluginFormatter`, `CsvPluginFormatter`)**: render plugin data as JSON, XML or CSV.
+- **Marketplace and remote registry (`PluginMarketplaceService`, `RemotePluginRegistry`)**: search and install plugins from a marketplace and a remote HTTP registry.
+- **CLI host (`PluginEngineCliHost`)**: a command-line host. Its source is currently excluded from the build (`Compile Remove` in `src/PluginEngine/PluginEngine.csproj`), so it is not part of the compiled library yet.
+
 ## Installation
 
 The library targets .NET 10 (`net10.0`). Install it from NuGet as package `Zaiets.dotnet.plugin.engine`:
