@@ -149,8 +149,8 @@ public static class RateLimitMiddlewareExtensions
     /// <returns>The same pipeline instance, to allow chaining.</returns>
     public static PluginMiddlewarePipeline UseRateLimit(
         this PluginMiddlewarePipeline pipeline,
-        int maxTokensPerSecond = 100,
-        int windowSizeSeconds = 1)
+        int maxTokensPerSecond = RateLimitMiddleware.DefaultMaxTokensPerSecond,
+        int windowSizeSeconds = RateLimitMiddleware.DefaultWindowSizeSeconds)
     {
         return pipeline.Use(next => async context =>
         {
