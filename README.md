@@ -404,6 +404,53 @@ await publisher.PublishAsync(new PluginLoadedEvent
 
 For the full event reference, see [docs/events-guide.md](docs/events-guide.md).
 
+## Dependency Injection
+
+Extension methods register the engine with `Microsoft.Extensions.DependencyInjection`. Every method returns the same `IServiceCollection`, so calls can be chained. All engine services are registered as singletons.
+
+- `DependencyInjectionSetup` (namespace `PluginEngine.Configuration`, `src/PluginEngine/Configuration/DependencyInjectionSetup.cs`) registers the core engine.
+- `ServiceCollectionExtensions` (namespace `PluginEngine.Utils.Extensions`, `src/PluginEngine/Utils/Extensions/ServiceCollectionExtensions.cs`) adds optional middleware, event, and repository registrations.
+
+| Method | Description |
+|--------|-------------|
+| `DependencyInjectionSetup.AddPluginEngine(services, configureOptions)` | Registers the core engine services and the `PluginEngine` facade. `configureOptions` is optional. Throws `InvalidOperationException` when the options are invalid. |
+| `DependencyInjectionSetup.AddPluginEngine(services)` | Same as above with default `PluginEngineOptions`. |
+| `AddPluginEngineStack(services, configureOptions)` | Calls `AddPluginEngine`, then adds the middleware pipeline, memory cache, event publisher and subscriber, HTTP clients, utilities, and formatters. |
+| `AddPluginMiddleware<TMiddleware>(services)` | Registers `TMiddleware` as a singleton `IPluginMiddleware`. Call it several times to register several middleware. |
+| `ConfigurePluginPipeline(services, configure)` | Registers a `PluginMiddlewarePipeline` built by running `configure` once. It replaces the pipeline from `AddPluginEngineStack`, so call it after that method. |
+| `AddPluginEventHandler<TEvent, THandler>(services)` | Registers `THandler` as a singleton `IPluginEventHandler<TEvent>`. |
+| `UsePluginRepository<TRepository>(services)` | Registers `TRepository` as the singleton `IPluginRepository`. It replaces the default in-memory `PluginRepository`, so call it after `AddPluginEngine` or `AddPluginEngineStack`. |
+
+Registration example:
+
+```csharp
+using Microsoft.Extensions.DependencyInjection;
+using PluginEngine.Configuration;
+using PluginEngine.Middleware;
+using PluginEngine.Utils.Extensions;
+using PluginEngineFacade = PluginEngine.PluginEngine;
+
+var services = new ServiceCollection();
+
+services
+    .AddPluginEngineStack(options =>
+    {
+        options.PluginDirectory = Path.Combine(AppContext.BaseDirectory, "plugins");
+        options.EnableHotReload = false;
+    })
+    .AddPluginMiddleware<AuditMiddleware>()                           // your IPluginMiddleware
+    .ConfigurePluginPipeline(pipeline => pipeline.UseLogging())       // replaces the stack's pipeline
+    .AddPluginEventHandler<PluginLoadedEvent, PluginLoadedAuditHandler>() // your IPluginEventHandler<PluginLoadedEvent>
+    .UsePluginRepository<SqlPluginRepository>();                      // your IPluginRepository
+
+using var serviceProvider = services.BuildServiceProvider();
+var pluginEngine = serviceProvider.GetRequiredService<PluginEngineFacade>();
+```
+
+`AuditMiddleware`, `PluginLoadedEvent`, `PluginLoadedAuditHandler`, and `SqlPluginRepository` are placeholders for your own types. The example is not part of the build.
+
+Plain core registration needs only `DependencyInjectionSetup.AddPluginEngine` (see [Getting Started](#getting-started)).
+
 ## Contributing
 Fork the repository, create a branch for your feature or bug fix, make your changes, and ensure that `dotnet test` passes before submitting a pull request. Follow conventional commits for commit messages.
 
