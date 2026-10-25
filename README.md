@@ -1127,6 +1127,27 @@ dotnet-plugin-engine/
 └── docs/                                  ARCHITECTURE.md, guides, and one reference page per public type
 ```
 
+## Documentation
+
+Guides:
+
+- [Getting started](docs/getting-started.md)
+- [Architecture](docs/architecture.md)
+- [API reference](docs/api-reference.md)
+- [ALC isolation guide](docs/alc-isolation-guide.md)
+- [Dependency resolution guide](docs/dependency-resolution-guide.md)
+- [Events guide](docs/events-guide.md)
+- [Formatters guide](docs/formatters-guide.md)
+- [Middleware pipeline guide](docs/middleware-pipeline-guide.md)
+- [Marketplace publishing guide](docs/marketplace-publishing-guide.md)
+- [Deployment](docs/deployment.md)
+- [Docker guide](docs/docker-guide.md)
+- [Error codes](docs/error-codes.md)
+- [FAQ](docs/faq.md)
+- [Migration guide to v2](docs/migration-guide-v2.md)
+
+Per-class reference pages live in `docs/<ClassName>.md` (for example, `docs/PluginEngine.md` or `docs/PluginLoaderService.md`).
+
 ## Contributing
 Fork the repository, create a branch for your feature or bug fix, make your changes, and ensure that `dotnet test` passes before submitting a pull request. Follow conventional commits for commit messages.
 
