@@ -2,6 +2,22 @@
 
 dotnet-plugin-engine is a robust and extensible .NET plugin engine. It loads plugin assemblies from a directory into isolated, collectible `AssemblyLoadContext`s, so each plugin can be unloaded independently, and supports dynamic loading, hot reload and hot swap of plugins at runtime without restarting the host. Inter-plugin dependencies are resolved into a validated graph and versions are checked for compatibility. Plugins are discovered and installed through a marketplace and remote registry, and plugin operations pass through an ASP.NET-style middleware pipeline (logging, caching, error handling, rate limiting). Everything is exposed through dependency injection and a thin `PluginEngine` facade.
 
+## Installation
+
+The library targets .NET 10 (`net10.0`). Install it from NuGet as package `Zaiets.dotnet.plugin.engine`:
+
+```bash
+dotnet add package Zaiets.dotnet.plugin.engine
+```
+
+To build from source instead, clone the repository and build the solution:
+
+```bash
+git clone https://github.com/sarmkadan/dotnet-plugin-engine.git
+cd dotnet-plugin-engine
+dotnet build dotnet-plugin-engine.sln -c Release
+```
+
 ## Test Suite Notes
 
 The `IPluginEventPublisher` interface provides a set of extension methods for event publishing, subscription management, and diagnostics.
