@@ -17,6 +17,9 @@ namespace PluginEngine.Services.Implementations;
 /// </summary>
 public sealed class PluginDependencyResolver : IPluginDependencyResolver
 {
+    private const int ErrorCodeDependencyResolutionFailed = 1002;
+    private const int ErrorCodeNotFound = 404;
+
     private readonly IPluginLoaderService _loader;
     private readonly ILogger<PluginDependencyResolver> _logger;
 
@@ -55,7 +58,7 @@ public sealed class PluginDependencyResolver : IPluginDependencyResolver
         {
             _logger.LogError(ex, "Circular dependency detected during topological sort");
             return Task.FromResult(
-                PluginOperationResult<List<Plugin>>.CreateFailure(ex.Message, 1002));
+                PluginOperationResult<List<Plugin>>.CreateFailure(ex.Message, ErrorCodeDependencyResolutionFailed));
         }
         catch (Exception ex)
         {
@@ -99,7 +102,7 @@ public sealed class PluginDependencyResolver : IPluginDependencyResolver
             if (root is null)
             {
                 return PluginOperationResult<DependencyResolutionPlan>.CreateFailure(
-                    $"Plugin {pluginId} is not loaded.", 404);
+                    $"Plugin {pluginId} is not loaded.", ErrorCodeNotFound);
             }
 
             var allPlugins = (await _loader.GetAllLoadedPluginsAsync(cancellationToken)).ToList();
