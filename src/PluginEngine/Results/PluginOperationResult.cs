@@ -147,6 +147,19 @@ public class PluginOperationResult
     }
 
     /// <summary>
+    /// Returns a concise, human-readable representation of the operation result.
+    /// Successful results render as <c>Success: message (durationms)</c>;
+    /// failed results render as <c>Failure [code]: message (durationms)</c>.
+    /// </summary>
+    /// <returns>A single-line description of the result.</returns>
+    public override string ToString()
+    {
+        return Success
+            ? $"Success: {Message} ({DurationMs}ms)"
+            : $"Failure [{ErrorCode}]: {Message} ({DurationMs}ms)";
+    }
+
+    /// <summary>
     /// Maps an exception to the corresponding plugin operation error code.
     /// </summary>
     /// <param name="exception">The exception to map.</param>
@@ -308,5 +321,14 @@ public sealed class PluginBatchOperationResult
     {
         return $"Batch Operation: {SuccessCount} succeeded, {FailureCount} failed, " +
                $"Total time: {TotalDurationMs}ms";
+    }
+
+    /// <summary>
+    /// Returns the batch summary, the same text as <see cref="GetSummary"/>.
+    /// </summary>
+    /// <returns>A single-line summary of the batch.</returns>
+    public override string ToString()
+    {
+        return GetSummary();
     }
 }
