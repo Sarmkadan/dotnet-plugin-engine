@@ -172,6 +172,61 @@ async Task UpdatePluginAsync(
 }
 ```
 
+## Hot Reload
+
+`IHotReloadService` reloads a loaded plugin on request and keeps a record of each attempt. Unlike Hot Swapping, which replaces a plugin with a specific assembly file, hot reload reloads the plugin through `IPluginLoaderService` and reports the outcome through callbacks, statistics, and per-plugin status.
+
+- `StartHotReloadMonitoringAsync` starts monitoring the application base directory for `*.dll` changes. Calling it while monitoring is already active has no effect. `StopHotReloadMonitoringAsync` stops monitoring and releases the file watcher. The file-change handler does not reload plugins by itself, so call `HotReloadPluginAsync` to perform a reload.
+- `CanHotReload` returns `true` only when the plugin has `SupportsHotReload` set and its status is `Loaded`. It returns `false` for a `null` plugin.
+- `HotReloadPluginAsync` reloads the plugin with the given identifier and returns `true` on success. It returns `false` when the plugin is not loaded, cannot be hot reloaded, or the reload throws. Failures are recorded as events and do not propagate as exceptions.
+- `RegisterHotReloadCallback` registers one callback per plugin identifier. The callback receives the reloaded `Plugin` and runs only after a successful reload. Registering another callback for the same plugin replaces the existing one. `UnregisterHotReloadCallback` removes it, and `RemoveCallbacksForContext` removes every callback whose delegate was defined in the given `AssemblyLoadContext`.
+- `GetStatisticsAsync` returns a `HotReloadStatistics` snapshot. It covers the most recent 100 reload attempts. `RecentEvents` holds the last 10 of them.
+- `GetHotReloadStatusAsync` returns the `HotReloadStatus` for a plugin, or `null` if no reload has been attempted for it.
+
+### Types
+
+- `HotReloadStatistics` contains `TotalReloads`, `SuccessfulReloads`, `FailedReloads`, `LastReloadTime`, `AverageReloadTime`, and `RecentEvents`.
+- `HotReloadEvent` describes one attempt: `PluginId`, `Timestamp` (UTC), `Success`, `ErrorMessage` (set on failure), and `Duration`.
+- `HotReloadStatus` describes a plugin's reload state: `PluginId`, `SupportsHotReload`, `LastReloadTime`, `ReloadCount`, and `LastError`.
+
+Example usage:
+
+```csharp
+using PluginEngine.Domain.Entities;
+using PluginEngine.Services.Abstractions;
+
+async Task ReloadPluginAsync(
+    IHotReloadService hotReloadService,
+    Plugin plugin,
+    CancellationToken cancellationToken)
+{
+    hotReloadService.RegisterHotReloadCallback(
+        plugin.Id,
+        reloadedPlugin =>
+        {
+            Console.WriteLine($"Reloaded {reloadedPlugin.Name}");
+            return Task.CompletedTask;
+        });
+
+    await hotReloadService.StartHotReloadMonitoringAsync(cancellationToken);
+
+    if (!hotReloadService.CanHotReload(plugin))
+    {
+        return;
+    }
+
+    var reloaded = await hotReloadService.HotReloadPluginAsync(plugin.Id, cancellationToken);
+    if (!reloaded)
+    {
+        var status = await hotReloadService.GetHotReloadStatusAsync(plugin.Id, cancellationToken);
+        Console.WriteLine($"Reload failed: {status?.LastError ?? "plugin was not reloaded"}");
+    }
+
+    var statistics = await hotReloadService.GetStatisticsAsync();
+    Console.WriteLine(statistics);
+}
+```
+
 ## PluginOperationResult
 
 `PluginOperationResult` represents an operation without return data, while `PluginOperationResult<T>` adds a nullable `Data` value. Both expose `Success`, `Message`, `ErrorCode`, `ErrorDetails`, `DurationMs`, and `TimestampUtc`.
