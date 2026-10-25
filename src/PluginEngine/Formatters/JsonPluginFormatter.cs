@@ -22,8 +22,11 @@ public sealed class JsonPluginFormatter : IPluginFormatter
     /// </summary>
     /// <param name="plugin">The plugin to format.</param>
     /// <returns>A JSON string representing the plugin.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="plugin"/> is null.</exception>
     public Task<string> FormatPluginAsync(Plugin plugin)
     {
+        ArgumentNullException.ThrowIfNull(plugin);
+
         var output = new
         {
             id = plugin.Id,
@@ -46,8 +49,11 @@ public sealed class JsonPluginFormatter : IPluginFormatter
     /// </summary>
     /// <param name="plugins">The plugins to format.</param>
     /// <returns>A JSON string representing the plugins.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="plugins"/> is null.</exception>
     public Task<string> FormatPluginsAsync(IEnumerable<Plugin> plugins)
     {
+        ArgumentNullException.ThrowIfNull(plugins);
+
         var items = plugins.Select(p => new
         {
             id = p.Id,
@@ -75,8 +81,11 @@ public sealed class JsonPluginFormatter : IPluginFormatter
     /// </summary>
     /// <param name="plugin">The plugin to format.</param>
     /// <returns>A JSON string representing the plugin's detailed report.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="plugin"/> is null.</exception>
     public Task<string> FormatDetailedReportAsync(Plugin plugin)
     {
+        ArgumentNullException.ThrowIfNull(plugin);
+
         var output = new
         {
             plugin = new
@@ -118,8 +127,11 @@ public sealed class JsonPluginFormatter : IPluginFormatter
     /// </summary>
     /// <param name="health">The plugin health information to format.</param>
     /// <returns>A JSON string representing the plugin health report.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="health"/> is null.</exception>
     public Task<string> FormatHealthReportAsync(PluginHealthInfo health)
     {
+        ArgumentNullException.ThrowIfNull(health);
+
         var output = new
         {
             plugin = new
