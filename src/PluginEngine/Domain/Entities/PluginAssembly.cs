@@ -124,8 +124,12 @@ public sealed class PluginAssembly
     /// <summary>
     /// Records a successful load.
     /// </summary>
+    /// <param name="loadContextId">The identifier of the load context the assembly was loaded into.</param>
+    /// <exception cref="ArgumentException">Thrown if <paramref name="loadContextId"/> is <see langword="null"/>, empty, or white space.</exception>
     public void MarkAsLoaded(string loadContextId)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(loadContextId);
+
         Status = AssemblyLoadStatus.Loaded;
         LoadContextId = loadContextId;
         LoadedAt = DateTime.UtcNow;
