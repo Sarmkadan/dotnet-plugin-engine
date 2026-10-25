@@ -121,16 +121,26 @@ public sealed class PluginMetadata
     /// <summary>
     /// Gets a custom metadata property value.
     /// </summary>
+    /// <param name="key">The property key.</param>
+    /// <returns>The property value, or <c>null</c> if the key is not present.</returns>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="key"/> is null, empty, or whitespace.</exception>
     public string? GetCustomProperty(string key)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(key);
+
         return _customProperties.TryGetValue(key, out var value) ? value : null;
     }
 
     /// <summary>
     /// Removes a custom metadata property.
     /// </summary>
+    /// <param name="key">The property key.</param>
+    /// <returns><c>true</c> if the property was removed; <c>false</c> if the key was not present.</returns>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="key"/> is null, empty, or whitespace.</exception>
     public bool RemoveCustomProperty(string key)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(key);
+
         return _customProperties.Remove(key);
     }
 
