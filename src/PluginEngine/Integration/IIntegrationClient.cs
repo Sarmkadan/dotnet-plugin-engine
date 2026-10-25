@@ -62,6 +62,13 @@ public sealed class PluginNotification
     /// Gets or sets additional metadata associated with the notification.
     /// </summary>
     public Dictionary<string, object> Metadata { get; set; } = [];
+
+    /// <summary>
+    /// Returns a string representation of the notification containing the event type, plugin identifier and UTC timestamp.
+    /// </summary>
+    /// <returns>A formatted string describing the notification.</returns>
+    public override string ToString() =>
+        $"PluginNotification {{ EventType = {EventType}, PluginId = {PluginId}, OccurredAtUtc = {OccurredAtUtc:O} }}";
 }
 
 /// <summary>
@@ -98,4 +105,11 @@ public sealed class PluginInfo
     /// Gets or sets the download URL for the plugin.
     /// </summary>
     public string? DownloadUrl { get; set; }
+
+    /// <summary>
+    /// Returns a string representation of the plugin information containing the identifier, name, version and author.
+    /// </summary>
+    /// <returns>A formatted string describing the plugin.</returns>
+    public override string ToString() =>
+        $"PluginInfo {{ Id = {Id}, Name = {Name}, Version = {Version}, Author = {Author} }}";
 }
