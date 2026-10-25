@@ -319,8 +319,14 @@ public sealed class PluginLoaderService : IPluginLoaderService
     /// <summary>
     /// Loads all plugins from a directory.
     /// </summary>
+    /// <param name="directoryPath">The directory to scan for plugin assemblies.</param>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <returns>The plugins that were loaded successfully; assemblies that fail to load are skipped.</returns>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="directoryPath"/> is <c>null</c>, empty, or consists only of white-space characters.</exception>
     public async Task<IEnumerable<Plugin>> LoadPluginsFromDirectoryAsync(string directoryPath, CancellationToken cancellationToken = default)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(directoryPath);
+
         if (!Directory.Exists(directoryPath))
         {
             throw new DirectoryNotFoundException($"Directory not found: {directoryPath}");
