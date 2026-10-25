@@ -106,6 +106,82 @@ PluginOperationDelegate middleware = new PluginMiddlewarePipeline()
 await middleware(context);
 ```
 
+## Caching
+
+The engine has two caching layers. `IPluginCache` (namespace `PluginEngine.Caching`, `src/PluginEngine/Caching/IPluginCache.cs`) is a general key-value cache that application code can use directly. `CachingMiddleware` (namespace `PluginEngine.Middleware`, `src/PluginEngine/Middleware/CachingMiddleware.cs`) caches the results of selected plugin operations inside the pipeline. The two do not share storage: the middleware keeps its own `IMemoryCache`.
+
+### IPluginCache
+
+`IPluginCache` has five async operations:
+
+| Method | Description |
+|--------|-------------|
+| `Task<T?> GetAsync<T>(string key)` | Returns the cached value, or `default` on a miss. Each call counts as a hit or a miss. |
+| `Task SetAsync<T>(string key, T value, TimeSpan? expiration = null)` | Stores a value. The sliding expiration is always 15 minutes. `expiration` sets the absolute lifetime; when omitted it is 1 hour. |
+| `Task RemoveAsync(string key)` | Removes one entry. |
+| `Task ClearAsync()` | Removes every entry that the cache instance stored and resets the hit and miss counters. |
+| `Task<CacheStatistics> GetStatisticsAsync()` | Returns a snapshot of the current statistics. |
+
+`MemoryPluginCache` is the built-in implementation. It wraps `IMemoryCache`, and it is registered as the singleton `IPluginCache` by `AddPluginEngineStack`. Keys must not be null or whitespace. Errors from the backing cache are logged and not thrown: a failed `GetAsync` returns `default`, and a failed `SetAsync` or `RemoveAsync` does nothing.
+
+```csharp
+using PluginEngine.Caching;
+
+// Resolved from DI (registered by AddPluginEngineStack)
+IPluginCache cache = serviceProvider.GetRequiredService<IPluginCache>();
+
+// Uses the default 15-minute sliding expiration
+await cache.SetAsync("plugins:names", new[] { "alpha", "beta" });
+
+// Adds a 2-minute absolute lifetime on top of the sliding expiration
+await cache.SetAsync("plugins:short", "value", TimeSpan.FromMinutes(2));
+
+var names = await cache.GetAsync<string[]>("plugins:names");
+await cache.RemoveAsync("plugins:short");
+await cache.ClearAsync();
+```
+
+### CacheStatistics
+
+`CacheStatistics` (defined in `IPluginCache.cs`) has these properties:
+
+| Property | Description |
+|----------|-------------|
+| `TotalHits` | Number of `GetAsync` calls that found a value. |
+| `TotalMisses` | Number of `GetAsync` calls that did not find a value. |
+| `CurrentEntries` | Number of keys currently tracked by the cache. |
+| `TotalMemoryBytes` | Process-wide managed memory from `GC.GetTotalMemory(false)`. It is not the size of the cache alone. |
+| `HitRate` | `TotalHits / (TotalHits + TotalMisses)`, or `0` when there have been no requests. |
+
+`CacheStatisticsExtensions` (`src/PluginEngine/Caching/CacheStatisticsExtensions.cs`) adds helpers:
+
+- `IsEffective(minHitRate = 0.5)` returns `true` when `HitRate` meets the threshold.
+- `GetTotalRequests()` returns `TotalHits + TotalMisses`.
+- `ToSummaryString()` returns a one-line text summary.
+
+```csharp
+var stats = await cache.GetStatisticsAsync();
+
+Console.WriteLine(stats.ToSummaryString());
+Console.WriteLine($"Hit rate: {stats.HitRate:P1}, effective: {stats.IsEffective()}");
+```
+
+### CachingMiddleware
+
+`CachingMiddleware` caches successful results of three operations: `GetMetadata`, `ResolveDependencies`, and `ValidateVersion`. Other operations always run. Each entry uses a key built from the plugin ID, the operation type, and the metadata keys. The default lifetime is 5 minutes absolute and 1 minute sliding. A cache hit sets `context.Metadata["cached"] = true` and marks the context successful without calling the next middleware. A failed operation is not cached.
+
+Use `UseCaching` to add it to a pipeline. The `cacheDuration` argument sets the absolute lifetime.
+
+```csharp
+using PluginEngine.Middleware;
+
+PluginOperationDelegate middleware = new PluginMiddlewarePipeline()
+    .UseCaching(cacheDuration: TimeSpan.FromMinutes(10))
+    .Build();
+```
+
+To drop the cached results for one plugin, for example after it is reloaded, call `InvalidatePluginCache(pluginId)` on a `CachingMiddleware` instance. `UseCaching` creates its own instance internally and does not expose it, so keep a reference to the instance you construct if you need to invalidate.
+
 ## Hot Swapping Plugins
 
 `IHotSwapService` replaces a running plugin assembly while keeping the host application available. A plugin must be loaded or active and its assembly file must be accessible for `CanSwap` to return `true`.
