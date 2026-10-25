@@ -241,6 +241,70 @@ finally
 }
 ```
 
+## Configuration
+
+`PluginEngineOptions` (`src/PluginEngine/Configuration/PluginEngineOptions.cs`) holds every engine setting. Pass it through the `configureOptions` callback of `AddPluginEngine`, or set the properties directly. `IsValid()` and `GetValidationErrors()` check the options, and `AddPluginEngine` throws `InvalidOperationException` when a value is invalid.
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `PluginDirectory` | `string` | `"plugins"` | Plugin directory path. Must not be empty. |
+| `EnableHotReload` | `bool` | `true` | Enables hot reload. When `false`, the background plugin monitor does not run. |
+| `HotReloadCheckIntervalMs` | `int` | `5000` | Hot reload check interval in milliseconds. Must be greater than 0. |
+| `EnableDependencyCaching` | `bool` | `true` | Enables dependency caching. |
+| `OperationTimeoutMs` | `int` | `30000` | Operation timeout in milliseconds. Must be greater than 0. |
+| `EnableLogging` | `bool` | `true` | Enables logging. |
+| `LogLevel` | `LogLevel` | `Information` | Log level: `Trace`, `Debug`, `Information`, `Warning`, `Error`, `Critical`, or `None`. |
+| `MaxConcurrentPluginLoads` | `int` | `4` | Maximum concurrent plugin loads. Must be greater than 0. |
+| `DependencyCacheTtlMinutes` | `int` | `60` | Dependency cache TTL in minutes. Must be greater than 0. |
+| `TargetFramework` | `string` | `"net10.0"` | Target framework. |
+| `StrictVersionChecking` | `bool` | `true` | Enables strict version checking. |
+| `EnableCircularDependencyDetection` | `bool` | `true` | Enables circular dependency detection. |
+| `MaxDependencyResolutionAttempts` | `int` | `10` | Maximum dependency resolution attempts. Must be greater than 0. |
+
+### appsettings.json
+
+The keys below come from `ConfigurationKeys` in `src/PluginEngine/Constants/PluginEngineConstants.cs`. They are nested under the `ConfigurationKeys.SectionName` section, which is `PluginEngine`:
+
+```json
+{
+  "PluginEngine": {
+    "PluginDirectory": "plugins",
+    "EnableHotReload": true,
+    "HotReloadCheckInterval": 5000,
+    "EnableDependencyCaching": true,
+    "OperationTimeout": 30000,
+    "EnableLogging": true,
+    "LogLevel": "Information",
+    "MaxConcurrentPluginLoads": 4
+  }
+}
+```
+
+The engine does not read `appsettings.json` on its own. The host has to copy the values into `PluginEngineOptions`. Two keys use different names from their properties: `HotReloadCheckInterval` maps to `HotReloadCheckIntervalMs`, and `OperationTimeout` maps to `OperationTimeoutMs`. The other properties in the table have no `ConfigurationKeys` constant, so they keep their defaults unless the host sets them in code.
+
+```csharp
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using PluginEngine.Configuration;
+using PluginEngine.Constants;
+
+var section = configuration.GetSection(ConfigurationKeys.SectionName);
+
+DependencyInjectionSetup.AddPluginEngine(services, options =>
+{
+    options.PluginDirectory = section.GetValue(ConfigurationKeys.PluginDirectory, options.PluginDirectory)!;
+    options.EnableHotReload = section.GetValue(ConfigurationKeys.EnableHotReload, options.EnableHotReload);
+    options.HotReloadCheckIntervalMs = section.GetValue(ConfigurationKeys.HotReloadCheckInterval, options.HotReloadCheckIntervalMs);
+    options.EnableDependencyCaching = section.GetValue(ConfigurationKeys.EnableDependencyCaching, options.EnableDependencyCaching);
+    options.OperationTimeoutMs = section.GetValue(ConfigurationKeys.OperationTimeout, options.OperationTimeoutMs);
+    options.EnableLogging = section.GetValue(ConfigurationKeys.EnableLogging, options.EnableLogging);
+    options.LogLevel = Enum.TryParse<LogLevel>(section[ConfigurationKeys.LogLevel], out var logLevel) ? logLevel : options.LogLevel;
+    options.MaxConcurrentPluginLoads = section.GetValue(ConfigurationKeys.MaxConcurrentPluginLoads, options.MaxConcurrentPluginLoads);
+});
+```
+
+`GetValue` comes from `Microsoft.Extensions.Configuration.Binder`. The host adds that package, and the engine does not depend on it.
+
 ## Output Formatters
 
 Plugin data can be rendered as text through the `IPluginFormatter` contract in `src/PluginEngine/Formatters/`. Every formatter returns a `Task<string>` from four methods:
