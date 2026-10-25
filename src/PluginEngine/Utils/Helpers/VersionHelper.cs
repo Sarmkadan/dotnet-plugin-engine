@@ -159,8 +159,11 @@ public sealed class VersionHelper
     /// <summary>
     /// Gets the latest version from a collection of version strings.
     /// </summary>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="versions"/> is null.</exception>
     public string? GetLatestVersion(IEnumerable<string> versions)
     {
+        ArgumentNullException.ThrowIfNull(versions);
+
         var parsed = versions
             .Select(v => (Original: v, Parsed: ParseVersion(v)))
             .Where(x => x.Parsed is not null)
