@@ -77,8 +77,10 @@ public sealed class PluginMiddlewarePipeline
     /// </summary>
     /// <param name="middleware">The middleware function to add to the pipeline.</param>
     /// <returns>The pipeline instance for chaining.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="middleware"/> is null.</exception>
     public PluginMiddlewarePipeline Use(Func<PluginOperationDelegate, PluginOperationDelegate> middleware)
     {
+        ArgumentNullException.ThrowIfNull(middleware);
         _pipeline.Add(middleware);
         return this;
     }
