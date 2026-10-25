@@ -37,9 +37,13 @@ public sealed class RateLimitMiddleware : IPluginMiddleware
     /// </summary>
     /// <param name="context">The operation context. Its plugin determines the rate-limit bucket.</param>
     /// <param name="next">The next delegate in the pipeline.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="context"/> or <paramref name="next"/> is null.</exception>
     /// <exception cref="InvalidOperationException">Thrown when the plugin has exhausted its rate limit.</exception>
     public async Task InvokeAsync(PluginOperationContext context, PluginOperationDelegate next)
     {
+        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(next);
+
         var bucket = GetOrCreateBucket(context.Plugin.Id);
 
         if (!bucket.TryAcquireToken())
