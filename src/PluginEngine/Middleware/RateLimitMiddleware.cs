@@ -84,6 +84,9 @@ public sealed class RateLimitMiddleware : IPluginMiddleware
 
         public int RemainingTokens => _tokens;
 
+        /// <summary>Initializes a new bucket that starts full.</summary>
+        /// <param name="capacity">The maximum number of tokens the bucket can hold; also the number of tokens added per refill interval.</param>
+        /// <param name="refillIntervalSeconds">The length of the refill interval, in seconds.</param>
         public TokenBucket(int capacity, int refillIntervalSeconds)
         {
             _capacity = capacity;
@@ -92,6 +95,10 @@ public sealed class RateLimitMiddleware : IPluginMiddleware
             _lastRefillMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         }
 
+        /// <summary>
+        /// Adds tokens based on the time elapsed since the last refill, capped at the bucket capacity.
+        /// The refill timestamp is only advanced when at least one whole token has been added.
+        /// </summary>
         public void Refill()
         {
             var nowMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
@@ -105,6 +112,10 @@ public sealed class RateLimitMiddleware : IPluginMiddleware
             }
         }
 
+        /// <summary>
+        /// Refills the bucket and attempts to consume a single token.
+        /// </summary>
+        /// <returns><c>true</c> if a token was consumed; <c>false</c> if the bucket is empty.</returns>
         public bool TryAcquireToken()
         {
             Refill();
@@ -128,6 +139,10 @@ public static class RateLimitMiddlewareExtensions
     /// <summary>
     /// Adds rate limiting middleware to the plugin pipeline.
     /// </summary>
+    /// <param name="pipeline">The pipeline to add the middleware to.</param>
+    /// <param name="maxTokensPerSecond">The maximum number of operations allowed per window.</param>
+    /// <param name="windowSizeSeconds">The length of the rate-limit window, in seconds.</param>
+    /// <returns>The same pipeline instance, to allow chaining.</returns>
     public static PluginMiddlewarePipeline UseRateLimit(
         this PluginMiddlewarePipeline pipeline,
         int maxTokensPerSecond = 100,
