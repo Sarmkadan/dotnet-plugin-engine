@@ -137,8 +137,14 @@ public sealed class VersionCompatibilityMatrix
     /// <param name="pluginVersion">The plugin version string (e.g., "2.1.0").</param>
     /// <param name="engineVersion">The host engine version string (e.g., "10.0").</param>
     /// <param name="status">The resolved compatibility status.</param>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="pluginVersion"/> or <paramref name="engineVersion"/> is null, empty, or whitespace.
+    /// </exception>
     public void Record(string pluginVersion, string engineVersion, CompatibilityStatus status)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(pluginVersion);
+        ArgumentException.ThrowIfNullOrWhiteSpace(engineVersion);
+
         if (!_matrix.TryGetValue(pluginVersion, out var row))
         {
             row = new Dictionary<string, CompatibilityStatus>(StringComparer.OrdinalIgnoreCase);
@@ -154,8 +160,14 @@ public sealed class VersionCompatibilityMatrix
     /// </summary>
     /// <param name="pluginVersion">The plugin version to look up.</param>
     /// <param name="engineVersion">The engine version to look up.</param>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="pluginVersion"/> or <paramref name="engineVersion"/> is null, empty, or whitespace.
+    /// </exception>
     public CompatibilityStatus GetStatus(string pluginVersion, string engineVersion)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(pluginVersion);
+        ArgumentException.ThrowIfNullOrWhiteSpace(engineVersion);
+
         if (_matrix.TryGetValue(pluginVersion, out var row) &&
             row.TryGetValue(engineVersion, out var status))
         {
@@ -170,11 +182,18 @@ public sealed class VersionCompatibilityMatrix
     /// with the specified engine version.
     /// </summary>
     /// <param name="engineVersion">The engine version to filter by.</param>
-    public IReadOnlyList<string> GetCompatiblePluginVersions(string engineVersion) =>
-        _matrix
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="engineVersion"/> is null, empty, or whitespace.
+    /// </exception>
+    public IReadOnlyList<string> GetCompatiblePluginVersions(string engineVersion)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(engineVersion);
+
+        return _matrix
             .Where(kvp => kvp.Value.TryGetValue(engineVersion, out var s) && s == CompatibilityStatus.Compatible)
             .Select(kvp => kvp.Key)
             .ToList();
+    }
 
     /// <summary>
     /// Returns a string representation of the compatibility matrix.
