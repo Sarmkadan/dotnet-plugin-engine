@@ -14,6 +14,31 @@ namespace PluginEngine.Integration;
 /// </summary>
 public sealed class RemotePluginRegistry : IRemotePluginRegistry
 {
+    /// <summary>
+    /// The default maximum number of results returned by <see cref="SearchAsync"/>.
+    /// </summary>
+    public const int DefaultSearchLimit = 20;
+
+    /// <summary>
+    /// How long search results are kept in the cache before they expire.
+    /// </summary>
+    private static readonly TimeSpan SearchCacheDuration = TimeSpan.FromHours(1);
+
+    /// <summary>
+    /// Absolute expiration applied to cached plugin information.
+    /// </summary>
+    private static readonly TimeSpan PluginInfoAbsoluteExpiration = TimeSpan.FromHours(1);
+
+    /// <summary>
+    /// Sliding expiration applied to cached plugin information.
+    /// </summary>
+    private static readonly TimeSpan PluginInfoSlidingExpiration = TimeSpan.FromMinutes(30);
+
+    /// <summary>
+    /// How long plugin version lists are kept in the cache before they expire.
+    /// </summary>
+    private static readonly TimeSpan VersionsCacheDuration = TimeSpan.FromHours(2);
+
     private readonly IHttpPluginClient _httpClient;
     private readonly IMemoryCache _cache;
     private readonly ILogger<RemotePluginRegistry> _logger;
@@ -48,7 +73,7 @@ public sealed class RemotePluginRegistry : IRemotePluginRegistry
     /// <returns>The matching plugins, empty when the registry returns nothing.</returns>
     /// <exception cref="ArgumentException">Thrown when <paramref name="query"/> is null or whitespace.</exception>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="limit"/> is not positive.</exception>
-    public async Task<List<PluginInfo>> SearchAsync(string query, int limit = 20)
+    public async Task<List<PluginInfo>> SearchAsync(string query, int limit = DefaultSearchLimit)
     {
         _logger.LogDebug("Starting registry plugin search for {Query} with limit {Limit}", query, limit);
 
@@ -69,7 +94,7 @@ public sealed class RemotePluginRegistry : IRemotePluginRegistry
 
             var cacheOptions = new MemoryCacheEntryOptions
             {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1)
+                AbsoluteExpirationRelativeToNow = SearchCacheDuration
             };
 
             _cache.Set(cacheKey, results, cacheOptions);
@@ -107,8 +132,8 @@ public sealed class RemotePluginRegistry : IRemotePluginRegistry
             {
                 var cacheOptions = new MemoryCacheEntryOptions
                 {
-                    AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1),
-                    SlidingExpiration = TimeSpan.FromMinutes(30)
+                    AbsoluteExpirationRelativeToNow = PluginInfoAbsoluteExpiration,
+                    SlidingExpiration = PluginInfoSlidingExpiration
                 };
 
                 _cache.Set(cacheKey, pluginInfo, cacheOptions);
@@ -144,7 +169,7 @@ public sealed class RemotePluginRegistry : IRemotePluginRegistry
 
             var cacheOptions = new MemoryCacheEntryOptions
             {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(2)
+                AbsoluteExpirationRelativeToNow = VersionsCacheDuration
             };
 
             _cache.Set(cacheKey, versions, cacheOptions);
