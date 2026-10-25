@@ -376,19 +376,20 @@ Register the plugin engine with an `IServiceCollection`, configure it through `P
 
 ```csharp
 using Microsoft.Extensions.DependencyInjection;
-using PluginEngine.Configuration;
+using PluginEngine.Utils.Extensions;
 using PluginEngineFacade = PluginEngine.PluginEngine;
+
+var pluginDirectory = Path.Combine(AppContext.BaseDirectory, "plugins");
+Directory.CreateDirectory(pluginDirectory);
 
 var services = new ServiceCollection();
 
-DependencyInjectionSetup.AddPluginEngine(
-    services,
-    (PluginEngineOptions options) =>
-    {
-        options.PluginDirectory = Path.Combine(AppContext.BaseDirectory, "plugins");
-        options.EnableHotReload = true;
-        options.MaxConcurrentPluginLoads = 4;
-    });
+services.AddPluginEngineStack(options =>
+{
+    options.PluginDirectory = pluginDirectory;
+    options.EnableHotReload = true;
+    options.MaxConcurrentPluginLoads = 4;
+});
 
 using var serviceProvider = services.BuildServiceProvider();
 var pluginEngine = serviceProvider.GetRequiredService<PluginEngineFacade>();
@@ -400,8 +401,11 @@ try
     var loadedPluginCount = await pluginEngine.LoadAllPluginsAsync();
     Console.WriteLine($"Loaded {loadedPluginCount} plugin(s).");
 
-    var healthInfo = await pluginEngine.GetHealthInfoAsync();
-    Console.WriteLine(healthInfo);
+    var plugins = await pluginEngine.PluginManager.GetAllPluginsAsync();
+    foreach (var plugin in plugins)
+    {
+        Console.WriteLine($"{plugin.Name} {plugin.Version} ({plugin.Status})");
+    }
 }
 finally
 {
