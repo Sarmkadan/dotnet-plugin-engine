@@ -220,9 +220,14 @@ public sealed class HotSwapService : IHotSwapService
 
     // ── helpers ────────────────────────────────────────────────────────────────
 
+    /// <summary>Returns the swap history list for a plugin, creating an empty one on first access.</summary>
     private List<SwapRecord> GetHistory(Guid pluginId)
         => _history.GetOrAdd(pluginId, _ => []);
 
+    /// <summary>
+    /// Appends a swap record to the plugin's history and trims the oldest entries
+    /// so that no more than <see cref="MaxHistoryEntriesPerPlugin"/> records are kept.
+    /// </summary>
     private void AppendRecord(Guid pluginId, SwapRecord record)
     {
         var list = GetHistory(pluginId);
@@ -237,6 +242,10 @@ public sealed class HotSwapService : IHotSwapService
         }
     }
 
+    /// <summary>
+    /// Best-effort reload of the previous assembly after a failed swap.
+    /// Logs and returns without throwing if the path is inaccessible or the reload fails.
+    /// </summary>
     private async Task AttemptRollbackAsync(Guid pluginId, string previousPath, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(previousPath) || !File.Exists(previousPath))
