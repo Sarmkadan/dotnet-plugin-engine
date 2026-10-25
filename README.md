@@ -764,6 +764,82 @@ else
 - `GetTrendingAsync` and `GetFeaturedAsync` search with an empty query, which the registry rejects. They return a failed result. `GetHomePageAsync` still succeeds, with empty `Trending` and `Featured` lists, and caches that page for 10 minutes.
 - `BrowseCategoryAsync` returns a failed result unless `filter.Query` is set.
 
+## Plugin Discovery
+
+`PluginDiscoveryService` (namespace `PluginEngine.Utils.Helpers`, `src/PluginEngine/Utils/Helpers/PluginDiscoveryService.cs`) scans a folder for plugin assemblies and reads their metadata without registering them with the engine. It is not registered by `DependencyInjectionSetup`, so create it yourself from `FileSystemHelper` and `VersionHelper`. `AddPluginEngineStack` registers both helpers.
+
+```csharp
+var discovery = new PluginDiscoveryService(fileSystemHelper, versionHelper, logger);
+```
+
+| Method | Description |
+|--------|-------------|
+| `DiscoverPluginsAsync(string directory)` | Returns `Task<List<PluginCandidateInfo>>`. Scans the directory's top level for `*.dll` files, skipping names that start with `_`, and inspects each one. A missing directory or no matches returns an empty list. Errors are logged and return an empty list. |
+| `InspectPluginAsync(string filePath)` | Returns `Task<PluginCandidateInfo?>` for one file. Returns `null` when the file does not exist, its file info cannot be read, or an unexpected error occurs. If `Assembly.LoadFrom` fails, the candidate is still returned with `IsValid = false` and no metadata. |
+| `FilterPlugins(candidates, filter)` | Returns a new `List<PluginCandidateInfo>` that matches `PluginDiscoveryFilter`. `filter` is optional, and a `null` value uses the default filter. |
+| `GetStatistics(candidates)` | Returns a `DiscoveryStatistics` with the counts and total size for the given candidates. |
+
+`DiscoverPluginsAsync` and `InspectPluginAsync` load each assembly with `Assembly.LoadFrom` into the default load context. This is not an isolated `AssemblyLoadContext`, so the files stay loaded for the life of the process. Use `PluginLoaderService` for plugins you plan to run.
+
+### PluginCandidateInfo
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `FilePath` | `string` | Full path to the file. Required. |
+| `FileName` | `string` | File name with the extension. Required. |
+| `AssemblyName` | `string` | File name without the extension. Required. |
+| `FileSize` | `long` | File size in bytes. Required. |
+| `ModifiedAtUtc` | `DateTime` | Last write time in UTC. Required. |
+| `IsValid` | `bool` | `true` when the assembly loaded. Required. |
+| `DiscoveredAtUtc` | `DateTime` | Time the candidate was created, in UTC. Required. |
+| `Version` | `string?` | `AssemblyVersionAttribute` value. |
+| `ProductName` | `string?` | `AssemblyProductAttribute` value. |
+| `Company` | `string?` | `AssemblyCompanyAttribute` value. |
+| `Description` | `string?` | `AssemblyDescriptionAttribute` value. |
+| `CustomAttributes` | `List<string>` | Type names of every assembly-level attribute. Read-only property, the list is mutable. |
+
+The fields marked as required are set by `InspectPluginAsync`. The metadata fields are filled only when the assembly loads.
+
+### PluginDiscoveryFilter
+
+| Property | Type | Default | Effect |
+|----------|------|---------|--------|
+| `ValidOnly` | `bool` | `true` | Keeps only candidates with `IsValid == true`. |
+| `MinimumVersionInfo` | `string?` | `null` | Keeps candidates whose `Version` is not `null` and is at least this version, using `VersionHelper.CompareVersions`. |
+| `NamePattern` | `string?` | `null` | Regular expression matched against `AssemblyName`. |
+| `MaxFileSizeBytes` | `long?` | `null` | Keeps candidates whose `FileSize` is at most this value. |
+
+Because `ValidOnly` defaults to `true`, invalid candidates are removed unless you set it to `false`.
+
+### DiscoveryStatistics
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `TotalCandidates` | `int` | Number of candidates passed to `GetStatistics`. |
+| `ValidPlugins` | `int` | Number with `IsValid == true`. |
+| `InvalidPlugins` | `int` | Number with `IsValid == false`. |
+| `TotalSizeBytes` | `long` | Sum of `FileSize`. |
+| `DiscoveredAtUtc` | `DateTime` | Time the statistics were created, in UTC. |
+| `ValidPercentage` | `double` | Read-only. Valid plugins as a percentage of `TotalCandidates`, or `0` when there are none. |
+
+Example:
+
+```csharp
+var discovery = new PluginDiscoveryService(fileSystemHelper, versionHelper, logger);
+
+var candidates = await discovery.DiscoverPluginsAsync(Path.Combine(AppContext.BaseDirectory, "plugins"));
+
+var usable = discovery.FilterPlugins(candidates, new PluginDiscoveryFilter
+{
+    MinimumVersionInfo = "1.2.0",
+    NamePattern = "^Acme\\.",
+    MaxFileSizeBytes = 5 * 1024 * 1024
+});
+
+var stats = discovery.GetStatistics(candidates);
+Console.WriteLine($"{stats.ValidPlugins}/{stats.TotalCandidates} valid ({stats.ValidPercentage:F0}%)");
+```
+
 ## Validation and Versioning
 
 Three types handle plugin validation and version strings. `PluginValidator` checks a whole `Plugin` entity. `VersionHelper` parses and matches individual version strings, including the constraint syntax used by plugin dependencies. `IVersioningService` is the service-layer API for the same kinds of checks.
