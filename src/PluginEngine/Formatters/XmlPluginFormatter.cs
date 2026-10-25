@@ -16,8 +16,11 @@ public sealed class XmlPluginFormatter : IPluginFormatter
     public string FormatType => "xml";
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="plugin"/> is <see langword="null"/>.</exception>
     public Task<string> FormatPluginAsync(Plugin plugin)
     {
+        ArgumentNullException.ThrowIfNull(plugin);
+
         using var stringWriter = new StringWriter();
         using var xmlWriter = new XmlTextWriter(stringWriter) { Formatting = Formatting.Indented };
 
@@ -31,8 +34,11 @@ public sealed class XmlPluginFormatter : IPluginFormatter
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="plugins"/> is <see langword="null"/>.</exception>
     public Task<string> FormatPluginsAsync(IEnumerable<Plugin> plugins)
     {
+        ArgumentNullException.ThrowIfNull(plugins);
+
         using var stringWriter = new StringWriter();
         using var xmlWriter = new XmlTextWriter(stringWriter) { Formatting = Formatting.Indented };
 
@@ -53,8 +59,11 @@ public sealed class XmlPluginFormatter : IPluginFormatter
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="plugin"/> is <see langword="null"/>.</exception>
     public Task<string> FormatDetailedReportAsync(Plugin plugin)
     {
+        ArgumentNullException.ThrowIfNull(plugin);
+
         using var stringWriter = new StringWriter();
         using var xmlWriter = new XmlTextWriter(stringWriter) { Formatting = Formatting.Indented };
 
@@ -119,8 +128,11 @@ public sealed class XmlPluginFormatter : IPluginFormatter
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="health"/> is <see langword="null"/>.</exception>
     public Task<string> FormatHealthReportAsync(PluginHealthInfo health)
     {
+        ArgumentNullException.ThrowIfNull(health);
+
         using var stringWriter = new StringWriter();
         using var xmlWriter = new XmlTextWriter(stringWriter) { Formatting = Formatting.Indented };
 
