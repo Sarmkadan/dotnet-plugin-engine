@@ -506,6 +506,77 @@ var pluginEngine = serviceProvider.GetRequiredService<PluginEngineFacade>();
 
 Plain core registration needs only `DependencyInjectionSetup.AddPluginEngine` (see [Getting Started](#getting-started)).
 
+## Dependency Resolution
+
+Dependency resolution has three parts. The two services are registered as singletons by `DependencyInjectionSetup.AddPluginEngine`. `DependencyGraphAnalyzer` is not registered, so create it yourself.
+
+| Type | Namespace | Role |
+|------|-----------|------|
+| `IDependencyResolutionService` | `PluginEngine.Services.Abstractions` | Per-plugin resolution. Implemented by `DependencyResolutionService`. |
+| `IPluginDependencyResolver` | `PluginEngine.Services.Abstractions` | Set-based install order, conflict detection, and resolution plans. Implemented by `PluginDependencyResolver`. |
+| `DependencyGraphAnalyzer` | `PluginEngine.Utils.Helpers` | Text graph visualization and complexity analysis, built on `IDependencyResolutionService`. |
+
+### IDependencyResolutionService
+
+Works on one plugin at a time. Its methods are `ResolveDependenciesAsync`, `ValidateDependenciesAsync`, `HasCircularDependenciesAsync`, `GetDependencyGraphAsync(Guid)`, `ResolveSingleDependencyAsync`, `GetDependentsAsync(Guid)`, and `ClearDependencyCacheAsync`. The graph it returns is a `DependencyGraph` with `Nodes` (`DependencyNode`) and `Edges` (`DependencyEdge`).
+
+### IPluginDependencyResolver
+
+Works on a group of plugins. All three methods return `PluginOperationResult<T>`. Check `Success` before you read `Data`.
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `GetInstallOrderAsync(IEnumerable<Plugin>, CancellationToken)` | `PluginOperationResult<List<Plugin>>` | Topological order. Each plugin comes after its dependencies. |
+| `FindConflictsAsync(IEnumerable<Plugin>, CancellationToken)` | `PluginOperationResult<List<DependencyConflict>>` | Finds plugins that declare incompatible version constraints on the same dependency. Each conflict lists `ConflictingRequirements`. |
+| `BuildResolutionPlanAsync(Guid, CancellationToken)` | `PluginOperationResult<DependencyResolutionPlan>` | Plan for one root plugin and its transitive dependencies. |
+
+A `DependencyResolutionPlan` has `Steps` (`ResolutionStep` items with `Order`, `PluginName`, `Version`, `IsOptional`, and `Action`), `Conflicts`, and `IsExecutable`. `IsExecutable` is `true` only when `Conflicts` is empty. `ResolutionAction` has four values: `Install`, `AlreadySatisfied`, `Upgrade`, and `ManualResolutionRequired`.
+
+`GetInstallOrderAsync` and `BuildResolutionPlanAsync` report failures in the result, for example a circular dependency. A `null` plugin collection passed to `GetInstallOrderAsync` or `FindConflictsAsync` throws `ArgumentNullException`.
+
+```csharp
+var resolver = serviceProvider.GetRequiredService<IPluginDependencyResolver>();
+
+var plan = await resolver.BuildResolutionPlanAsync(rootPluginId);
+if (plan.Success && plan.Data is { IsExecutable: true } resolved)
+{
+    foreach (var step in resolved.Steps)
+    {
+        Console.WriteLine(step); // e.g. "1. Install Logging v2.1.0"
+    }
+}
+```
+
+### DependencyGraphAnalyzer
+
+Constructor: `DependencyGraphAnalyzer(IDependencyResolutionService, ILogger<DependencyGraphAnalyzer>)`.
+
+- `AnalyzeAsync(Plugin)` returns a `DependencyAnalysisReport`. It contains `DirectDependencies`, `TotalDependencies`, `HasCircularDependencies`, `ComplexityScore`, `AnalyzedAtUtc`, and `Issues`. `GetComplexityLevel()` maps the score to `Simple` (below 20), `Moderate` (below 50), `Complex` (below 75), or `Very Complex`. `Issues` flags more than 20 direct dependencies, circular dependencies, and more than 50% optional dependencies. On error, the method logs the exception and returns a report with a score of 0 and no issues.
+- `GenerateGraphVisualizationAsync(Plugin)` returns an indented text tree of the plugin and its direct `Requires:` entries. It returns an empty string on error.
+
+The complexity score is calculated from the plugin's direct and total dependencies:
+
+- 10 points per direct dependency.
+- 2 points per resolved dependency (direct and transitive), up to 100 points.
+- 5 points per optional dependency.
+- The total is capped at 100.
+
+Circular dependencies do not add to the score. The `ComplexityScore` value is available on the report, but the formula is internal to the analyzer.
+
+```csharp
+var analyzer = new DependencyGraphAnalyzer(
+    serviceProvider.GetRequiredService<IDependencyResolutionService>(),
+    serviceProvider.GetRequiredService<ILogger<DependencyGraphAnalyzer>>());
+
+var report = await analyzer.AnalyzeAsync(plugin);
+Console.WriteLine(report);                  // includes Complexity Score and level
+Console.WriteLine(report.GetComplexityLevel());
+
+Console.WriteLine(await analyzer.GenerateGraphVisualizationAsync(plugin));
+```
+
+For the full reference, see [docs/dependency-resolution-guide.md](docs/dependency-resolution-guide.md).
+
 ## Marketplace and Remote Registry
 
 The marketplace has three layers. Each layer calls only the one below it:
