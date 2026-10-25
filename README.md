@@ -1019,6 +1019,46 @@ These constants are not used by the library. The exception types set their own `
 
 For the numeric codes on `PluginOperationResult.ErrorCode` and how exceptions map to them, see [docs/error-codes.md](docs/error-codes.md).
 
+## Building and Testing
+
+Restore, build and test from the repository root with the .NET 10 SDK:
+
+```bash
+dotnet restore
+dotnet build -c Release --no-restore
+dotnet test -c Release --no-build --verbosity normal
+```
+
+The unit tests live in `tests/dotnet-plugin-engine.Tests/` and use xUnit, FluentAssertions and Moq. To run only the tests in that project, or a subset of them, use the project path and a filter:
+
+```bash
+dotnet test tests/dotnet-plugin-engine.Tests/dotnet-plugin-engine.Tests.csproj -c Release
+dotnet test tests/dotnet-plugin-engine.Tests/dotnet-plugin-engine.Tests.csproj -c Release --filter "FullyQualifiedName~PluginEngineOptionsTests"
+```
+
+### Benchmarks
+
+Performance benchmarks are in `benchmarks/dotnet-plugin-engine.Benchmarks/` and use [BenchmarkDotNet](https://benchmarkdotnet.org/). Always run benchmarks in Release configuration, because Debug builds give misleading timings:
+
+```bash
+dotnet run -c Release --project benchmarks/dotnet-plugin-engine.Benchmarks
+```
+
+To run a single suite, pass a BenchmarkDotNet filter after `--`, for example `dotnet run -c Release --project benchmarks/dotnet-plugin-engine.Benchmarks -- --filter "*PluginLoadingBenchmarks*"`. Use `--list flat` to print the available benchmark names.
+
+The folder contains these benchmark classes:
+
+- `PluginEngineBenchmarks`: the `PluginEngine` facade
+- `PluginEngineCoreBenchmarks`: the core services
+- `PluginLoadingBenchmarks`: plugin assembly loading
+- `PluginDiscoveryBenchmarks`: plugin discovery
+- `PluginExecutionBenchmarks`: plugin execution
+- `DependencyResolutionBenchmarks`: dependency resolution
+- `DependencyResolutionExceptionBenchmarks`: `DependencyResolutionException` creation and handling
+- `PluginExceptionBenchmarks`: `PluginException` creation and handling
+- `PluginEventPublisherBenchmarks`: in-process event publishing
+- `WebhookHandlerBenchmarks`: webhook handling
+
 ## Project Structure
 
 ```
