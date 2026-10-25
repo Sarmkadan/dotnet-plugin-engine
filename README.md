@@ -289,6 +289,57 @@ string pluginsCsv = await factory
 
 For the full format reference, see [docs/formatters-guide.md](docs/formatters-guide.md).
 
+## Plugin Events
+
+Lifecycle changes are published in-process through `PluginEventPublisher` and consumed through `PluginEventSubscriber`. The publisher keeps handlers in a dictionary keyed by event type, so a subscriber only receives the event types it registered for. Delivery is in-process and not retried. If a handler throws, the other handlers still run and the failures are reported as an `AggregateException` from `PublishAsync`. This is a notification mechanism, not a message bus. Use the webhook integration for anything that must leave the process.
+
+The event types are defined in `src/PluginEngine/Events/IPluginEvent.cs`. They all derive from `PluginEventBase`, which supplies `EventId`, `OccurredAtUtc`, and the required `PluginId`:
+
+| Event | `EventType` | Event-specific properties |
+| --- | --- | --- |
+| `PluginLoadedEvent` | `PluginLoaded` | `PluginName`, `Version`, `LoadTimeMs` |
+| `PluginUnloadedEvent` | `PluginUnloaded` | `PluginName`, `Reason` |
+| `PluginUpdatedEvent` | `PluginUpdated` | `PreviousVersion`, `NewVersion`, `ChangesSummary` |
+| `PluginErrorEvent` | `PluginError` | `ErrorMessage`, `ErrorDetails`, `ErrorCode` |
+| `DependenciesResolvedEvent` | `DependenciesResolved` | `ResolvedDependencies`, `ResolutionTimeMs` |
+
+Subscribe with a `Func<TEvent, Task>` handler, then publish an event:
+
+```csharp
+using Microsoft.Extensions.Logging.Abstractions;
+using PluginEngine.Events;
+
+var publisher = new PluginEventPublisher(NullLogger<PluginEventPublisher>.Instance);
+var subscriber = new PluginEventSubscriber(publisher, NullLogger<PluginEventSubscriber>.Instance);
+
+subscriber.OnPluginLoaded(async e =>
+{
+    Console.WriteLine($"{e.PluginName} {e.Version} loaded in {e.LoadTimeMs} ms");
+    await Task.CompletedTask;
+});
+
+subscriber.Subscribe<PluginErrorEvent>(async e =>
+{
+    Console.WriteLine($"Error {e.ErrorCode}: {e.ErrorMessage}");
+    await Task.CompletedTask;
+});
+
+await publisher.PublishAsync(new PluginLoadedEvent
+{
+    PluginId = Guid.NewGuid(),
+    PluginName = "ReportExporter",
+    Version = "1.2.0",
+    LoadTimeMs = 42
+});
+```
+
+`PluginEventPublisherExtensions` adds helpers to `PluginEventPublisher`:
+
+- `SubscribeOnce<T>` registers a handler that unsubscribes itself after the first event. It returns an `IDisposable`. Disposing it earlier removes the handler without waiting for an event. Overloads accept `Func<T, Task>` or `Action<T>`.
+- `PublishBatchAsync<T>` publishes a sequence of events concurrently and awaits them all. Publisher re-entrancy protection works per event type and stays active until every handler for the in-flight event has finished. A batch with several events of the same type can therefore skip the later ones while the first is still being handled. The skipped events are logged as a warning and not delivered. Use `PublishBatchAsync` for mixed event types, or publish same-type events one at a time with `await`.
+
+For the full event reference, see [docs/events-guide.md](docs/events-guide.md).
+
 ## Contributing
 Fork the repository, create a branch for your feature or bug fix, make your changes, and ensure that `dotnet test` passes before submitting a pull request. Follow conventional commits for commit messages.
 
