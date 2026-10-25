@@ -241,6 +241,54 @@ finally
 }
 ```
 
+## Output Formatters
+
+Plugin data can be rendered as text through the `IPluginFormatter` contract in `src/PluginEngine/Formatters/`. Every formatter returns a `Task<string>` from four methods:
+
+- `FormatPluginAsync` formats a single `Plugin`.
+- `FormatPluginsAsync` formats a collection of plugins.
+- `FormatDetailedReportAsync` formats a plugin with its metadata, dependencies, and capabilities.
+- `FormatHealthReportAsync` formats a `PluginHealthInfo` snapshot, including health state and issues.
+
+The `FormatType` property identifies the format. Three implementations ship with the library:
+
+- `JsonPluginFormatter` (`"json"`) writes indented JSON for API responses and file storage.
+- `CsvPluginFormatter` (`"csv"`) writes comma-separated rows for spreadsheets and data analysis.
+- `XmlPluginFormatter` (`"xml"`) writes indented XML for configuration files and system integration.
+
+`FormatterFactory` maps a format name to a formatter. `GetFormatter` matches the name case-insensitively and returns `null` for unknown formats. `GetSupportedFormats` lists the registered names. The factory is constructed with one instance of each built-in formatter.
+
+`PluginHealthInfoExtensions` adds `HasIssues`, `GetIssueSummary`, and `IsStale` to `PluginHealthInfo`.
+
+Example usage:
+
+```csharp
+using PluginEngine.Formatters;
+
+var factory = new FormatterFactory(
+    new JsonPluginFormatter(),
+    new CsvPluginFormatter(),
+    new XmlPluginFormatter());
+
+IPluginFormatter? formatter = factory.GetFormatter("JSON");
+if (formatter is null)
+{
+    throw new NotSupportedException("Unknown output format.");
+}
+
+string pluginJson = await formatter.FormatPluginAsync(plugin);
+
+string healthXml = await factory
+    .GetFormatter("xml")!
+    .FormatHealthReportAsync(healthInfo);
+
+string pluginsCsv = await factory
+    .GetFormatter("csv")!
+    .FormatPluginsAsync(plugins);
+```
+
+For the full format reference, see [docs/formatters-guide.md](docs/formatters-guide.md).
+
 ## Contributing
 Fork the repository, create a branch for your feature or bug fix, make your changes, and ensure that `dotnet test` passes before submitting a pull request. Follow conventional commits for commit messages.
 
