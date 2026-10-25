@@ -1,16 +1,20 @@
 # dotnet-plugin-engine
 
+dotnet-plugin-engine is a robust and extensible .NET plugin engine. It loads plugin assemblies from a directory into isolated, collectible `AssemblyLoadContext`s, so each plugin can be unloaded independently, and supports dynamic loading, hot reload and hot swap of plugins at runtime without restarting the host. Inter-plugin dependencies are resolved into a validated graph and versions are checked for compatibility. Plugins are discovered and installed through a marketplace and remote registry, and plugin operations pass through an ASP.NET-style middleware pipeline (logging, caching, error handling, rate limiting). Everything is exposed through dependency injection and a thin `PluginEngine` facade.
+
+## Test Suite Notes
+
 The `IPluginEventPublisher` interface provides a set of extension methods for event publishing, subscription management, and diagnostics.
 
-## PluginIncompatibleExceptionExtensionsTests
+### PluginIncompatibleExceptionExtensionsTests
 
 The `PluginIncompatibleExceptionExtensionsTests` class contains unit tests for the extension methods that operate on `PluginIncompatibleException`. These tests verify that the extension methods correctly determine version incompatibility, format incompatibility reasons, and handle null or empty values.
 
-## PluginExceptionTests
+### PluginExceptionTests
 
 The `PluginExceptionTests` class contains unit tests for the `PluginException` class, verifying its constructors, property getters, fluent modification methods, and string representation. It ensures that error codes, entity IDs, and contextual metadata are correctly stored and that appropriate exceptions are thrown for invalid inputs.
 
-## PluginLoadExceptionExtensionsTests
+### PluginLoadExceptionExtensionsTests
 
 The `PluginLoadExceptionExtensionsTests` class contains unit tests for the extension methods that operate on `PluginLoadException`. These tests verify that the extension methods correctly check the load stage, generate a formatted failure summary, and create a new exception with an updated load stage while preserving other properties.
 
@@ -22,7 +26,7 @@ string summary = ex.GetLoadFailureSummary(); // returns "Failed to load plugin '
 var updatedEx = ex.WithLoadStage(PluginLoadStage.TypeLoading); // returns a new exception with LoadStage set to TypeLoading
 ```
 
-## DependencyResolutionExceptionValidationTests
+### DependencyResolutionExceptionValidationTests
 
 The `DependencyResolutionExceptionValidationTests` class verifies the validation logic for `DependencyResolutionException` objects. It ensures that the exception contains valid version constraints, reasons, and a list of unresolved dependencies, and that the validation methods correctly report problems or confirm validity.
 
@@ -50,7 +54,7 @@ else
 }
 ```
 
-## VersionMismatchExceptionTests
+### VersionMismatchExceptionTests
 
 The `VersionMismatchExceptionTests` class contains unit tests for the `VersionMismatchException` class, verifying its constructors and the `ToString` method under various conditions.
 
@@ -70,7 +74,7 @@ var ex = new VersionMismatchException(
 string errorMessage = ex.ToString();
 ```
 
-## VersionMismatchExceptionExtensionsTests
+### VersionMismatchExceptionExtensionsTests
 
 The `VersionMismatchExceptionExtensionsTests` class contains unit tests for the extension methods that operate on `VersionMismatchException`. These tests verify that the extension methods correctly format error messages, determine critical version mismatches based on version numbers, add contextual information, and produce simplified messages.
 
