@@ -35,8 +35,13 @@ public sealed class PluginDiscoveryService
     /// <summary>
     /// Discovers all plugins in a directory.
     /// </summary>
+    /// <param name="directory">The directory to scan for plugins.</param>
+    /// <returns>A list of inspected plugin candidates; empty when the directory does not exist or contains no plugins.</returns>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="directory"/> is null, empty, or consists only of white-space characters.</exception>
     public async Task<List<PluginCandidateInfo>> DiscoverPluginsAsync(string directory)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(directory);
+
         try
         {
             if (!Directory.Exists(directory))
@@ -78,8 +83,13 @@ public sealed class PluginDiscoveryService
     /// <summary>
     /// Inspects a single plugin file for metadata.
     /// </summary>
+    /// <param name="filePath">The full path to the plugin file.</param>
+    /// <returns>The candidate information, or <c>null</c> when the file is missing or cannot be inspected.</returns>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="filePath"/> is null, empty, or consists only of white-space characters.</exception>
     public async Task<PluginCandidateInfo?> InspectPluginAsync(string filePath)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(filePath);
+
         try
         {
             if (!File.Exists(filePath))
@@ -136,10 +146,16 @@ public sealed class PluginDiscoveryService
     /// <summary>
     /// Filters discovered plugins based on criteria.
     /// </summary>
+    /// <param name="candidates">The plugin candidates to filter.</param>
+    /// <param name="filter">The filter criteria; when <c>null</c>, default criteria are applied.</param>
+    /// <returns>A new list containing the candidates that match the filter.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="candidates"/> is <c>null</c>.</exception>
     public List<PluginCandidateInfo> FilterPlugins(
         List<PluginCandidateInfo> candidates,
         PluginDiscoveryFilter? filter = null)
     {
+        ArgumentNullException.ThrowIfNull(candidates);
+
         filter ??= new PluginDiscoveryFilter();
 
         return candidates
@@ -200,8 +216,13 @@ public sealed class PluginDiscoveryService
     /// <summary>
     /// Gets discovery statistics.
     /// </summary>
+    /// <param name="candidates">The plugin candidates to summarize.</param>
+    /// <returns>Statistics describing the total, valid, and invalid candidates and their combined size.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="candidates"/> is <c>null</c>.</exception>
     public DiscoveryStatistics GetStatistics(List<PluginCandidateInfo> candidates)
     {
+        ArgumentNullException.ThrowIfNull(candidates);
+
         return new DiscoveryStatistics
         {
             TotalCandidates = candidates.Count,
