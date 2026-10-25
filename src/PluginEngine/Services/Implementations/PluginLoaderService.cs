@@ -24,11 +24,21 @@ public sealed class PluginLoaderService : IPluginLoaderService
     {
         private readonly AssemblyDependencyResolver _resolver;
 
+        /// <summary>
+        /// Initializes a new collectible load context whose dependencies are resolved from the plugin's directory.
+        /// </summary>
+        /// <param name="name">The name of the load context.</param>
+        /// <param name="pluginPath">The full path to the plugin assembly.</param>
         public PluginAssemblyLoadContext(string name, string pluginPath) : base(name, isCollectible: true)
         {
             _resolver = new AssemblyDependencyResolver(pluginPath);
         }
 
+        /// <summary>
+        /// Resolves a managed dependency assembly from the plugin's directory and loads it into this context.
+        /// </summary>
+        /// <param name="assemblyName">The name of the assembly to load.</param>
+        /// <returns>The loaded assembly, or <c>null</c> if the dependency cannot be resolved.</returns>
         protected override Assembly? Load(AssemblyName assemblyName)
         {
             string? assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName);
@@ -39,6 +49,11 @@ public sealed class PluginLoaderService : IPluginLoaderService
             return null;
         }
 
+        /// <summary>
+        /// Resolves a native library from the plugin's directory and loads it into the process.
+        /// </summary>
+        /// <param name="unmanagedDllName">The name of the unmanaged library to load.</param>
+        /// <returns>The handle of the loaded library, or <see cref="IntPtr.Zero"/> if it cannot be resolved.</returns>
         protected override IntPtr LoadUnmanagedDll(string unmanagedDllName)
         {
             string? libraryPath = _resolver.ResolveUnmanagedDllToPath(unmanagedDllName);
@@ -348,6 +363,12 @@ public sealed class PluginLoaderService : IPluginLoaderService
         return await LoadPluginAsync(assemblyPath, cancellationToken);
     }
 
+    /// <summary>
+    /// Builds a plugin descriptor from the assembly name and attaches its metadata, if present.
+    /// </summary>
+    /// <param name="fullPath">The full path to the plugin assembly.</param>
+    /// <param name="assemblyPath">The assembly path to record on the plugin.</param>
+    /// <returns>A plugin in the <see cref="PluginStatus.Loading"/> state.</returns>
     private async Task<Plugin> CreatePluginFromAssemblyAsync(string fullPath, string assemblyPath)
     {
         var assemblyName = AssemblyName.GetAssemblyName(fullPath);
@@ -369,6 +390,12 @@ public sealed class PluginLoaderService : IPluginLoaderService
         return plugin;
     }
 
+    /// <summary>
+    /// Reads the optional <c>plugin.json</c> metadata file next to the assembly and applies it to the plugin.
+    /// Invalid JSON is logged and ignored.
+    /// </summary>
+    /// <param name="plugin">The plugin to receive the metadata.</param>
+    /// <param name="fullPath">The full path to the plugin assembly.</param>
     private async Task LoadPluginMetadataAsync(Plugin plugin, string fullPath)
     {
         var directory = Path.GetDirectoryName(fullPath) ?? string.Empty;
@@ -398,6 +425,12 @@ public sealed class PluginLoaderService : IPluginLoaderService
         }
     }
 
+    /// <summary>
+    /// Verifies that the host engine version satisfies the plugin's engine version constraint.
+    /// </summary>
+    /// <param name="plugin">The plugin whose metadata declares the constraint.</param>
+    /// <param name="pluginJsonPath">The path of the metadata file the constraint was read from.</param>
+    /// <exception cref="PluginIncompatibleException">Thrown when the host engine version does not satisfy the constraint.</exception>
     private async Task ValidateEngineVersionConstraintAsync(Plugin plugin, string pluginJsonPath)
     {
         var versioningService = _serviceProvider?.GetService(typeof(IVersioningService)) as IVersioningService;
@@ -411,6 +444,11 @@ public sealed class PluginLoaderService : IPluginLoaderService
         }
     }
 
+    /// <summary>
+    /// Creates an instance of every concrete <see cref="IPluginLifecycle"/> type declared in the assembly.
+    /// </summary>
+    /// <param name="assembly">The assembly to scan for lifecycle types.</param>
+    /// <returns>The instantiated lifecycle handlers.</returns>
     private async Task<List<IPluginLifecycle>> DiscoverPluginLifecyclesAsync(Assembly assembly)
     {
         var lifecycles = new List<IPluginLifecycle>();
@@ -429,6 +467,11 @@ public sealed class PluginLoaderService : IPluginLoaderService
         return lifecycles;
     }
 
+    /// <summary>
+    /// Runs the given action for each lifecycle handler in order, awaiting each one before the next.
+    /// </summary>
+    /// <param name="lifecycles">The lifecycle handlers to invoke.</param>
+    /// <param name="lifecycleAction">The action to run against each handler.</param>
     private async Task InvokeLifecycleMethodsAsync(List<IPluginLifecycle> lifecycles, Func<IPluginLifecycle, Task> lifecycleAction)
     {
         foreach (var lifecycle in lifecycles)
