@@ -451,6 +451,117 @@ var pluginEngine = serviceProvider.GetRequiredService<PluginEngineFacade>();
 
 Plain core registration needs only `DependencyInjectionSetup.AddPluginEngine` (see [Getting Started](#getting-started)).
 
+## Marketplace and Remote Registry
+
+The marketplace has three layers. Each layer calls only the one below it:
+
+| Layer | Types | Namespace | Role |
+|-------|-------|-----------|------|
+| Browsing | `IMarketplaceBrowserService`, `MarketplaceBrowserService` | `PluginEngine.Marketplace` | Categories, trending, featured plugins, category browsing, home page snapshot |
+| Marketplace | `IPluginMarketplaceService`, `PluginMarketplaceService` | `PluginEngine.Marketplace` | Search, listing details, compatibility matrix, install |
+| Registry | `IRemotePluginRegistry`, `RemotePluginRegistry`, `IHttpPluginClient`, `HttpPluginClient` | `PluginEngine.Integration` | HTTP calls to the registry back-end, with in-memory caching |
+
+Marketplace methods return `PluginOperationResult<T>`. Check `Success` first, then read `Data`, or `ErrorCode` and `Message` on failure. For how to package and publish a plugin, see the [Plugin Marketplace Publishing Guide](docs/marketplace-publishing-guide.md).
+
+### Registration and Configuration
+
+`AddPluginMarketplace` (`PluginEngine.Marketplace.MarketplaceExtensions`) registers `IPluginMarketplaceService` and `IMarketplaceBrowserService` as singletons, and adds the memory cache. It requires `IRemotePluginRegistry`, which `AddPluginEngineStack` registers. `AddPluginEngine` alone does not register it.
+
+`AddPluginEngineStack` does not register `IHttpPluginClient`, so add it yourself or `IRemotePluginRegistry` cannot be resolved:
+
+```csharp
+services.AddPluginEngineStack()
+        .AddPluginMarketplace();
+
+// Required: RemotePluginRegistry depends on IHttpPluginClient
+services.AddHttpClient<IHttpPluginClient, HttpPluginClient>();
+```
+
+`HttpPluginClient` reads the registry address from the `PluginRegistry:BaseUrl` configuration key and appends routes such as `/plugins/search`. Use a base URL without a trailing slash. When the key is missing, the client makes no requests and returns empty results.
+
+```json
+{
+  "PluginRegistry": {
+    "BaseUrl": "https://registry.example.com"
+  }
+}
+```
+
+### Searching with MarketplaceSearchFilter
+
+`MarketplaceSearchFilter` carries the search criteria. Only `Query` and `PageSize` take effect today (see [Current Limitations](#current-limitations)):
+
+```csharp
+using Microsoft.Extensions.DependencyInjection;
+using PluginEngine.Marketplace;
+
+var marketplace = serviceProvider.GetRequiredService<IPluginMarketplaceService>();
+
+var filter = new MarketplaceSearchFilter
+{
+    Query = "logging",
+    PageSize = 10
+};
+
+var result = await marketplace.SearchAsync(filter);
+
+if (result.Success)
+{
+    foreach (var entry in result.Data!)
+    {
+        Console.WriteLine(entry); // "{Name} v{LatestVersion} by {Author} (... downloads, ... rating)"
+    }
+}
+else
+{
+    Console.WriteLine($"Search failed ({result.ErrorCode}): {result.Message}");
+}
+```
+
+### Browsing with IMarketplaceBrowserService
+
+| Method | Returns | Behavior |
+|--------|---------|----------|
+| `GetCategoriesAsync()` | `List<MarketplaceCategory>` | Returns a built-in list of eight categories: analytics, authentication, caching, database, logging, messaging, security, and ui. The list is not fetched from the registry, and `PluginCount` is not populated. Cached for 6 hours. |
+| `GetTrendingAsync(limit = 10)` | `List<MarketplaceEntry>` | Intended to return plugins ordered by downloads. `limit` is clamped to 1–50. Cached for 15 minutes. |
+| `GetFeaturedAsync()` | `List<MarketplaceEntry>` | Intended to return up to six verified plugins ordered by rating. Cached for 1 hour. |
+| `BrowseCategoryAsync(categoryId, filter = null)` | `List<MarketplaceEntry>` | Runs a search with the given filter. The category slug is added to `Tags`, which is not sent to the registry yet. Set `filter.Query`. |
+| `GetHomePageAsync()` | `MarketplaceHomePage` | Combines categories, up to five trending plugins, and up to six featured plugins. Cached for 10 minutes. |
+
+### Plugin Listings, Compatibility, and Install
+
+`IPluginMarketplaceService` also provides:
+
+- `GetEntryAsync(pluginId)` returns the listing with `AvailableVersions` populated. It fails with code `404` when the plugin is not found.
+- `GetCompatibilityMatrixAsync(pluginId)` returns a `VersionCompatibilityMatrix` for engine versions 8.0, 9.0, and 10.0. It is cached for 30 minutes. Each stable version is rated as follows:
+  - Released within 365 days: `Compatible`.
+  - Released within 730 days: `Compatible` on engine 9.0 or later, otherwise `Deprecated`.
+  - Older: `Deprecated` on engine 10.0 or later, otherwise `Incompatible`.
+  - Prereleases are `Compatible` on engine 10.0 or later. Unstable versions are `Unknown`.
+- `CheckCompatibilityAsync(pluginId, pluginVersion, engineVersion)` reads one pair from that matrix. It returns `Unknown` for pairs that were not recorded.
+- `InstallAsync(pluginId, version, targetDirectory)` creates the directory if needed and downloads the package into it. It does not load the plugin into the engine.
+
+### Remote Registry and HTTP Client
+
+`IRemotePluginRegistry` wraps `IHttpPluginClient` and caches its results in `IMemoryCache`:
+
+| Method | Behavior |
+|--------|----------|
+| `SearchAsync(query, limit = 20)` | Searches the registry. Results are cached for 1 hour. Rejects a null or whitespace query. |
+| `GetPluginAsync(pluginId)` | Returns plugin metadata, or `null` when it is not found. Cached for 1 hour. |
+| `GetVersionsAsync(pluginId)` | Returns a list of `PluginVersionInfo`. |
+| `DownloadPluginAsync(pluginId, version, downloadPath)` | Downloads the package and returns its path, or `null`. |
+| `PublishPluginAsync(filePath, metadata)` | Publishes a package with a `PluginPublishMetadata` record. `PluginName`, `Version`, `Description`, and `Author` are required. |
+| `InvalidateCache(pluginId)` | Removes the cached plugin and version entries. Cached search results stay until they expire. |
+
+`IHttpPluginClient` is the raw HTTP layer. It provides `SearchPluginsAsync`, `GetPluginInfoAsync`, `GetPluginVersionsAsync`, `UploadPluginAsync`, and `GetAsync`. The concrete `HttpPluginClient` also exposes `IsAvailableAsync` (health check), `SendNotificationAsync`, and `CheckForUpdatesAsync`.
+
+### Current Limitations
+
+- `SearchAsync` sends only `Query` and `PageSize` to the registry. `Tags`, `MinVersion`, `TargetFramework`, `OnlyVerified`, `Page`, and `SortOrder` have no effect yet.
+- `GetTrendingAsync` and `GetFeaturedAsync` search with an empty query, which the registry rejects. They return a failed result. `GetHomePageAsync` still succeeds, with empty `Trending` and `Featured` lists, and caches that page for 10 minutes.
+- `BrowseCategoryAsync` returns a failed result unless `filter.Query` is set.
+
 ## Contributing
 Fork the repository, create a branch for your feature or bug fix, make your changes, and ensure that `dotnet test` passes before submitting a pull request. Follow conventional commits for commit messages.
 
